@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: nj_hin_db
+    environment:
+      POSTGRES_DB: nj_hin_db
+      POSTGRES_USER: hin_user
+      POSTGRES_PASSWORD: hin_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hin_user -d nj_hin_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nj_hin_backend
+    environment:
+      DATABASE_URL: postgresql://hin_user:hin_password@db:5432/nj_hin_db
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: nj_hin_db
+      DATABASE_USER: hin_user
+      DATABASE_PASSWORD: hin_password
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      CORS_ORIGINS: http://localhost:3000
+    volumes:
+      - ./backend:/app
+      - ./data:/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nj_hin_frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:8000/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    command: npm start
+
+volumes:
+  postgres_data:
