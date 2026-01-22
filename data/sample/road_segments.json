@@ -1,0 +1,5252 @@
+[
+  {
+    "osm_id": 1000000,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.213,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.66037094709135,
+          40.36313149367825
+        ],
+        [
+          -74.65897940664982,
+          40.36037822881687
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000001,
+    "road_name": "Washington Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.093,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6812598036559,
+          40.334506656776185
+        ],
+        [
+          -74.68253690800896,
+          40.334080479731725
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000002,
+    "road_name": "Route 27",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.1,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63085552862238,
+          40.31836600460279
+        ],
+        [
+          -74.63211873811615,
+          40.31907438521478
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000003,
+    "road_name": "Meadow Road",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.216,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65354559547161,
+          40.320400677735506
+        ],
+        [
+          -74.6543117578705,
+          40.31737176681261
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000004,
+    "road_name": "Route 1",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.158,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65065617954565,
+          40.380704484085875
+        ],
+        [
+          -74.65233738958378,
+          40.38225672368228
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000005,
+    "road_name": "Nassau Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.07,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.68760131675721,
+          40.375693721165426
+        ],
+        [
+          -74.68817642849409,
+          40.37486132222061
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000006,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.185,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.70394978574305,
+          40.38985847021681
+        ],
+        [
+          -74.70281031843116,
+          40.38742745897281
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000007,
+    "road_name": "Cranbury Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.138,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64747760345153,
+          40.34938540707437
+        ],
+        [
+          -74.6458912307976,
+          40.35060896388145
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000008,
+    "road_name": "Harrison Street",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.191,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.68703357562774,
+          40.33846040533646
+        ],
+        [
+          -74.68926071664677,
+          40.34010431418423
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000009,
+    "road_name": "Route 1",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.303,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.69729830585366,
+          40.34902216365502
+        ],
+        [
+          -74.69394658803003,
+          40.35185960995585
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000010,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.086,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63066913601304,
+          40.338093203764565
+        ],
+        [
+          -74.63049019938977,
+          40.336855260602405
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000011,
+    "road_name": "Alexander Road",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.241,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64526216792699,
+          40.38979846570462
+        ],
+        [
+          -74.64663528036425,
+          40.39301481408553
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000012,
+    "road_name": "Harrison Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.148,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.66458033858493,
+          40.3592771752904
+        ],
+        [
+          -74.66279903281946,
+          40.358085614681265
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000013,
+    "road_name": "Clarksville Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.173,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.69256831006197,
+          40.3288413759055
+        ],
+        [
+          -74.69480197840907,
+          40.32998074233842
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000014,
+    "road_name": "Washington Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.084,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.695915311072,
+          40.38494482608091
+        ],
+        [
+          -74.69478376381181,
+          40.38537528158428
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000015,
+    "road_name": "Main Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.148,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.67929714923774,
+          40.37992394912781
+        ],
+        [
+          -74.67916282013417,
+          40.37777794559151
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000016,
+    "road_name": "Province Line Road",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.292,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.70149776165718,
+          40.36396152511706
+        ],
+        [
+          -74.69726789740513,
+          40.36391146275772
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000017,
+    "road_name": "Cranbury Road",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.237,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63711923608234,
+          40.37872652150786
+        ],
+        [
+          -74.63643326743995,
+          40.37535866975722
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000018,
+    "road_name": "Main Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.191,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6838361966909,
+          40.382180128721984
+        ],
+        [
+          -74.68652431599332,
+          40.381497809304555
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000019,
+    "road_name": "Nassau Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.305,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6970125361825,
+          40.35786718083045
+        ],
+        [
+          -74.6985901412845,
+          40.353740652481704
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000020,
+    "road_name": "Route 1",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.255,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65365219172983,
+          40.322922651762646
+        ],
+        [
+          -74.65640480508911,
+          40.32538978108322
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000021,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.261,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.68230275781049,
+          40.38815285662105
+        ],
+        [
+          -74.683315862402,
+          40.384506662148965
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000022,
+    "road_name": "Clarksville Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.093,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64319925432122,
+          40.339898783894284
+        ],
+        [
+          -74.64217644691915,
+          40.34077830521005
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000023,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.147,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.67868397793642,
+          40.39508159258759
+        ],
+        [
+          -74.6785768851279,
+          40.39720396074098
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000024,
+    "road_name": "Nassau Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.174,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.68996042524213,
+          40.36089834828503
+        ],
+        [
+          -74.69207991112908,
+          40.35952045190664
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000025,
+    "road_name": "Route 1",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.278,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.70063129492064,
+          40.337234368885156
+        ],
+        [
+          -74.70204099102833,
+          40.333453835529866
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000026,
+    "road_name": "Clarksville Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.175,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6288335234552,
+          40.33301282970018
+        ],
+        [
+          -74.62655718193824,
+          40.331906434371156
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000027,
+    "road_name": "Province Line Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.169,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65919714962757,
+          40.36579521116549
+        ],
+        [
+          -74.65726897237141,
+          40.36427526765306
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000028,
+    "road_name": "Main Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.319,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64520461545592,
+          40.37521451672301
+        ],
+        [
+          -74.6474622760676,
+          40.37117684179143
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000029,
+    "road_name": "Harrison Street",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.111,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.683185667658,
+          40.38900380943315
+        ],
+        [
+          -74.68269809233912,
+          40.387468696366916
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000030,
+    "road_name": "Route 27",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.281,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.66998576030834,
+          40.34124115697878
+        ],
+        [
+          -74.67096342068223,
+          40.33728707815699
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000031,
+    "road_name": "Southfield Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.071,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64281247105548,
+          40.362132683761686
+        ],
+        [
+          -74.64306738059496,
+          40.36313213583573
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000032,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.307,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64230823294888,
+          40.36475443450977
+        ],
+        [
+          -74.64163872872379,
+          40.369148019343356
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000033,
+    "road_name": "Washington Road",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.139,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.66714572034259,
+          40.383997908259005
+        ],
+        [
+          -74.66839825098162,
+          40.382422275068436
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000034,
+    "road_name": "Alexander Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.218,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.70076896498105,
+          40.33239787194112
+        ],
+        [
+          -74.6988552468768,
+          40.329882481245455
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000035,
+    "road_name": "Cranbury Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.073,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6632050822463,
+          40.32338962408714
+        ],
+        [
+          -74.66281168055384,
+          40.3224116268707
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000036,
+    "road_name": "Harrison Street",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.322,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64315075974035,
+          40.3523612488919
+        ],
+        [
+          -74.64188112435617,
+          40.34786397152983
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000037,
+    "road_name": "Meadow Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.145,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65986194316444,
+          40.375903152018815
+        ],
+        [
+          -74.65819505479361,
+          40.377188999314356
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000038,
+    "road_name": "Province Line Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.091,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64771232249936,
+          40.3493292941003
+        ],
+        [
+          -74.64640785132293,
+          40.34915706547253
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000039,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.202,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.68782080287694,
+          40.37992451623923
+        ],
+        [
+          -74.68703690444399,
+          40.37710044674551
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000040,
+    "road_name": "Washington Road",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.159,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63643761439123,
+          40.34596311112982
+        ],
+        [
+          -74.63868161519645,
+          40.34647921358435
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000041,
+    "road_name": "Meadow Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.173,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64290162000177,
+          40.3424843987298
+        ],
+        [
+          -74.64041038428348,
+          40.34278626878777
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000042,
+    "road_name": "Southfield Road",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.309,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63971954343222,
+          40.37063167690473
+        ],
+        [
+          -74.63930120290341,
+          40.37509553269442
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000043,
+    "road_name": "Nassau Street",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.266,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6968272859099,
+          40.36913263000662
+        ],
+        [
+          -74.69518877602337,
+          40.365638253792525
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000044,
+    "road_name": "Route 1",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.225,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64647100999,
+          40.35003837662137
+        ],
+        [
+          -74.64467212026156,
+          40.35275713545641
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000045,
+    "road_name": "Meadow Road",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.187,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65297190232556,
+          40.334545106293085
+        ],
+        [
+          -74.65532198521059,
+          40.33589791915037
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000046,
+    "road_name": "Alexander Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.194,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.68184545052412,
+          40.36815583906417
+        ],
+        [
+          -74.68266070324425,
+          40.36546304273323
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000047,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.175,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6746730704213,
+          40.351062729741436
+        ],
+        [
+          -74.67222856076843,
+          40.35037964364583
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000048,
+    "road_name": "Route 27",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.271,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65566439147466,
+          40.34132598563606
+        ],
+        [
+          -74.65694589028733,
+          40.345045280384014
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000049,
+    "road_name": "Alexander Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.207,
+    "muni_id": 1,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.67994286973455,
+          40.375238010046424
+        ],
+        [
+          -74.67799127377906,
+          40.372967382083445
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000000,
+    "road_name": "Main Street",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.159,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.62505942000145,
+          40.28353300672576
+        ],
+        [
+          -74.6228614605617,
+          40.28281981311266
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000001,
+    "road_name": "Clarksville Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.303,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64243955356544,
+          40.302437053956965
+        ],
+        [
+          -74.64525472638105,
+          40.2990758804769
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000002,
+    "road_name": "Cranbury Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.223,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.67384149782494,
+          40.29376292820985
+        ],
+        [
+          -74.67561924285921,
+          40.29106733649662
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000003,
+    "road_name": "Route 27",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.343,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6237213498873,
+          40.32516477836204
+        ],
+        [
+          -74.6286465060333,
+          40.324502342060924
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000004,
+    "road_name": "Province Line Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.181,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.62221448761437,
+          40.2907937138856
+        ],
+        [
+          -74.61966874740257,
+          40.29144804551864
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000005,
+    "road_name": "Harrison Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.284,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63330012889702,
+          40.26334727631433
+        ],
+        [
+          -74.63318314290368,
+          40.259232228905084
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000006,
+    "road_name": "Cranbury Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.344,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64809547204605,
+          40.27702426489388
+        ],
+        [
+          -74.6512500973562,
+          40.28088588325053
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000007,
+    "road_name": "Southfield Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.279,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63160500696883,
+          40.26611693816123
+        ],
+        [
+          -74.63200356784144,
+          40.2701413744665
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000008,
+    "road_name": "Route 1",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.264,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63757464228779,
+          40.32735762217006
+        ],
+        [
+          -74.63387685319803,
+          40.32634771769573
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000009,
+    "road_name": "Alexander Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.265,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.61453155435532,
+          40.31918783900961
+        ],
+        [
+          -74.61238316003862,
+          40.32237517557366
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000010,
+    "road_name": "Alexander Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.276,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.61445722258156,
+          40.31498122748034
+        ],
+        [
+          -74.614973227024,
+          40.31894973748764
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000011,
+    "road_name": "Southfield Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.168,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63671017004485,
+          40.26107010171809
+        ],
+        [
+          -74.63858008972561,
+          40.262628925206144
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000012,
+    "road_name": "Washington Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.249,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64173568260665,
+          40.32849905594537
+        ],
+        [
+          -74.64434360555802,
+          40.33099658677433
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000013,
+    "road_name": "Harrison Street",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.23,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.60561107419768,
+          40.29925647468849
+        ],
+        [
+          -74.60889672722243,
+          40.298707947342464
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000014,
+    "road_name": "Main Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.269,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6137771061644,
+          40.27794774518227
+        ],
+        [
+          -74.61635182416741,
+          40.28086766730626
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000015,
+    "road_name": "Nassau Street",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.271,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.5975253081926,
+          40.32730186811483
+        ],
+        [
+          -74.59359551982013,
+          40.32743473658512
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000016,
+    "road_name": "Clarksville Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.342,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6621382667405,
+          40.293809289823585
+        ],
+        [
+          -74.65853400611144,
+          40.29040572655247
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000017,
+    "road_name": "Province Line Road",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.095,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63838663314453,
+          40.26449223916301
+        ],
+        [
+          -74.6397524764383,
+          40.26471446103275
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000018,
+    "road_name": "Main Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.263,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64356759121068,
+          40.32946723642634
+        ],
+        [
+          -74.64244954803762,
+          40.32582653506963
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000019,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.177,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.62398849623153,
+          40.26739258707896
+        ],
+        [
+          -74.62164260703946,
+          40.268445533290574
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000020,
+    "road_name": "Cranbury Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.26,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6648971879823,
+          40.29174954083611
+        ],
+        [
+          -74.66829686662183,
+          40.29336572467105
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000021,
+    "road_name": "Washington Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.286,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65152716413006,
+          40.28347337843294
+        ],
+        [
+          -74.65462478554217,
+          40.28071025601963
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000022,
+    "road_name": "Route 1",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.117,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64652772487857,
+          40.26947884052549
+        ],
+        [
+          -74.6458322221673,
+          40.26793763861937
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000023,
+    "road_name": "Washington Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.113,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6538996478587,
+          40.261762902787396
+        ],
+        [
+          -74.65247495474391,
+          40.26094780954271
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000024,
+    "road_name": "Washington Road",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.249,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.66529287230736,
+          40.27751593874013
+        ],
+        [
+          -74.6673655866551,
+          40.28046735136699
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000025,
+    "road_name": "Nassau Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.315,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63099242957108,
+          40.288225976386904
+        ],
+        [
+          -74.62772801657374,
+          40.29140784322318
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000026,
+    "road_name": "Route 27",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.271,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65180582635608,
+          40.25997920532142
+        ],
+        [
+          -74.65014172351492,
+          40.26352981695524
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000027,
+    "road_name": "Route 1",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.326,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65155012144804,
+          40.2908850299081
+        ],
+        [
+          -74.6490601543618,
+          40.286877008376415
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000028,
+    "road_name": "Clarksville Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.201,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.62632742202479,
+          40.265824432727165
+        ],
+        [
+          -74.62710211936421,
+          40.26862750458241
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000029,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.119,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6326534609667,
+          40.26036203096487
+        ],
+        [
+          -74.63428307028465,
+          40.25977811485949
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000030,
+    "road_name": "Meadow Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.137,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.67223697330178,
+          40.282130625299914
+        ],
+        [
+          -74.67086205081326,
+          40.28070013571439
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000031,
+    "road_name": "Meadow Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.332,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.60194668210272,
+          40.30320432380866
+        ],
+        [
+          -74.59812295405155,
+          40.300282903741845
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000032,
+    "road_name": "Washington Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.214,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65463131333863,
+          40.27991930396172
+        ],
+        [
+          -74.65766658217743,
+          40.27927486698421
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000033,
+    "road_name": "Province Line Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.179,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6400792878664,
+          40.290851951583875
+        ],
+        [
+          -74.6390702741472,
+          40.28846489108748
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000034,
+    "road_name": "Southfield Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.204,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.60683641118564,
+          40.31502656678401
+        ],
+        [
+          -74.6046486527511,
+          40.317018027125975
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000035,
+    "road_name": "Province Line Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.278,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65073391174798,
+          40.320858147116155
+        ],
+        [
+          -74.64924508047447,
+          40.31711402491797
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000036,
+    "road_name": "Washington Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.277,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.66882530113907,
+          40.298403383343974
+        ],
+        [
+          -74.67273868867726,
+          40.2993003833176
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000037,
+    "road_name": "Southfield Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.248,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.60066606510011,
+          40.332756874032754
+        ],
+        [
+          -74.60423082404093,
+          40.333185744791294
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000038,
+    "road_name": "Cranbury Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.147,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65799610009432,
+          40.305698120844085
+        ],
+        [
+          -74.65857832159249,
+          40.303645549600596
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000039,
+    "road_name": "Route 1",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.319,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.61253520278672,
+          40.3013944330713
+        ],
+        [
+          -74.61013535486148,
+          40.29744303934992
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000040,
+    "road_name": "Meadow Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.22,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.62663837405444,
+          40.26061752796267
+        ],
+        [
+          -74.62400986570427,
+          40.26241809850069
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000041,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.293,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.60619853031321,
+          40.277824947973
+        ],
+        [
+          -74.60288800052697,
+          40.28049140222805
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000042,
+    "road_name": "Nassau Street",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.09,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.61198521967945,
+          40.29383562525333
+        ],
+        [
+          -74.61134124973347,
+          40.29269883513782
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000043,
+    "road_name": "Alexander Road",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.224,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.61663068773036,
+          40.26120488535199
+        ],
+        [
+          -74.61433005260032,
+          40.26350286886071
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000044,
+    "road_name": "Nassau Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.275,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.65495515898102,
+          40.28375461956625
+        ],
+        [
+          -74.65851536070961,
+          40.28555869585809
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000045,
+    "road_name": "Harrison Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.173,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63896662625335,
+          40.329662416949695
+        ],
+        [
+          -74.63691456203289,
+          40.33110448474704
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000046,
+    "road_name": "Clarksville Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.088,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6287980123526,
+          40.324397111441
+        ],
+        [
+          -74.62759615915733,
+          40.32397995069855
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000047,
+    "road_name": "Southfield Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.322,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.63426892687293,
+          40.309324068414014
+        ],
+        [
+          -74.63102879440785,
+          40.30595788135839
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000048,
+    "road_name": "Main Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.332,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.6495187608534,
+          40.32898442379225
+        ],
+        [
+          -74.64654785594877,
+          40.332769386540654
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000049,
+    "road_name": "Nassau Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.173,
+    "muni_id": 2,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.64679152762109,
+          40.32676678006942
+        ],
+        [
+          -74.64556684246317,
+          40.32895674395044
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000000,
+    "road_name": "Route 1",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.088,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.17584181486524,
+          40.69661327443668
+        ],
+        [
+          -74.17548970592385,
+          40.69538744780105
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000001,
+    "road_name": "Clarksville Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.31,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.15238802952385,
+          40.74144901918849
+        ],
+        [
+          -74.14789667669059,
+          40.74161667705289
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000002,
+    "road_name": "Nassau Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.196,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.17669243596085,
+          40.708612347324596
+        ],
+        [
+          -74.17719441755132,
+          40.71140789246647
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000003,
+    "road_name": "Washington Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.089,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.17980444900167,
+          40.737756625934715
+        ],
+        [
+          -74.18041321075576,
+          40.73661999211219
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000004,
+    "road_name": "Clarksville Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.152,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.16793662356625,
+          40.70897749147523
+        ],
+        [
+          -74.16766138870925,
+          40.711158693755934
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000005,
+    "road_name": "Clarksville Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.335,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.19708337926167,
+          40.753983888888186
+        ],
+        [
+          -74.20165377185067,
+          40.75233604681593
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000006,
+    "road_name": "Nassau Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.074,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.16266355712442,
+          40.709861583814366
+        ],
+        [
+          -74.16371821100029,
+          40.7100889861844
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000007,
+    "road_name": "Alexander Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.312,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.14765278549982,
+          40.737879484567046
+        ],
+        [
+          -74.14810006809648,
+          40.73337766760143
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000008,
+    "road_name": "Route 27",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.283,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.16360694240016,
+          40.703442815146566
+        ],
+        [
+          -74.16278294950703,
+          40.699420019971505
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000009,
+    "road_name": "Cranbury Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.137,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.17653448970722,
+          40.70964847388778
+        ],
+        [
+          -74.17849092494923,
+          40.709303183022065
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000010,
+    "road_name": "Route 1",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.238,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.20653184614942,
+          40.74842002740383
+        ],
+        [
+          -74.20647876345028,
+          40.75187166194621
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000011,
+    "road_name": "Southfield Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.277,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.1366029230217,
+          40.74184004071365
+        ],
+        [
+          -74.133143424395,
+          40.73979076920268
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000012,
+    "road_name": "Clarksville Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.145,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.16134975721279,
+          40.71589843617218
+        ],
+        [
+          -74.16172186673583,
+          40.71383739202811
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000013,
+    "road_name": "Clarksville Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.094,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.17382643203062,
+          40.696580257352785
+        ],
+        [
+          -74.17289665135876,
+          40.69559309773604
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000014,
+    "road_name": "Nassau Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.088,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.1349800495924,
+          40.7698086744819
+        ],
+        [
+          -74.13625106884308,
+          40.76996161074612
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000015,
+    "road_name": "Washington Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.291,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.17715462096923,
+          40.76844184012618
+        ],
+        [
+          -74.17832282126147,
+          40.7724881094119
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000016,
+    "road_name": "Harrison Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.18,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.13787707183143,
+          40.7372739876134
+        ],
+        [
+          -74.1388691358733,
+          40.73485471326105
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000017,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.302,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.16263166442593,
+          40.76965924396331
+        ],
+        [
+          -74.16493974321114,
+          40.77337468766272
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000018,
+    "road_name": "Province Line Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.326,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.1470982337827,
+          40.72538668021171
+        ],
+        [
+          -74.1517036739173,
+          40.724337466285554
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000019,
+    "road_name": "Clarksville Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.329,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.19220952150475,
+          40.7280335520424
+        ],
+        [
+          -74.19208196182093,
+          40.72326454460832
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000020,
+    "road_name": "Cranbury Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.192,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.20091916153926,
+          40.75308075686712
+        ],
+        [
+          -74.19817766822636,
+          40.7535428529181
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000021,
+    "road_name": "Meadow Road",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.107,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.16219701151797,
+          40.76748702183951
+        ],
+        [
+          -74.16146870980748,
+          40.766111278124136
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000022,
+    "road_name": "Southfield Road",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.084,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.13944287898227,
+          40.70137899440312
+        ],
+        [
+          -74.14034383881865,
+          40.70056883141804
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000023,
+    "road_name": "Main Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.274,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.13810709953678,
+          40.701367916627994
+        ],
+        [
+          -74.1354651818496,
+          40.698404410210635
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000024,
+    "road_name": "Main Street",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.174,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.1476474086126,
+          40.760833862992556
+        ],
+        [
+          -74.14853257419242,
+          40.763201467906825
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000025,
+    "road_name": "Route 1",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.217,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.18922169599323,
+          40.70990817507292
+        ],
+        [
+          -74.19219334036148,
+          40.70888020342761
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000026,
+    "road_name": "Main Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.334,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.19634998318924,
+          40.755762500868016
+        ],
+        [
+          -74.19996648101767,
+          40.752536761606315
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000027,
+    "road_name": "Alexander Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.171,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.15282364129915,
+          40.70340980063896
+        ],
+        [
+          -74.15517512246156,
+          40.70263784473635
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000028,
+    "road_name": "Meadow Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.27,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.18624268264429,
+          40.77133122349348
+        ],
+        [
+          -74.18863373165769,
+          40.77442970009329
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000029,
+    "road_name": "Washington Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.114,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.19100541660664,
+          40.73477980554314
+        ],
+        [
+          -74.19130960877554,
+          40.733155216623366
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000030,
+    "road_name": "Meadow Road",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.159,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.17081177440795,
+          40.7745089474768
+        ],
+        [
+          -74.16866920715377,
+          40.77537430654957
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000031,
+    "road_name": "Route 27",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.286,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.16198850644085,
+          40.75802610382562
+        ],
+        [
+          -74.16034566899505,
+          40.76183787976298
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000032,
+    "road_name": "Main Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.198,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.17122756407038,
+          40.726789812453724
+        ],
+        [
+          -74.17394695856407,
+          40.727696781174075
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000033,
+    "road_name": "Clarksville Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.085,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.1958499626271,
+          40.70457648848205
+        ],
+        [
+          -74.19516701248575,
+          40.703545260001746
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000034,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.222,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.19635180935259,
+          40.71081662135215
+        ],
+        [
+          -74.19647884209358,
+          40.707594750992
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000035,
+    "road_name": "Meadow Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.226,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.16443975682913,
+          40.75043829659679
+        ],
+        [
+          -74.16183561277786,
+          40.75242011874155
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000036,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.094,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.19949940556616,
+          40.75949737357897
+        ],
+        [
+          -74.20048335872585,
+          40.76043683022254
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000037,
+    "road_name": "Alexander Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.192,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.19870480275408,
+          40.759308429699914
+        ],
+        [
+          -74.19644769573289,
+          40.757691742967765
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000038,
+    "road_name": "Harrison Street",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.121,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.21088779258265,
+          40.75268245903656
+        ],
+        [
+          -74.21068931681219,
+          40.75441919469327
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000039,
+    "road_name": "Main Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.307,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.20387604579467,
+          40.76389519953324
+        ],
+        [
+          -74.19945074742924,
+          40.76347337398091
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000040,
+    "road_name": "Nassau Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.311,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.20414864313963,
+          40.709313479429134
+        ],
+        [
+          -74.20669301982143,
+          40.70559227560693
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000041,
+    "road_name": "Harrison Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.315,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.19647833307468,
+          40.723302136854954
+        ],
+        [
+          -74.19558678607808,
+          40.71882608548982
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000042,
+    "road_name": "Southfield Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.24,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.15474813863894,
+          40.759596625408705
+        ],
+        [
+          -74.15224383681655,
+          40.757178309644104
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000043,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.201,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.19863088060039,
+          40.73208732748103
+        ],
+        [
+          -74.19578445872426,
+          40.73143968092288
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000044,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.077,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.15682590168191,
+          40.767045541038
+        ],
+        [
+          -74.15694441868226,
+          40.7681593525003
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000045,
+    "road_name": "Route 1",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.254,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.18836240681304,
+          40.71109158034398
+        ],
+        [
+          -74.19122849885456,
+          40.71340915016563
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000046,
+    "road_name": "Province Line Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.16,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.14673802046242,
+          40.74396550838287
+        ],
+        [
+          -74.14835729167149,
+          40.7456210041767
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000047,
+    "road_name": "Meadow Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.107,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.17263734419569,
+          40.77509654513972
+        ],
+        [
+          -74.17198387554316,
+          40.776506882676806
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000048,
+    "road_name": "Washington Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.34,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.19023164014773,
+          40.760068634541845
+        ],
+        [
+          -74.19037057187174,
+          40.76499144348412
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000049,
+    "road_name": "Route 27",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.189,
+    "muni_id": 3,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.13750265797168,
+          40.70922252515185
+        ],
+        [
+          -74.13990149893765,
+          40.71055555501808
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000000,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.201,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.02871080614727,
+          40.727961480496575
+        ],
+        [
+          -74.03107726350788,
+          40.7262749516004
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000001,
+    "road_name": "Main Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.184,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.0407606443644,
+          40.756395116616694
+        ],
+        [
+          -74.03907749448096,
+          40.75847036144548
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000002,
+    "road_name": "Province Line Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.196,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.01119374865927,
+          40.71333485885625
+        ],
+        [
+          -74.01400248121504,
+          40.71286875452097
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000003,
+    "road_name": "Washington Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.247,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.01168789208985,
+          40.69239971284614
+        ],
+        [
+          -74.01157593804236,
+          40.69597884608634
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000004,
+    "road_name": "Southfield Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.331,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.00448321420019,
+          40.71038278384255
+        ],
+        [
+          -74.00181958147402,
+          40.71436707779535
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000005,
+    "road_name": "Clarksville Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.298,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.06143202006976,
+          40.67810120172102
+        ],
+        [
+          -74.06553534185797,
+          40.676758025850056
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000006,
+    "road_name": "Route 1",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.223,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.06589658653668,
+          40.693763842372796
+        ],
+        [
+          -74.06495890299676,
+          40.69685572624765
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000007,
+    "road_name": "Cranbury Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.301,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.0254038535644,
+          40.704454069912295
+        ],
+        [
+          -74.0254000006676,
+          40.70881033283045
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000008,
+    "road_name": "Province Line Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.213,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.01588309575753,
+          40.683620106627586
+        ],
+        [
+          -74.01812172840269,
+          40.68149794222341
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000009,
+    "road_name": "Route 27",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.33,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.0813846344071,
+          40.68979861009309
+        ],
+        [
+          -74.07661025282773,
+          40.689675551927444
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000010,
+    "road_name": "Harrison Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.291,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.08277453384753,
+          40.70675407176882
+        ],
+        [
+          -74.08082594042368,
+          40.7104882163724
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000011,
+    "road_name": "Province Line Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.134,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.00538869570336,
+          40.719238079406345
+        ],
+        [
+          -74.00692595302387,
+          40.720417821792346
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000012,
+    "road_name": "Nassau Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.337,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.06385440143345,
+          40.70798939666853
+        ],
+        [
+          -74.06685085339562,
+          40.70414003042352
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000013,
+    "road_name": "Clarksville Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.258,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.02842988899597,
+          40.681409488689894
+        ],
+        [
+          -74.02500210659002,
+          40.679927502987475
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000014,
+    "road_name": "Clarksville Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.285,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.0765155641809,
+          40.71893830713313
+        ],
+        [
+          -74.0737351254388,
+          40.721988303857664
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000015,
+    "road_name": "Washington Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.24,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.04274270795239,
+          40.71088548563392
+        ],
+        [
+          -74.04585583756531,
+          40.70934053340143
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000016,
+    "road_name": "Nassau Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.176,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.03704445787827,
+          40.707374754688736
+        ],
+        [
+          -74.03672804824605,
+          40.70991114006426
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000017,
+    "road_name": "Washington Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.301,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.06383458081038,
+          40.698515460204206
+        ],
+        [
+          -74.05983657070288,
+          40.700257115289844
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000018,
+    "road_name": "Route 1",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.34,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.05097028452222,
+          40.691944735313704
+        ],
+        [
+          -74.04752827332506,
+          40.695470415946325
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000019,
+    "road_name": "Nassau Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.326,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.04815866607,
+          40.69055750876224
+        ],
+        [
+          -74.04534619771216,
+          40.68676322012046
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000020,
+    "road_name": "Harrison Street",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.264,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.07651938536232,
+          40.693325718777764
+        ],
+        [
+          -74.07514149702881,
+          40.696898027986414
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000021,
+    "road_name": "Alexander Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.073,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.04248942743747,
+          40.71802045656737
+        ],
+        [
+          -74.04146750739768,
+          40.71776133775269
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000022,
+    "road_name": "Washington Road",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.117,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.07844378382276,
+          40.7068667412442
+        ],
+        [
+          -74.0786862110407,
+          40.70519573382751
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000023,
+    "road_name": "Meadow Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.147,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.05155212508882,
+          40.73560070998459
+        ],
+        [
+          -74.05076438182648,
+          40.737580387174035
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000024,
+    "road_name": "Province Line Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.164,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.04236781047656,
+          40.72064419976625
+        ],
+        [
+          -74.04114944646984,
+          40.71860733689633
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000025,
+    "road_name": "Clarksville Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.212,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.00569498081047,
+          40.691791200022685
+        ],
+        [
+          -74.00872634709201,
+          40.69228363405601
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000026,
+    "road_name": "Clarksville Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.121,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.01866096306364,
+          40.707244331102395
+        ],
+        [
+          -74.01751686754555,
+          40.70591968576879
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000027,
+    "road_name": "Clarksville Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.116,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.03445392666679,
+          40.71348928134552
+        ],
+        [
+          -74.03297622237811,
+          40.71429641384163
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000028,
+    "road_name": "Harrison Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.309,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.0581760758122,
+          40.71760668173771
+        ],
+        [
+          -74.05944201479912,
+          40.71331087281212
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000029,
+    "road_name": "Province Line Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.117,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.00766078307723,
+          40.71059301402311
+        ],
+        [
+          -74.0081045964307,
+          40.71222865124859
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000030,
+    "road_name": "Alexander Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.226,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.0440667443289,
+          40.69731254369539
+        ],
+        [
+          -74.04300926315575,
+          40.70040871076658
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000031,
+    "road_name": "Clarksville Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.306,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.02434184749539,
+          40.74783084821645
+        ],
+        [
+          -74.02068444260074,
+          40.75033932417043
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000032,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.291,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.03283148893094,
+          40.730019587865094
+        ],
+        [
+          -74.02921450396057,
+          40.727862477000414
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000033,
+    "road_name": "Harrison Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.094,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.07013974402129,
+          40.72817712297512
+        ],
+        [
+          -74.07047155380353,
+          40.729498580320694
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000034,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.159,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.0456578307327,
+          40.69544215697416
+        ],
+        [
+          -74.04447950262337,
+          40.69345858540075
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000035,
+    "road_name": "Cranbury Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.162,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.04437346222439,
+          40.729904589596
+        ],
+        [
+          -74.046196152289,
+          40.73137719807103
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000036,
+    "road_name": "Meadow Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.316,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.0815967017898,
+          40.707002807922315
+        ],
+        [
+          -74.08601248824888,
+          40.70821223525709
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000037,
+    "road_name": "Meadow Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.314,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.07560511036598,
+          40.69249328839352
+        ],
+        [
+          -74.07452026761231,
+          40.68806935344885
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000038,
+    "road_name": "Southfield Road",
+    "road_type": "trunk",
+    "road_class": "arterial",
+    "length_miles": 0.229,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.07681016261722,
+          40.72092010033378
+        ],
+        [
+          -74.07454625741153,
+          40.723339295599146
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000039,
+    "road_name": "Route 27",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.069,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.04505175842506,
+          40.692081476950335
+        ],
+        [
+          -74.04423665060465,
+          40.69149254694404
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000040,
+    "road_name": "Route 1",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.145,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.05569454333217,
+          40.70814652226183
+        ],
+        [
+          -74.05655706682418,
+          40.710069790382455
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000041,
+    "road_name": "Cranbury Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.244,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.07239715437868,
+          40.731228054228886
+        ],
+        [
+          -74.07024408993017,
+          40.73403184802461
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000042,
+    "road_name": "Main Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.159,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.02417868935626,
+          40.73183817061994
+        ],
+        [
+          -74.02319062785246,
+          40.729762247086924
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000043,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.181,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.0828123577854,
+          40.737387207849785
+        ],
+        [
+          -74.08481943806122,
+          40.73570750929446
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000044,
+    "road_name": "Alexander Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.338,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.00986885695562,
+          40.6831203909129
+        ],
+        [
+          -74.00986448991235,
+          40.68801691705936
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000045,
+    "road_name": "Clarksville Road",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.237,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.02819005623407,
+          40.712331148727465
+        ],
+        [
+          -74.0304528514525,
+          40.71491023684001
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000046,
+    "road_name": "Washington Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.154,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.07748863426107,
+          40.691804893954306
+        ],
+        [
+          -74.07972078579431,
+          40.69187914853517
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000047,
+    "road_name": "Nassau Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.28,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.08219934868862,
+          40.74419546097211
+        ],
+        [
+          -74.08487212739239,
+          40.741135732301416
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000048,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.323,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.01539146174872,
+          40.72834834778174
+        ],
+        [
+          -74.01477368128877,
+          40.7329860961154
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000049,
+    "road_name": "Clarksville Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.163,
+    "muni_id": 4,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.07342640724289,
+          40.71268784005071
+        ],
+        [
+          -74.07496449795018,
+          40.714480459890446
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000000,
+    "road_name": "Route 1",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.295,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.72018179024063,
+          40.256244805170546
+        ],
+        [
+          -74.7198716093863,
+          40.25198773725283
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000001,
+    "road_name": "Route 27",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.138,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.76053961715122,
+          40.20231922921871
+        ],
+        [
+          -74.76035630293966,
+          40.204306405375235
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000002,
+    "road_name": "Alexander Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.188,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.74244052670228,
+          40.192092421960695
+        ],
+        [
+          -74.74139653907602,
+          40.18957883808845
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000003,
+    "road_name": "Southfield Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.214,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.77742842151392,
+          40.20604520948406
+        ],
+        [
+          -74.78035400645621,
+          40.205024031822674
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000004,
+    "road_name": "Route 1",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.219,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.74726528743747,
+          40.219025659950915
+        ],
+        [
+          -74.74515565397233,
+          40.21664677222307
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000005,
+    "road_name": "Province Line Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.219,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.76094652762274,
+          40.227546716661706
+        ],
+        [
+          -74.75916387796791,
+          40.224912492135815
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000006,
+    "road_name": "Route 1",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.304,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.70675091582753,
+          40.25170906093025
+        ],
+        [
+          -74.71088952734323,
+          40.25320152985383
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000007,
+    "road_name": "Main Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.154,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.76922230290228,
+          40.25220764369884
+        ],
+        [
+          -74.76799758949578,
+          40.25408111269631
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000008,
+    "road_name": "Nassau Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.24,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.70688187050366,
+          40.21786457932599
+        ],
+        [
+          -74.70365842177279,
+          40.21917645606376
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000009,
+    "road_name": "Southfield Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.202,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.76344821993804,
+          40.18381435455311
+        ],
+        [
+          -74.76637508136933,
+          40.184006753653094
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000010,
+    "road_name": "Harrison Street",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.156,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.75600404688831,
+          40.2177886253207
+        ],
+        [
+          -74.75816724132851,
+          40.218432322621396
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000011,
+    "road_name": "Clarksville Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.279,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.7130470631639,
+          40.230455926940124
+        ],
+        [
+          -74.71336695119118,
+          40.234480867902406
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000012,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.153,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.71977641342575,
+          40.19176249252126
+        ],
+        [
+          -74.72122299546176,
+          40.19009062034114
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000013,
+    "road_name": "Clarksville Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.135,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.78091235071349,
+          40.20109988623572
+        ],
+        [
+          -74.77986513019891,
+          40.19945217505477
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000014,
+    "road_name": "Harrison Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.127,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.71010837718676,
+          40.212360849272784
+        ],
+        [
+          -74.71117060920412,
+          40.21386815992525
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000015,
+    "road_name": "Harrison Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.171,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.73800205378369,
+          40.239590591123545
+        ],
+        [
+          -74.7404811362114,
+          40.23957295445058
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000016,
+    "road_name": "Route 1",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.092,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.76305524733051,
+          40.25702939752457
+        ],
+        [
+          -74.76246538590358,
+          40.25582787068163
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000017,
+    "road_name": "Route 27",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.097,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.71532254034435,
+          40.23094376581745
+        ],
+        [
+          -74.71393907371481,
+          40.231191436690224
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000018,
+    "road_name": "Harrison Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.144,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.7206092492658,
+          40.21503870032836
+        ],
+        [
+          -74.72144479260118,
+          40.21312639398511
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000019,
+    "road_name": "Meadow Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.264,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.72748799502884,
+          40.241015264047356
+        ],
+        [
+          -74.73100812284395,
+          40.23950143180258
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000020,
+    "road_name": "Route 1",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.242,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.74912153314614,
+          40.224035158332185
+        ],
+        [
+          -74.75009468543523,
+          40.22065990794889
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000021,
+    "road_name": "Southfield Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.178,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.73696590475497,
+          40.25695480247096
+        ],
+        [
+          -74.73955040931112,
+          40.25697576744009
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000022,
+    "road_name": "Cranbury Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.204,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.76214658889552,
+          40.20049354340604
+        ],
+        [
+          -74.75977704443966,
+          40.19873053044108
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000023,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.303,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.74958989916273,
+          40.2422870641365
+        ],
+        [
+          -74.74520451141085,
+          40.24254429787644
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000024,
+    "road_name": "Province Line Road",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.135,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.764050044241,
+          40.20354862608905
+        ],
+        [
+          -74.76593420240218,
+          40.204064607202106
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000025,
+    "road_name": "Southfield Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.298,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.71417074704897,
+          40.1955775161989
+        ],
+        [
+          -74.71605010594062,
+          40.19169239295813
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000026,
+    "road_name": "Route 27",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.273,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.7196749148276,
+          40.23373403488891
+        ],
+        [
+          -74.71931444209636,
+          40.229797532413876
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000027,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.287,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.75295533011173,
+          40.177373209857606
+        ],
+        [
+          -74.75015706283416,
+          40.18044093029075
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000028,
+    "road_name": "Alexander Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.093,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.71804601811758,
+          40.21939898692496
+        ],
+        [
+          -74.71939388210488,
+          40.21946513761605
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000029,
+    "road_name": "Main Street",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.134,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.78187080169464,
+          40.24994976933167
+        ],
+        [
+          -74.78128039796917,
+          40.25180504089029
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000030,
+    "road_name": "Clarksville Road",
+    "road_type": "motorway",
+    "road_class": "arterial",
+    "length_miles": 0.129,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.71796977497186,
+          40.2230932030979
+        ],
+        [
+          -74.71798399335908,
+          40.22495756225715
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000031,
+    "road_name": "Meadow Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.078,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.77454158129143,
+          40.23892330061326
+        ],
+        [
+          -74.77519052057558,
+          40.23985413614926
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000032,
+    "road_name": "Washington Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.342,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.71977381781838,
+          40.192988448716484
+        ],
+        [
+          -74.71587608307773,
+          40.189933998475404
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000033,
+    "road_name": "Alexander Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.296,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.73298901606925,
+          40.25534649510033
+        ],
+        [
+          -74.7344313748511,
+          40.25131224381242
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000034,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.339,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.75957484714374,
+          40.21334405098171
+        ],
+        [
+          -74.76358969623243,
+          40.21618194061861
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000035,
+    "road_name": "Route 27",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.341,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.76111921850337,
+          40.25329699486881
+        ],
+        [
+          -74.76367812307589,
+          40.25753091662205
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000036,
+    "road_name": "Clarksville Road",
+    "road_type": "secondary",
+    "road_class": "collector",
+    "length_miles": 0.211,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.70452767377753,
+          40.18407204463337
+        ],
+        [
+          -74.7060146378202,
+          40.18674586105031
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000037,
+    "road_name": "Route 27",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.288,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.74139793360375,
+          40.24503877439068
+        ],
+        [
+          -74.74323142698586,
+          40.24128121962233
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000038,
+    "road_name": "Quaker Bridge Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.21,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.77084675498251,
+          40.186850918383875
+        ],
+        [
+          -74.77382783799739,
+          40.18624755915823
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000039,
+    "road_name": "Southfield Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.335,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.73370082295294,
+          40.250623326720685
+        ],
+        [
+          -74.7337237346797,
+          40.255471341084046
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000040,
+    "road_name": "Province Line Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.169,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.74955019943933,
+          40.17842659342706
+        ],
+        [
+          -74.7498441808216,
+          40.18085714298494
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000041,
+    "road_name": "Province Line Road",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.101,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.75822023221058,
+          40.17923338900599
+        ],
+        [
+          -74.75890485511785,
+          40.18052748010504
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000042,
+    "road_name": "Harrison Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.218,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.7578496553573,
+          40.18532812957601
+        ],
+        [
+          -74.7547371034778,
+          40.184829270824714
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000043,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.161,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.77530013239289,
+          40.22454616944385
+        ],
+        [
+          -74.77373585967177,
+          40.22628395260759
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000044,
+    "road_name": "Nassau Street",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.24,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.7036991394864,
+          40.223114704788394
+        ],
+        [
+          -74.70459693915714,
+          40.21975984782018
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000045,
+    "road_name": "Clarksville Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.206,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.7340019528054,
+          40.21135501364155
+        ],
+        [
+          -74.73455962634148,
+          40.208422871364654
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000046,
+    "road_name": "Route 27",
+    "road_type": "tertiary",
+    "road_class": "collector",
+    "length_miles": 0.218,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.78077422128133,
+          40.21683390033383
+        ],
+        [
+          -74.77970275633027,
+          40.213862939687154
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000047,
+    "road_name": "Alexander Road",
+    "road_type": "primary",
+    "road_class": "arterial",
+    "length_miles": 0.128,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.71149193370091,
+          40.20599371267758
+        ],
+        [
+          -74.71043103316411,
+          40.204463160134644
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000048,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.315,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.7764316172521,
+          40.245604754660754
+        ],
+        [
+          -74.77314650444534,
+          40.24243925064947
+        ]
+      ]
+    }
+  },
+  {
+    "osm_id": 1000049,
+    "road_name": "Cranbury Road",
+    "road_type": "residential",
+    "road_class": "local",
+    "length_miles": 0.191,
+    "muni_id": 5,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -74.7820454079895,
+          40.248298687969914
+        ],
+        [
+          -74.7813792799948,
+          40.24561716782418
+        ]
+      ]
+    }
+  }
+]
