@@ -1,237 +1,271 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { analysisApi, exportApi } from '../services/api';
-import MapView from '../components/MapView';
+import { analysisApi } from '../services/api';
+import { MapContainer, TileLayer, CircleMarker, Polyline, Popup } from 'react-leaflet';
+import { 
+  Loader2, AlertCircle, CheckCircle, Clock, 
+  X, Info, Download, Users, MapPin, TrendingUp
+} from 'lucide-react';
+import 'leaflet/dist/leaflet.css';
 
 function AnalysisPage() {
   const { analysisId } = useParams();
-  const navigate = useNavigate();
-  const [showCrashes, setShowCrashes] = useState(true);
-  const [showHIN, setShowHIN] = useState(true);
-  const [hinType, setHINType] = useState('general');
+  const [sidePanelOpen, setSidePanelOpen] = useState(true);
 
-  const { data: analysis, isLoading: analysisLoading, error: analysisError } = useQuery({
+  // Fetch analysis details
+  const { data: analysis, isLoading, error, refetch } = useQuery({
     queryKey: ['analysis', analysisId],
     queryFn: () => analysisApi.get(analysisId).then(res => res.data),
     refetchInterval: (data) => {
-      if (data?.status === 'running' || data?.status === 'pending') {
-        return 5000;
+      // Refetch every 3 seconds if status is pending or running
+      if (data?.status === 'pending' || data?.status === 'running') {
+        return 3000;
       }
       return false;
     },
   });
 
-  const { data: summary } = useQuery({
-    queryKey: ['analysis-summary', analysisId],
-    queryFn: () => analysisApi.getSummary(analysisId).then(res => res.data),
-    enabled: analysis?.status === 'completed',
-  });
-
+  // Fetch crash data when analysis is complete
   const { data: crashData } = useQuery({
     queryKey: ['crashes', analysisId],
     queryFn: () => analysisApi.getCrashes(analysisId).then(res => res.data),
-    enabled: analysis?.status === 'completed' && showCrashes,
+    enabled: analysis?.status === 'completed',
   });
 
+  // Fetch HIN data when analysis is complete
   const { data: hinData } = useQuery({
-    queryKey: ['hin', analysisId, hinType],
-    queryFn: () => analysisApi.getHIN(analysisId, hinType).then(res => res.data),
-    enabled: analysis?.status === 'completed' && showHIN,
+    queryKey: ['hin', analysisId],
+    queryFn: () => analysisApi.getHIN(analysisId).then(res => res.data),
+    enabled: analysis?.status === 'completed',
   });
 
-  const handleDownloadGeoJSON = async () => {
-    try {
-      const response = await exportApi.downloadGeoJSON(analysisId, 'hin');
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `analysis_${analysisId}_hin.geojson`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      console.error('Download failed:', error);
-      alert('Download failed. Please try again.');
+  // Get map center from first crash or default to NJ
+  const getMapCenter = () => {
+    if (crashData?.features && crashData.features.length > 0) {
+      const coords = crashData.features[0].geometry.coordinates;
+      return [coords[1], coords[0]]; // Leaflet uses [lat, lon]
     }
+    return [40.0583, -74.4057]; // Center of NJ
   };
 
-  if (analysisLoading) {
+  const getSeverityColor = (severity) => {
+    const colors = {
+      fatal: '#dc2626',
+      serious_injury: '#ea580c',
+      minor_injury: '#f59e0b',
+      property_damage: '#3b82f6',
+    };
+    return colors[severity] || '#6b7280';
+  };
+
+  const getStatusDisplay = (status) => {
+    const displays = {
+      pending: { icon: Clock, color: 'text-gray-600', bg: 'bg-gray-50', text: 'Pending' },
+      running: { icon: Loader2, color: 'text-primary', bg: 'bg-blue-50', text: 'Running' },
+      completed: { icon: CheckCircle, color: 'text-success', bg: 'bg-green-50', text: 'Completed' },
+      failed: { icon: AlertCircle, color: 'text-error', bg: 'bg-red-50', text: 'Failed' },
+    };
+    return displays[status] || displays.pending;
+  };
+
+  if (isLoading) {
     return (
-      <div className="App">
-        <div className="header">
-          <div className="container">
-            <h1>Analysis Loading...</h1>
-          </div>
-        </div>
-        <div className="container">
-          <div className="loading">Loading analysis details...</div>
-        </div>
+      <div className="h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
-  if (analysisError) {
+  if (error) {
     return (
-      <div className="App">
-        <div className="header">
-          <div className="container">
-            <h1>Error</h1>
-          </div>
-        </div>
-        <div className="container">
-          <div className="error">
-            Error loading analysis: {analysisError.message}
-          </div>
-          <button className="button" onClick={() => navigate('/')}>
-            Back to Home
+      <div className="h-screen flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Analysis</h2>
+          <p className="text-gray-600 mb-6">Unable to load analysis data. Please try again.</p>
+          <button
+            onClick={() => refetch()}
+            className="px-6 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors"
+          >
+            Retry
           </button>
         </div>
       </div>
     );
   }
 
+  const statusDisplay = getStatusDisplay(analysis.status);
+  const StatusIcon = statusDisplay.icon;
+
   return (
-    <div className="App">
-      <div className="header">
-        <div className="container">
-          <h1>High Injury Network Analysis</h1>
-          <p>{analysis.municipality_name || `Municipality ID: ${analysis.muni_id}`}</p>
-          <p>Years: {analysis.start_year} - {analysis.end_year}</p>
+    <div className="h-[calc(100vh-4rem)] relative">
+      {/* Map Container */}
+      <div className="absolute inset-0">
+        {analysis.status === 'completed' && crashData ? (
+          <MapContainer
+            center={getMapCenter()}
+            zoom={13}
+            style={{ height: '100%', width: '100%' }}
+            zoomControl={false}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+
+            {/* Crash Points */}
+            {crashData.features?.map((feature, idx) => (
+              <CircleMarker
+                key={idx}
+                center={[
+                  feature.geometry.coordinates[1],
+                  feature.geometry.coordinates[0]
+                ]}
+                radius={4}
+                fillColor={getSeverityColor(feature.properties.severity)}
+                color="#fff"
+                weight={1}
+                fillOpacity={0.7}
+              >
+                <Popup>
+                  <div className="text-sm">
+                    <p className="font-medium mb-1">
+                      {feature.properties.severity.replace('_', ' ').toUpperCase()}
+                    </p>
+                    <p className="text-gray-600">
+                      {feature.properties.date}
+                    </p>
+                    {feature.properties.road_name && (
+                      <p className="text-gray-600 mt-1">
+                        {feature.properties.road_name}
+                      </p>
+                    )}
+                  </div>
+                </Popup>
+              </CircleMarker>
+            ))}
+          </MapContainer>
+        ) : (
+          <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+              <p className="text-gray-600">Loading map...</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Side Panel */}
+      <div
+        className={`absolute top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
+          sidePanelOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="h-full flex flex-col">
+          {/* Panel Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">Analysis Details</h2>
+            <button
+              onClick={() => setSidePanelOpen(false)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
+
+          {/* Panel Content */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Status Card */}
+            <div className={`${statusDisplay.bg} rounded-lg p-4`}>
+              <div className="flex items-center space-x-3">
+                <StatusIcon className={`w-5 h-5 ${statusDisplay.color} ${analysis.status === 'running' ? 'animate-spin' : ''}`} />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Status</p>
+                  <p className={`text-sm ${statusDisplay.color}`}>{statusDisplay.text}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Municipality Info */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 mb-3">Municipality</h3>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm font-medium text-gray-900">{analysis.municipality_name || 'Loading...'}</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  Analysis Period: {analysis.start_year} - {analysis.end_year}
+                </p>
+              </div>
+            </div>
+
+            {/* Statistics */}
+            {analysis.status === 'completed' && (
+              <>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">Crash Statistics</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">Total Crashes</span>
+                      <span className="text-sm font-semibold text-gray-900">{analysis.total_crashes || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">Fatalities</span>
+                      <span className="text-sm font-semibold text-red-600">{analysis.total_fatalities || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">Injuries</span>
+                      <span className="text-sm font-semibold text-orange-600">{analysis.total_injuries || 0}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">High Injury Network</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">HIN Miles</span>
+                      <span className="text-sm font-semibold text-gray-900">{(analysis.hin_miles || 0).toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">HIN Segments</span>
+                      <span className="text-sm font-semibold text-gray-900">{analysis.hin_segment_count || 0}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Export Button */}
+                <button className="w-full flex items-center justify-center space-x-2 bg-primary hover:bg-primary-hover text-white py-3 px-4 rounded-lg transition-colors">
+                  <Download className="w-5 h-5" />
+                  <span className="font-medium">Export Data</span>
+                </button>
+              </>
+            )}
+
+            {/* Error Message */}
+            {analysis.status === 'failed' && analysis.error_message && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-red-900">Analysis Failed</p>
+                    <p className="text-sm text-red-700 mt-1">{analysis.error_message}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="container">
-        {analysis.status === 'running' || analysis.status === 'pending' ? (
-          <div className="card">
-            <h2>Analysis in Progress</h2>
-            <p>Status: {analysis.status}</p>
-            <p>This page will automatically update when the analysis is complete.</p>
-            <div className="loading">Processing crash data and identifying high-risk segments...</div>
-          </div>
-        ) : analysis.status === 'failed' ? (
-          <div className="error">
-            <h3>Analysis Failed</h3>
-            <p>{analysis.error_message || 'Unknown error occurred'}</p>
-            <button className="button" onClick={() => navigate('/')} style={{ marginTop: '10px' }}>
-              Start New Analysis
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-value">{summary?.total_crashes || 0}</div>
-                <div className="stat-label">Total Crashes</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{summary?.fatal_crashes || 0}</div>
-                <div className="stat-label">Fatal Crashes</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{summary?.hin_miles?.toFixed(1) || 0}</div>
-                <div className="stat-label">HIN Miles</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{summary?.hin_corridors || 0}</div>
-                <div className="stat-label">HIN Corridors</div>
-              </div>
-            </div>
-
-            <div className="card">
-              <h2>Map Controls</h2>
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '15px', flexWrap: 'wrap' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <input
-                    type="checkbox"
-                    checked={showCrashes}
-                    onChange={(e) => setShowCrashes(e.target.checked)}
-                  />
-                  Show Crash Points
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <input
-                    type="checkbox"
-                    checked={showHIN}
-                    onChange={(e) => setShowHIN(e.target.checked)}
-                  />
-                  Show HIN Segments
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  HIN Type:
-                  <select
-                    className="select"
-                    style={{ width: 'auto', marginLeft: '8px' }}
-                    value={hinType}
-                    onChange={(e) => setHINType(e.target.value)}
-                  >
-                    <option value="general">General</option>
-                    <option value="pedestrian">Pedestrian</option>
-                    <option value="bicycle">Bicycle</option>
-                  </select>
-                </label>
-              </div>
-              <button className="button" onClick={handleDownloadGeoJSON} style={{ marginRight: '10px' }}>
-                Download HIN GeoJSON
-              </button>
-              <button className="button" onClick={() => navigate('/')}>
-                New Analysis
-              </button>
-            </div>
-
-            <div className="card">
-              <div className="map-container">
-                <MapView
-                  crashes={showCrashes ? crashData : null}
-                  hinSegments={showHIN ? hinData : null}
-                />
-              </div>
-            </div>
-
-            {summary && (
-              <div className="card">
-                <h2>Analysis Summary</h2>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <tbody>
-                    <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td style={{ padding: '10px' }}>Total Crashes</td>
-                      <td style={{ padding: '10px', fontWeight: 'bold' }}>{summary.total_crashes}</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td style={{ padding: '10px' }}>Fatal Crashes</td>
-                      <td style={{ padding: '10px', fontWeight: 'bold', color: '#dc2626' }}>{summary.fatal_crashes}</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td style={{ padding: '10px' }}>Serious Injury Crashes</td>
-                      <td style={{ padding: '10px', fontWeight: 'bold', color: '#ea580c' }}>{summary.serious_injury_crashes}</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td style={{ padding: '10px' }}>Pedestrian Crashes</td>
-                      <td style={{ padding: '10px', fontWeight: 'bold' }}>{summary.ped_crashes}</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td style={{ padding: '10px' }}>Bicycle Crashes</td>
-                      <td style={{ padding: '10px', fontWeight: 'bold' }}>{summary.bike_crashes}</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td style={{ padding: '10px' }}>High Injury Network Miles</td>
-                      <td style={{ padding: '10px', fontWeight: 'bold' }}>{summary.hin_miles.toFixed(2)}</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td style={{ padding: '10px' }}>Number of HIN Corridors</td>
-                      <td style={{ padding: '10px', fontWeight: 'bold' }}>{summary.hin_corridors}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '10px' }}>HIN in Vulnerable Areas</td>
-                      <td style={{ padding: '10px', fontWeight: 'bold' }}>{summary.vulnerable_tract_percentage.toFixed(1)}%</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      {/* Toggle Button (when panel is closed) */}
+      {!sidePanelOpen && (
+        <button
+          onClick={() => setSidePanelOpen(true)}
+          className="absolute top-4 right-4 p-3 bg-white shadow-lg rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <Info className="w-5 h-5 text-gray-600" />
+        </button>
+      )}
     </div>
   );
 }
