@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { analysisApi } from '../services/api';
+import { analysisApi, exportApi } from '../services/api';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup } from 'react-leaflet';
 import { 
-  Loader2, AlertCircle, CheckCircle, Clock, 
-  X, Info, Download, Users, MapPin, TrendingUp
+  Loader2, AlertCircle, CheckCircle, Clock,
+  X, Info, Download, Users, MapPin, TrendingUp, FileText
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 function AnalysisPage() {
   const { analysisId } = useParams();
   const [sidePanelOpen, setSidePanelOpen] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Fetch analysis details
   const { data: analysis, isLoading, error, refetch } = useQuery({
@@ -94,6 +95,30 @@ function AnalysisPage() {
       </div>
     );
   }
+
+
+  const handleDownloadPDF = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await exportApi.downloadPDF(analysisId);
+      
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `HIN_Analysis_${analysis.municipality_name?.replace(/\s+/g, '_')}_${analysis.start_year}-${analysis.end_year}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Error downloading PDF. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const statusDisplay = getStatusDisplay(analysis.status);
   const StatusIcon = statusDisplay.icon;
@@ -234,10 +259,22 @@ function AnalysisPage() {
                 </div>
 
                 {/* Export Button */}
-                <button className="w-full flex items-center justify-center space-x-2 bg-primary hover:bg-primary-hover text-white py-3 px-4 rounded-lg transition-colors">
-                  <Download className="w-5 h-5" />
-                  <span className="font-medium">Export Data</span>
-                </button>
+                <div className="space-y-3">
+                  <button
+                    onClick={handleDownloadPDF}
+                    disabled={isDownloading}
+                    className="w-full flex items-center justify-center space-x-2 bg-primary hover:bg-primary-hover disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg transition-colors"
+                  >
+                    {isDownloading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <FileText className="w-5 h-5" />
+                    )}
+                    <span className="font-medium">
+                      {isDownloading ? 'Generating PDF...' : 'Download PDF Report'}
+                    </span>
+                  </button>
+                </div>
               </>
             )}
 
