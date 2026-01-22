@@ -1,186 +1,186 @@
+#!/usr/bin/env python3
 """
-Ingest NJ municipal boundaries from NJ GIS Open Data.
+NJ Municipality Boundaries Ingestion
 
-Downloads municipal boundary shapefiles and loads them into the database.
-Source: https://njogis-newjersey.opendata.arcgis.com/
+Downloads NJ municipal boundaries from the Socrata API
+and loads them into the PostgreSQL database.
+
+Data Source: https://data.nj.gov/
 """
 
-import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-import geopandas as gpd
-import requests
-from sqlalchemy.orm import Session
-from backend.app.models.database import SessionLocal, init_db, init_postgis
-from backend.app.models.tables import Municipality
-from shapely.geometry import shape
+import sys
 import logging
+import requests
+from pathlib import Path
+from typing import List, Dict
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from sqlalchemy.orm import Session
+from app.models.database import SessionLocal
+from app.models.tables import Municipality
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# NJ Municipal Boundaries GeoJSON URL
-NJ_MUNI_URL = "https://services2.arcgis.com/XVOqAjTOJ5P6ngMu/arcgis/rest/services/New_Jersey_Municipal_Boundaries/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=geojson"
 
+class MunicipalityIngester:
+    """Ingests municipality boundaries from NJ Open Data Portal."""
 
-def download_municipal_boundaries(output_path: str = None) -> gpd.GeoDataFrame:
-    """
-    Download NJ municipal boundaries from ArcGIS REST API.
+    # Socrata API endpoint for NJ municipalities
+    BASE_URL = "https://data.nj.gov/resource/k9xb-zgh4.json"
 
-    Args:
-        output_path: Optional path to save the downloaded data
+    def __init__(self, api_token: str = None):
+        """Initialize the ingester."""
+        self.api_token = api_token
+        self.session = requests.Session()
 
-    Returns:
-        GeoDataFrame with municipal boundaries
-    """
-    logger.info("Downloading NJ municipal boundaries...")
+        if api_token:
+            self.session.headers.update({'X-App-Token': api_token})
 
-    try:
-        response = requests.get(NJ_MUNI_URL, timeout=60)
-        response.raise_for_status()
+    def fetch_municipalities(self) -> List[Dict]:
+        """
+        Fetch all NJ municipalities from Socrata API.
 
-        # Load into GeoDataFrame
-        gdf = gpd.read_file(response.text)
+        Returns:
+            List of municipality records
+        """
+        params = {
+            '$limit': 1000,  # NJ has 565 municipalities
+            '$order': 'mun ASC',
+        }
 
-        logger.info(f"Downloaded {len(gdf)} municipalities")
+        logger.info("Fetching municipalities from NJ Open Data Portal...")
 
-        # Save to file if requested
-        if output_path:
-            gdf.to_file(output_path, driver='GeoJSON')
-            logger.info(f"Saved to {output_path}")
-
-        return gdf
-
-    except Exception as e:
-        logger.error(f"Error downloading municipal boundaries: {e}")
-        raise
-
-
-def process_municipal_data(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    """
-    Process and clean municipal boundary data.
-
-    Args:
-        gdf: Raw GeoDataFrame from source
-
-    Returns:
-        Cleaned GeoDataFrame
-    """
-    logger.info("Processing municipal data...")
-
-    # Ensure CRS is WGS84 (EPSG:4326)
-    if gdf.crs != "EPSG:4326":
-        gdf = gdf.to_crs("EPSG:4326")
-
-    # Standardize column names (adjust based on actual source schema)
-    column_mapping = {
-        'MUN': 'name',
-        'COUNTY': 'county',
-        'MUN_CODE': 'muni_code',
-        'MUNICIPAL': 'name',
-        'MUNICIPALITY': 'name'
-    }
-
-    # Rename columns if they exist
-    for old_col, new_col in column_mapping.items():
-        if old_col in gdf.columns:
-            gdf.rename(columns={old_col: new_col}, inplace=True)
-
-    # Ensure geometry is MultiPolygon
-    gdf['geometry'] = gdf['geometry'].apply(
-        lambda geom: geom if geom.geom_type == 'MultiPolygon'
-        else shape({'type': 'MultiPolygon', 'coordinates': [geom.__geo_interface__['coordinates']]})
-    )
-
-    # Clean text fields
-    if 'name' in gdf.columns:
-        gdf['name'] = gdf['name'].str.strip().str.title()
-    if 'county' in gdf.columns:
-        gdf['county'] = gdf['county'].str.strip().str.title()
-
-    logger.info(f"Processed {len(gdf)} municipalities")
-
-    return gdf
-
-
-def load_municipalities(gdf: gpd.GeoDataFrame, db: Session):
-    """
-    Load municipal boundaries into database.
-
-    Args:
-        gdf: GeoDataFrame with municipal data
-        db: Database session
-    """
-    logger.info("Loading municipalities into database...")
-
-    loaded_count = 0
-    skipped_count = 0
-
-    for idx, row in gdf.iterrows():
         try:
-            # Check if municipality already exists
-            muni_code = row.get('muni_code')
-            if muni_code:
+            response = self.session.get(self.BASE_URL, params=params)
+            response.raise_for_status()
+
+            data = response.json()
+            logger.info(f"Fetched {len(data)} municipalities")
+
+            return data
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error fetching municipality data: {e}")
+            raise
+
+    def load_to_db(self, municipalities: List[Dict], db: Session) -> int:
+        """
+        Load municipalities to database.
+
+        Args:
+            municipalities: List of municipality records
+            db: Database session
+
+        Returns:
+            Number of municipalities loaded
+        """
+        logger.info("Loading municipalities to database...")
+
+        loaded_count = 0
+
+        for muni_data in municipalities:
+            try:
+                # Extract fields
+                muni_code = muni_data.get('mun_code')
+                muni_name = muni_data.get('mun')
+                county_name = muni_data.get('county')
+
+                if not muni_code or not muni_name:
+                    continue
+
+                # Check if already exists
                 existing = db.query(Municipality).filter(
                     Municipality.muni_code == muni_code
                 ).first()
+
                 if existing:
-                    logger.debug(f"Municipality {row['name']} already exists, skipping")
-                    skipped_count += 1
                     continue
 
-            # Create municipality record
-            municipality = Municipality(
-                name=row.get('name', 'Unknown'),
-                county=row.get('county', 'Unknown'),
-                muni_code=muni_code,
-                geom=f"SRID=4326;{row.geometry.wkt}"
-            )
+                # Extract geometry if available
+                geom_wkt = None
+                if 'the_geom' in muni_data:
+                    geom_data = muni_data['the_geom']
+                    if geom_data and 'coordinates' in geom_data:
+                        # Convert to WKT format
+                        geom_wkt = self._geojson_to_wkt(geom_data)
 
-            db.add(municipality)
-            loaded_count += 1
+                # Create municipality record
+                municipality = Municipality(
+                    muni_code=muni_code,
+                    name=muni_name,
+                    county=county_name,
+                    geom=geom_wkt
+                )
 
-            if loaded_count % 50 == 0:
-                db.commit()
-                logger.info(f"Loaded {loaded_count} municipalities...")
+                db.add(municipality)
+                loaded_count += 1
 
+                if loaded_count % 100 == 0:
+                    db.commit()
+                    logger.info(f"Loaded {loaded_count} municipalities...")
+
+            except Exception as e:
+                logger.error(f"Error loading municipality {muni_data.get('mun')}: {e}")
+                continue
+
+        db.commit()
+        logger.info(f"Successfully loaded {loaded_count} municipalities")
+        return loaded_count
+
+    def _geojson_to_wkt(self, geojson: Dict) -> str:
+        """Convert GeoJSON geometry to WKT format."""
+        from shapely.geometry import shape
+
+        try:
+            geom = shape(geojson)
+            return f"SRID=4326;{geom.wkt}"
         except Exception as e:
-            logger.error(f"Error loading municipality {row.get('name', 'unknown')}: {e}")
-            db.rollback()
-            continue
-
-    db.commit()
-    logger.info(f"Loaded {loaded_count} municipalities, skipped {skipped_count}")
+            logger.warning(f"Error converting GeoJSON to WKT: {e}")
+            return None
 
 
 def main():
     """Main ingestion workflow."""
-    logger.info("Starting municipal boundaries ingestion...")
+    import argparse
 
-    # Initialize database
-    try:
-        init_postgis()
-        init_db()
-    except Exception as e:
-        logger.warning(f"Database initialization warning: {e}")
+    parser = argparse.ArgumentParser(description='Ingest NJ municipalities')
+    parser.add_argument('--api-token', type=str, default=None,
+                        help='Socrata API token (optional)')
 
-    # Download data
-    gdf = download_municipal_boundaries(
-        output_path='data/raw/nj_municipalities.geojson'
-    )
+    args = parser.parse_args()
 
-    # Process data
-    gdf_processed = process_municipal_data(gdf)
+    # Get API token from environment if not provided
+    api_token = args.api_token or os.getenv('SOCRATA_API_TOKEN')
 
-    # Load into database
+    if not api_token:
+        logger.warning(
+            "No API token provided. Get token at: https://data.nj.gov/profile/app_tokens"
+        )
+
+    logger.info("Starting municipality data ingestion...")
+
+    # Initialize ingester
+    ingester = MunicipalityIngester(api_token=api_token)
+
+    # Fetch municipalities
+    municipalities = ingester.fetch_municipalities()
+
+    if not municipalities:
+        logger.error("No municipalities found")
+        return
+
+    # Load to database
     db = SessionLocal()
     try:
-        load_municipalities(gdf_processed, db)
-        logger.info("Municipal boundaries ingestion complete!")
+        loaded = ingester.load_to_db(municipalities, db)
+        logger.info(f"Successfully loaded {loaded} municipalities")
     finally:
         db.close()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
