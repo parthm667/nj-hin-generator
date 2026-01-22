@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 from datetime import date, datetime
 from typing import Optional, List, Dict, Any
 from enum import Enum
@@ -112,6 +112,13 @@ class AnalysisConfig(BaseModel):
     snap_distance_meters: float = Field(default=50.0, ge=10, le=200)
     segment_length_miles: float = Field(default=0.1, ge=0.05, le=1.0)
     significance_threshold: float = Field(default=0.05, ge=0.01, le=0.2)
+
+    @model_validator(mode='after')
+    def validate_years(self):
+        """Ensure start_year <= end_year."""
+        if self.start_year > self.end_year:
+            raise ValueError("start_year must be less than or equal to end_year")
+        return self
 
 
 class AnalysisCreate(BaseModel):

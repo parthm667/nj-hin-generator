@@ -46,20 +46,39 @@ def run_analysis_background(
         significance_threshold: Significance threshold
     """
     from backend.app.models.database import SessionLocal
+    import traceback
 
     db = SessionLocal()
     try:
         hin_service = HINService(db)
         hin_service.run_analysis(
+            analysis_id=analysis_id,
             muni_id=muni_id,
             start_year=start_year,
             end_year=end_year,
             snap_distance_meters=snap_distance_meters,
             significance_threshold=significance_threshold
         )
-        logger.info(f"Analysis {analysis_id} completed")
+        logger.info(f"Analysis {analysis_id} completed successfully")
+
     except Exception as e:
         logger.error(f"Analysis {analysis_id} failed: {e}")
+        logger.error(traceback.format_exc())
+
+        # Update analysis status to failed
+        try:
+            analysis = db.query(Analysis).filter(
+                Analysis.analysis_id == analysis_id
+            ).first()
+
+            if analysis:
+                analysis.status = 'failed'
+                analysis.error_message = str(e)[:500]
+                db.commit()
+        except Exception as update_error:
+            logger.error(f"Failed to update analysis status: {update_error}")
+            db.rollback()
+
     finally:
         db.close()
 

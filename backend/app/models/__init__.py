@@ -1,5 +1,5 @@
-from backend.app.models.database import Base, engine, get_db, init_db, init_postgis
-from backend.app.models.tables import (
+from .database import Base, engine, get_db, init_db, init_postgis
+from .tables import (
     Municipality,
     RoadSegment,
     Crash,

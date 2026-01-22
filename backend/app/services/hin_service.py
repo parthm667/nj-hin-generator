@@ -31,6 +31,7 @@ class HINService:
 
     def run_analysis(
         self,
+        analysis_id: int,
         muni_id: int,
         start_year: int,
         end_year: int,
@@ -41,6 +42,7 @@ class HINService:
         Run complete HIN analysis for a municipality.
 
         Args:
+            analysis_id: Existing analysis ID to update
             muni_id: Municipality ID
             start_year: Start year for analysis
             end_year: End year for analysis
@@ -59,18 +61,16 @@ class HINService:
         if significance_threshold is None:
             significance_threshold = settings.significance_threshold
 
-        # Create analysis record
-        analysis = Analysis(
-            muni_id=muni_id,
-            start_year=start_year,
-            end_year=end_year,
-            years_included=list(range(start_year, end_year + 1)),
-            snap_distance_meters=snap_distance_meters,
-            significance_threshold=significance_threshold,
-            status='running'
-        )
+        # Look up existing analysis record
+        analysis = self.db.query(Analysis).filter(
+            Analysis.analysis_id == analysis_id
+        ).first()
 
-        self.db.add(analysis)
+        if not analysis:
+            raise ValueError(f"Analysis {analysis_id} not found")
+
+        # Update status to running
+        analysis.status = 'running'
         self.db.commit()
 
         try:

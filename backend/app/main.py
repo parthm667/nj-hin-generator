@@ -4,6 +4,7 @@ Main FastAPI application for NJ HIN Generator.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from backend.app.config import settings
 from backend.app.routers import municipalities, analysis, export
 from backend.app.models.database import init_db
@@ -17,13 +18,35 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan."""
+    # Startup
+    logger.info("Starting NJ HIN Generator API...")
+
+    # Initialize database tables
+    try:
+        init_db()
+        logger.info("Database initialized")
+    except Exception as e:
+        logger.error(f"Database initialization error: {e}")
+        raise
+
+    yield
+
+    # Shutdown
+    logger.info("Shutting down NJ HIN Generator API...")
+
+
 # Create FastAPI app
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description="Automated High Injury Network identification for New Jersey municipalities",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 # Configure CORS
@@ -34,25 +57,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize application on startup."""
-    logger.info("Starting NJ HIN Generator API...")
-
-    # Initialize database tables
-    try:
-        init_db()
-        logger.info("Database initialized")
-    except Exception as e:
-        logger.error(f"Database initialization error: {e}")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Cleanup on shutdown."""
-    logger.info("Shutting down NJ HIN Generator API...")
 
 
 # Health check endpoint

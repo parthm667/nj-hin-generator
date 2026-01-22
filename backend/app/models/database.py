@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from geoalchemy2 import Geometry
@@ -47,6 +47,5 @@ def init_postgis():
     Initialize PostGIS extension in the database.
     Must be run with appropriate database privileges.
     """
-    with engine.connect() as conn:
-        conn.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
-        conn.commit()
+    with engine.begin() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
