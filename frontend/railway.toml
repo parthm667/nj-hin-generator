@@ -1,0 +1,7 @@
+# Railway Frontend Service Configuration
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "npx serve -s build -l $PORT"
