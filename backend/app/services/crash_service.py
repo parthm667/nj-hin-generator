@@ -99,24 +99,29 @@ class CrashService:
         Returns:
             Dictionary with segment_id and distance, or None
         """
-        # Use PostGIS spatial query
+        # Use PostGIS spatial query. Reference the crash geometry from the
+        # crashes table by id so we don't have to bind a WKBElement (which
+        # SQLAlchemy can't pass as a plain parameter).
         query = text("""
+            WITH crash_point AS (
+                SELECT geom FROM crashes WHERE crash_id = :crash_id
+            )
             SELECT
-                segment_id,
+                rs.segment_id AS segment_id,
                 ST_Distance(
-                    :crash_geom::geography,
-                    geom::geography
+                    (SELECT geom FROM crash_point)::geography,
+                    rs.geom::geography
                 ) as distance
-            FROM road_segments
-            WHERE muni_id = :muni_id
-            ORDER BY geom <-> :crash_geom::geometry
+            FROM road_segments rs
+            WHERE rs.muni_id = :muni_id
+            ORDER BY rs.geom <-> (SELECT geom FROM crash_point)
             LIMIT 1
         """)
 
         result = self.db.execute(
             query,
             {
-                'crash_geom': crash.geom,
+                'crash_id': crash.crash_id,
                 'muni_id': muni_id
             }
         ).fetchone()

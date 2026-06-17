@@ -23,7 +23,7 @@ from reportlab.platypus import (
 from reportlab.pdfgen import canvas
 
 from sqlalchemy.orm import Session
-from app.models.tables import Analysis, Municipality, Crash, HINSegment
+from backend.app.models.tables import Analysis, Municipality, Crash, HINSegment
 
 logger = logging.getLogger(__name__)
 
@@ -174,7 +174,7 @@ class PDFReportGenerator:
 
         # Date range
         date_range = Paragraph(
-            f"Analysis Period: {analysis.config.get('start_year', 'N/A')} - {analysis.config.get('end_year', 'N/A')}",
+            f"Analysis Period: {analysis.start_year} - {analysis.end_year}",
             self.styles['CustomSubtitle']
         )
         elements.append(date_range)
@@ -206,7 +206,7 @@ class PDFReportGenerator:
         summary_text = f"""
         This report presents the results of a High Injury Network (HIN) analysis for
         {municipality.name if municipality else 'the municipality'}, conducted for the period
-        {analysis.config.get('start_year', 'N/A')} through {analysis.config.get('end_year', 'N/A')}.
+        {analysis.start_year} through {analysis.end_year}.
         The analysis identified roadway segments with elevated crash rates and severity,
         focusing resources on locations with the greatest potential for safety improvements.
         """
@@ -310,10 +310,14 @@ class PDFReportGenerator:
         elements.append(Paragraph(desc_text, self.styles['BodyJustify']))
         elements.append(Spacer(1, 0.2*inch))
 
-        # Get HIN segments
-        hin_segments = self.db.query(HINSegment).filter(
-            HINSegment.analysis_id == analysis.analysis_id
-        ).order_by(HINSegment.weighted_rate.desc()).limit(10).all()
+        # Get significant HIN segments joined to their road geometry/metadata
+        from backend.app.models.tables import RoadSegment
+        hin_segments = self.db.query(HINSegment, RoadSegment).join(
+            RoadSegment, HINSegment.segment_id == RoadSegment.segment_id
+        ).filter(
+            HINSegment.analysis_id == analysis.analysis_id,
+            HINSegment.is_significant == True
+        ).order_by(HINSegment.crash_rate.desc()).limit(10).all()
 
         if hin_segments:
             elements.append(Paragraph("Top 10 High Injury Network Segments", self.styles['Heading3']))
@@ -321,13 +325,13 @@ class PDFReportGenerator:
             # Create table
             table_data = [['Rank', 'Road Name', 'Crashes', 'Rate', 'Length (mi)']]
 
-            for idx, segment in enumerate(hin_segments, 1):
+            for idx, (hin, road) in enumerate(hin_segments, 1):
                 table_data.append([
                     str(idx),
-                    segment.road_name or 'Unnamed',
-                    str(segment.crash_count),
-                    f"{segment.weighted_rate:.2f}",
-                    f"{segment.length_miles:.2f}"
+                    (road.road_name or 'Unnamed')[:30],
+                    str(hin.crash_count_total),
+                    f"{hin.crash_rate:.2f}",
+                    f"{road.length_miles:.2f}"
                 ])
 
             hin_table = Table(table_data, colWidths=[0.6*inch, 2.5*inch, 1*inch, 1*inch, 1*inch])
@@ -369,7 +373,7 @@ class PDFReportGenerator:
             "Severity Weighting: Fatal crashes weighted 4x, serious injury 3x, minor injury 2x",
             "Rate Calculation: Crash rates calculated per segment mile per year",
             "Statistical Testing: Poisson distribution used to identify statistically significant crash rates",
-            f"Significance Threshold: P-value < {analysis.config.get('significance_threshold', 0.05)}",
+            f"Significance Threshold: P-value < {analysis.significance_threshold}",
             "Network Assembly: Contiguous high-crash segments grouped into corridors"
         ]
 
@@ -407,45 +411,46 @@ class PDFReportGenerator:
         canvas.restoreState()
 
     def _get_crash_statistics(self, analysis: Analysis) -> Dict:
-        """Get basic crash statistics."""
-        from sqlalchemy import func
+        """Get basic crash statistics for the analysis municipality and period."""
+        from sqlalchemy import func, case
 
         stats = self.db.query(
             func.count(Crash.crash_id).label('total'),
-            func.sum(func.case((Crash.severity == 'fatal', 1), else_=0)).label('fatal'),
-            func.sum(func.case((Crash.severity == 'serious_injury', 1), else_=0)).label('serious_injury'),
-            func.sum(Crash.total_killed).label('total_killed'),
-            func.sum(Crash.total_injured).label('total_injured'),
+            func.sum(case((Crash.severity == 'fatal', 1), else_=0)).label('fatal'),
+            func.sum(case((Crash.severity == 'serious_injury', 1), else_=0)).label('serious_injury'),
         ).filter(
-            Crash.crash_date >= f"{analysis.config.get('start_year')}-01-01",
-            Crash.crash_date <= f"{analysis.config.get('end_year')}-12-31"
+            Crash.muni_id == analysis.muni_id,
+            Crash.crash_date >= f"{analysis.start_year}-01-01",
+            Crash.crash_date <= f"{analysis.end_year}-12-31"
         ).first()
 
         return {
             'total': stats.total or 0,
             'fatal': stats.fatal or 0,
             'serious_injury': stats.serious_injury or 0,
-            'total_killed': stats.total_killed or 0,
-            'total_injured': stats.total_injured or 0,
+            # Per-crash casualty counts are not stored; use analysis summary.
+            'total_killed': analysis.total_fatalities or 0,
+            'total_injured': analysis.total_injuries or 0,
         }
 
     def _get_detailed_crash_statistics(self, analysis: Analysis) -> Dict:
         """Get detailed crash statistics with percentages."""
-        from sqlalchemy import func
+        from sqlalchemy import func, case
 
         stats = self.db.query(
             func.count(Crash.crash_id).label('total'),
-            func.sum(func.case((Crash.severity == 'fatal', 1), else_=0)).label('fatal'),
-            func.sum(func.case((Crash.severity == 'serious_injury', 1), else_=0)).label('serious_injury'),
-            func.sum(func.case((Crash.severity == 'minor_injury', 1), else_=0)).label('minor_injury'),
-            func.sum(func.case((Crash.severity == 'property_damage', 1), else_=0)).label('property_damage'),
-            func.sum(Crash.pedestrians_killed).label('ped_killed'),
-            func.sum(Crash.pedestrians_injured).label('ped_injured'),
-            func.sum(Crash.cyclists_killed).label('bike_killed'),
-            func.sum(Crash.cyclists_injured).label('bike_injured'),
+            func.sum(case((Crash.severity == 'fatal', 1), else_=0)).label('fatal'),
+            func.sum(case((Crash.severity == 'serious_injury', 1), else_=0)).label('serious_injury'),
+            func.sum(case((Crash.severity == 'minor_injury', 1), else_=0)).label('minor_injury'),
+            func.sum(case((Crash.severity == 'property_damage', 1), else_=0)).label('property_damage'),
+            func.sum(case((Crash.ped_involved == True, 1), else_=0)).label('ped_killed'),
+            func.sum(case((Crash.ped_involved == True, 1), else_=0)).label('ped_injured'),
+            func.sum(case((Crash.bike_involved == True, 1), else_=0)).label('bike_killed'),
+            func.sum(case((Crash.bike_involved == True, 1), else_=0)).label('bike_injured'),
         ).filter(
-            Crash.crash_date >= f"{analysis.config.get('start_year')}-01-01",
-            Crash.crash_date <= f"{analysis.config.get('end_year')}-12-31"
+            Crash.muni_id == analysis.muni_id,
+            Crash.crash_date >= f"{analysis.start_year}-01-01",
+            Crash.crash_date <= f"{analysis.end_year}-12-31"
         ).first()
 
         total = stats.total or 1  # Avoid division by zero
@@ -467,17 +472,8 @@ class PDFReportGenerator:
         }
 
     def _get_hin_statistics(self, analysis: Analysis) -> Dict:
-        """Get HIN statistics."""
-        from sqlalchemy import func
-
-        stats = self.db.query(
-            func.count(HINSegment.segment_id).label('segment_count'),
-            func.sum(HINSegment.length_miles).label('total_miles'),
-        ).filter(
-            HINSegment.analysis_id == analysis.analysis_id
-        ).first()
-
+        """Get HIN statistics from the stored analysis summary."""
         return {
-            'segment_count': stats.segment_count or 0,
-            'total_miles': stats.total_miles or 0,
+            'segment_count': analysis.hin_segment_count or 0,
+            'total_miles': analysis.hin_miles or 0,
         }

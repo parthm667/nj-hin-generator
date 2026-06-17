@@ -12,7 +12,7 @@ from backend.app.models.tables import (
 )
 from backend.app.services.crash_service import CrashService
 from backend.app.config import settings
-from scipy import stats
+from scipy import stats as scipy_stats
 import numpy as np
 import logging
 from typing import List, Dict, Optional
@@ -214,12 +214,13 @@ class HINService:
             expected_crashes = baseline_rate * length_miles * years_of_data
 
             # Poisson test: probability of observing this many crashes or more
-            # under the null hypothesis
-            observed_crashes = stats['total_crashes']
+            # under the null hypothesis. Use the severity-weighted score so it
+            # is consistent with the severity-weighted baseline/expected value.
+            observed_crashes = stats['severity_score']
 
             if expected_crashes > 0:
                 # One-tailed test (we care about higher than expected)
-                p_value = 1 - stats.poisson.cdf(observed_crashes - 1, expected_crashes)
+                p_value = float(1 - scipy_stats.poisson.cdf(observed_crashes - 1, expected_crashes))
             else:
                 p_value = 1.0
 
