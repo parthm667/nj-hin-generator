@@ -115,15 +115,15 @@ def load_crashes(data_file: str, db: Session):
         crashes = json.load(f)
 
     loaded_count = 0
+    seen_ids = set()
 
     for crash_data in crashes:
-        # Check if already exists
-        existing = db.query(Crash).filter(
-            Crash.external_id == crash_data['external_id']
-        ).first()
-
-        if existing:
-            continue
+        # Ensure external_id is unique (sample data contains repeated ids)
+        ext_id = crash_data['external_id']
+        if ext_id in seen_ids:
+            ext_id = f"{ext_id}-{loaded_count}"
+        seen_ids.add(ext_id)
+        crash_data = {**crash_data, 'external_id': ext_id}
 
         # Convert to point WKT
         lon = crash_data['longitude']

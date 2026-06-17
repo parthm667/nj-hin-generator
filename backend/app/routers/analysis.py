@@ -5,6 +5,7 @@ Endpoints for running HIN analysis and retrieving results.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from backend.app.models.database import get_db
 from backend.app.models.tables import Analysis, Municipality
@@ -17,6 +18,7 @@ from backend.app.models.schemas import (
 )
 from backend.app.services.hin_service import HINService
 from backend.app.services.crash_service import CrashService
+from backend.app.services.pdf_service import PDFReportGenerator
 from typing import List
 import logging
 from datetime import datetime
@@ -406,3 +408,61 @@ async def delete_analysis(
     logger.info(f"Deleted analysis {analysis_id}")
 
     return {"message": "Analysis deleted successfully"}
+
+
+@router.get("/{analysis_id}/export/pdf")
+async def export_analysis_pdf(
+    analysis_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Export analysis results as PDF report.
+
+    Args:
+        analysis_id: Analysis ID
+        db: Database session
+
+    Returns:
+        PDF file
+    """
+    analysis = db.query(Analysis).filter(
+        Analysis.analysis_id == analysis_id
+    ).first()
+
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+
+    if analysis.status != 'completed':
+        raise HTTPException(
+            status_code=400,
+            detail=f"Analysis not completed (status: {analysis.status})"
+        )
+
+    # Get municipality for filename
+    municipality = db.query(Municipality).filter(
+        Municipality.muni_id == analysis.muni_id
+    ).first()
+
+    try:
+        # Generate PDF
+        pdf_generator = PDFReportGenerator(db)
+        pdf_bytes = pdf_generator.generate_report(analysis_id)
+
+        # Create filename
+        muni_name = municipality.name.replace(' ', '_') if municipality else 'Unknown'
+        filename = f"HIN_Analysis_{muni_name}_{analysis.start_year}-{analysis.end_year}.pdf"
+
+        logger.info(f"Generated PDF report for analysis {analysis_id}")
+
+        # Return PDF
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error generating PDF for analysis {analysis_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error generating PDF: {str(e)}")

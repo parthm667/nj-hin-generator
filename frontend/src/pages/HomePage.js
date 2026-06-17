@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { municipalitiesApi, analysisApi } from '../services/api';
+import { MapPin, Calendar, TrendingUp, AlertCircle, Loader2 } from 'lucide-react';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -25,7 +26,6 @@ function HomePage() {
     e.preventDefault();
 
     if (!selectedMuni) {
-      alert('Please select a municipality');
       return;
     }
 
@@ -42,105 +42,163 @@ function HomePage() {
   };
 
   return (
-    <div className="App">
-      <div className="header">
-        <div className="container">
-          <h1>NJ High Injury Network Generator</h1>
-          <p>Automated crash analysis and safety planning for New Jersey municipalities</p>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Hero Section */}
+      <div className="text-center mb-16">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          High Injury Network Analysis
+        </h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Identify statistically significant crash corridors to support Safe Streets and Roads for All grant applications
+        </p>
       </div>
 
-      <div className="container">
-        <div className="card">
-          <h2>Create New Analysis</h2>
-          <p style={{ color: '#666', marginBottom: '20px' }}>
-            Select your municipality and analysis period to generate a High Injury Network analysis.
-          </p>
+      {/* Main Form Card */}
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              Create Analysis
+            </h2>
 
-          {isLoading ? (
-            <div className="loading">Loading municipalities...</div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                  Municipality
-                </label>
-                <select
-                  className="select"
-                  value={selectedMuni}
-                  onChange={(e) => setSelectedMuni(e.target.value)}
-                  required
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Municipality Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Municipality
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <select
+                      value={selectedMuni}
+                      onChange={(e) => setSelectedMuni(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                      required
+                    >
+                      <option value="">Select a municipality...</option>
+                      {municipalities?.map((muni) => (
+                        <option key={muni.muni_id} value={muni.muni_id}>
+                          {muni.name} — {muni.county} County
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Year Selection */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Start Year
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="number"
+                        min="2000"
+                        max="2024"
+                        value={startYear}
+                        onChange={(e) => setStartYear(parseInt(e.target.value))}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      End Year
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="number"
+                        min="2000"
+                        max="2024"
+                        value={endYear}
+                        onChange={(e) => setEndYear(parseInt(e.target.value))}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={createAnalysisMutation.isPending || !selectedMuni}
+                  className="w-full flex items-center justify-center space-x-2 bg-primary hover:bg-primary-hover text-white font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <option value="">Select a municipality...</option>
-                  {municipalities?.map((muni) => (
-                    <option key={muni.muni_id} value={muni.muni_id}>
-                      {muni.name} - {muni.county} County
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  {createAnalysisMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Creating Analysis...</span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingUp className="w-5 h-5" />
+                      <span>Run Analysis</span>
+                    </>
+                  )}
+                </button>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                    Start Year
-                  </label>
-                  <input
-                    type="number"
-                    className="select"
-                    min="2000"
-                    max="2024"
-                    value={startYear}
-                    onChange={(e) => setStartYear(parseInt(e.target.value))}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                    End Year
-                  </label>
-                  <input
-                    type="number"
-                    className="select"
-                    min="2000"
-                    max="2024"
-                    value={endYear}
-                    onChange={(e) => setEndYear(parseInt(e.target.value))}
-                    required
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="button"
-                disabled={createAnalysisMutation.isPending}
-              >
-                {createAnalysisMutation.isPending ? 'Creating Analysis...' : 'Run Analysis'}
-              </button>
-
-              {createAnalysisMutation.isError && (
-                <div className="error" style={{ marginTop: '20px' }}>
-                  Error creating analysis: {createAnalysisMutation.error.message}
-                </div>
-              )}
-            </form>
-          )}
+                {createAnalysisMutation.isError && (
+                  <div className="flex items-start space-x-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-red-800">
+                      <p className="font-medium">Error creating analysis</p>
+                      <p className="mt-1 text-red-700">{createAnalysisMutation.error.message}</p>
+                    </div>
+                  </div>
+                )}
+              </form>
+            )}
+          </div>
         </div>
 
-        <div className="card">
-          <h2>About This Tool</h2>
-          <p>
-            The NJ High Injury Network Generator automatically identifies road segments with
-            statistically significant crash rates, helping municipalities:
-          </p>
-          <ul style={{ color: '#666', lineHeight: '1.8' }}>
-            <li>Apply for federal Safe Streets and Roads for All (SS4A) grants</li>
-            <li>Prioritize safety improvements based on crash data</li>
-            <li>Identify vulnerable road user safety issues</li>
-            <li>Focus resources on high-impact corridors</li>
-          </ul>
+        {/* Info Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <MapPin className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="text-sm font-medium text-gray-900 mb-2">
+              Statistical Analysis
+            </h3>
+            <p className="text-sm text-gray-600">
+              Poisson-based significance testing identifies true crash hotspots
+            </p>
+          </div>
+
+          <div className="text-center">
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <TrendingUp className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="text-sm font-medium text-gray-900 mb-2">
+              Grant Ready
+            </h3>
+            <p className="text-sm text-gray-600">
+              Results formatted for SS4A Action Plan submissions
+            </p>
+          </div>
+
+          <div className="text-center">
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="text-sm font-medium text-gray-900 mb-2">
+              Multi-Year Data
+            </h3>
+            <p className="text-sm text-gray-600">
+              Analyze up to 5 years of crash history for robust results
+            </p>
+          </div>
         </div>
       </div>
     </div>

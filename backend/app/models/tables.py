@@ -14,7 +14,7 @@ class Municipality(Base):
     name = Column(String(100), nullable=False, index=True)
     county = Column(String(50), nullable=False)
     muni_code = Column(String(20), unique=True)  # Official NJ municipality code
-    geom = Column(Geometry(geometry_type='MULTIPOLYGON', srid=4326), nullable=False)
+    geom = Column(Geometry(geometry_type='MULTIPOLYGON', srid=4326, spatial_index=False), nullable=False)
 
     # Relationships
     road_segments = relationship("RoadSegment", back_populates="municipality")
@@ -43,7 +43,7 @@ class RoadSegment(Base):
     road_class = Column(String(20))  # Simplified: arterial, collector, local
     length_miles = Column(Float, nullable=False)
     muni_id = Column(Integer, ForeignKey('municipalities.muni_id'), nullable=False)
-    geom = Column(Geometry(geometry_type='LINESTRING', srid=4326), nullable=False)
+    geom = Column(Geometry(geometry_type='LINESTRING', srid=4326, spatial_index=False), nullable=False)
 
     # Relationships
     municipality = relationship("Municipality", back_populates="road_segments")
@@ -87,7 +87,7 @@ class Crash(Base):
     light_condition = Column(String(50))
 
     # Geometry
-    geom = Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)
+    geom = Column(Geometry(geometry_type='POINT', srid=4326, spatial_index=False), nullable=False)
 
     # Data quality flags
     geocode_quality = Column(String(20))  # high, medium, low
@@ -131,7 +131,7 @@ class CensusTract(Base):
     ejscreen_score = Column(Float)  # EPA Environmental Justice Screen
 
     # Geometry
-    geom = Column(Geometry(geometry_type='MULTIPOLYGON', srid=4326), nullable=False)
+    geom = Column(Geometry(geometry_type='MULTIPOLYGON', srid=4326, spatial_index=False), nullable=False)
 
     # Relationships
     municipality = relationship("Municipality", back_populates="census_tracts")

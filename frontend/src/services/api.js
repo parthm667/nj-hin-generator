@@ -51,19 +51,14 @@ export const analysisApi = {
 
 export const exportApi = {
   downloadPDF: (analysisId) => {
-    return api.post(`/export/${analysisId}/pdf`, null, { responseType: 'blob' });
+    return api.get(`/analysis/${analysisId}/export/pdf`, { responseType: 'blob' });
   },
-  downloadCSV: (analysisId, dataType = 'crashes') => {
-    return api.get(`/export/${analysisId}/csv`, {
-      params: { data_type: dataType },
-      responseType: 'blob',
-    });
-  },
-  downloadGeoJSON: (analysisId, layer = 'hin') => {
-    return api.get(`/export/${analysisId}/geojson`, {
-      params: { layer },
-      responseType: 'blob',
-    });
+  downloadGeoJSON: (analysisId, layer = 'crashes') => {
+    // Download crashes or HIN as GeoJSON
+    const endpoint = layer === 'crashes'
+      ? `/analysis/${analysisId}/crashes`
+      : `/analysis/${analysisId}/hin`;
+    return api.get(endpoint, { responseType: 'blob' });
   },
 };
 
