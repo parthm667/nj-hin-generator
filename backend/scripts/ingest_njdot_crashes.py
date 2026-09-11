@@ -134,7 +134,9 @@ def to_crash_dict(rec: dict):
 def ingest(file_path, muni_id, municipality=None, start_year=None, end_year=None):
     db = SessionLocal()
     loaded = skipped_geo = skipped_muni = skipped_year = dup = 0
-    seen = set()
+    # Idempotent re-runs: anything already in the table is skipped instead of
+    # tripping the UNIQUE(external_id) constraint and aborting the whole file.
+    seen = {ext for (ext,) in db.query(Crash.external_id).all()}
     try:
         for rec in parse_njdot_accidents(file_path):
             if municipality and municipality.upper() not in rec.get("municipality_name", "").upper():
@@ -153,7 +155,8 @@ def ingest(file_path, muni_id, municipality=None, start_year=None, end_year=None
 
             ext = c.pop("external_id")
             if ext in seen:
-                ext = f"{ext}-{loaded}"
+                dup += 1
+                continue
             seen.add(ext)
             c.pop("latitude"); c.pop("longitude")
 
@@ -168,7 +171,8 @@ def ingest(file_path, muni_id, municipality=None, start_year=None, end_year=None
 
     logger.info(
         f"Done: loaded={loaded} skipped(no geo)={skipped_geo} "
-        f"skipped(other muni)={skipped_muni} skipped(year)={skipped_year}"
+        f"skipped(other muni)={skipped_muni} skipped(year)={skipped_year} "
+        f"skipped(already loaded)={dup}"
     )
     return loaded
 
