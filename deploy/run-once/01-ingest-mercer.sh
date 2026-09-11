@@ -16,7 +16,10 @@ for i in $(seq 1 60); do
 done
 
 echo "== $(date -Is) starting Mercer ingest"
-$COMPOSE exec -T backend bash deploy/ingest-mercer.sh
+# Older images do not contain deploy/, so ship the script in explicitly.
+$COMPOSE exec -T backend mkdir -p /srv/deploy
+$COMPOSE cp deploy/ingest-mercer.sh backend:/srv/deploy/ingest-mercer.sh
+$COMPOSE exec -T backend bash /srv/deploy/ingest-mercer.sh
 rc=$?
 echo "== $(date -Is) ingest finished rc=$rc"
 exit $rc
