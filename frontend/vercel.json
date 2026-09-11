@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "create-react-app",
+  "rewrites": [
+    { "source": "/nj-hin/static/:path*", "destination": "/static/:path*" },
+    { "source": "/nj-hin/:file(.*\\..*)", "destination": "/:file" },
+    { "source": "/nj-hin/:path*", "destination": "/index.html" },
+    { "source": "/:path((?!static/|index\\.html$).*)", "destination": "/index.html" }
+  ]
+}
