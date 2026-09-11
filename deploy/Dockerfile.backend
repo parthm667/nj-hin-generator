@@ -8,20 +8,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PYTHONPATH=/srv:/srv/backend
 
-# gdal for ogr2ogr / fiona, libpq for psycopg2, pango + cairo for WeasyPrint.
+# gdal for ogr2ogr / fiona, libpq for psycopg2.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         gcc g++ \
         gdal-bin libgdal-dev \
         libpq-dev \
-        libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 libcairo2 \
         libgeos-dev libproj-dev \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /srv
 
-COPY backend/requirements.txt backend/requirements.txt
-RUN pip install -r backend/requirements.txt
+COPY deploy/requirements.prod.txt deploy/requirements.prod.txt
+RUN pip install -r deploy/requirements.prod.txt
 
 COPY backend/ backend/
 COPY data/ data/

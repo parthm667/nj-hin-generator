@@ -1,0 +1,35 @@
+# Production subset of backend/requirements.txt: only what backend/app and
+# backend/scripts import. Drops pysal/esda/libpysal, weasyprint, matplotlib,
+# contextily and the test tooling, none of which the code uses, so the
+# aarch64 image builds in minutes and has no resolver conflicts.
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+sqlalchemy==2.0.25
+geoalchemy2==0.14.3
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+geopandas==0.14.2
+shapely==2.0.2
+pyproj==3.6.1
+rtree==1.1.0
+pyogrio==0.7.2
+fiona==1.9.5
+
+pandas==2.1.4
+numpy==1.26.3
+scipy==1.11.4
+
+httpx==0.26.0
+requests==2.31.0
+
+reportlab==4.0.9
+jinja2==3.1.3
+pillow==10.2.0
+
+python-dotenv==1.0.0
+python-multipart==0.0.6
+aiofiles==23.2.1

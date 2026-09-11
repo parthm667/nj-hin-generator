@@ -1,6 +1,6 @@
 #cloud-config
 # Bootstraps an Oracle Cloud (Ubuntu 24.04, aarch64) VM into the NJ HIN API host.
-# Paste this into "Advanced options → Management → Cloud-init script" when
+# Paste this into "Advanced options > Management > Cloud-init script" when
 # creating the instance. Everything it needs is in the public repo; the only
 # secret (the Postgres password) is generated on the machine at first boot.
 
