@@ -17,7 +17,7 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename="/nj-hin">
         <Layout>
           <Routes>
             <Route path="/" element={<HomePage />} />
