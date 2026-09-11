@@ -1,0 +1,71 @@
+#cloud-config
+# Bootstraps an Oracle Cloud (Ubuntu 24.04, aarch64) VM into the NJ HIN API host.
+# Paste this into "Advanced options → Management → Cloud-init script" when
+# creating the instance. Everything it needs is in the public repo; the only
+# secret (the Postgres password) is generated on the machine at first boot.
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - git
+  - docker.io
+  - docker-compose-v2
+  - netfilter-persistent
+  - iptables-persistent
+
+write_files:
+  - path: /usr/local/bin/hin
+    permissions: "0755"
+    content: |
+      #!/usr/bin/env bash
+      # Operator helper: hin <up|update|logs|ps|shell|psql|ingest ...>
+      set -euo pipefail
+      cd /opt/nj-hin
+      COMPOSE="docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env"
+      case "${1:-}" in
+        up)      $COMPOSE up -d --build ;;
+        update)  git pull --ff-only && $COMPOSE up -d --build && $COMPOSE image prune -f ;;
+        logs)    shift; $COMPOSE logs -f --tail=200 "$@" ;;
+        ps)      $COMPOSE ps ;;
+        shell)   $COMPOSE exec backend bash ;;
+        psql)    $COMPOSE exec db psql -U "$(grep ^POSTGRES_USER deploy/.env | cut -d= -f2)" "$(grep ^POSTGRES_DB deploy/.env | cut -d= -f2)" ;;
+        ingest)  shift; $COMPOSE exec backend bash deploy/ingest-mercer.sh "$@" ;;
+        run)     shift; $COMPOSE exec backend "$@" ;;
+        *) echo "usage: hin {up|update|logs [svc]|ps|shell|psql|ingest|run <cmd>}"; exit 1 ;;
+      esac
+
+runcmd:
+  # Oracle's Ubuntu image ships an iptables INPUT chain that rejects everything
+  # but SSH. Open 80/443 and persist it (the VCN security list must also allow them).
+  - iptables -I INPUT 1 -p tcp --dport 80  -m conntrack --ctstate NEW -j ACCEPT
+  - iptables -I INPUT 1 -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT
+  - netfilter-persistent save
+
+  - systemctl enable --now docker
+  - usermod -aG docker ubuntu
+
+  - git clone https://github.com/parthm667/nj-hin-generator.git /opt/nj-hin
+  - chown -R ubuntu:ubuntu /opt/nj-hin
+
+  # Generate deploy/.env once; never overwritten on later boots.
+  - |
+    if [ ! -f /opt/nj-hin/deploy/.env ]; then
+      PW=$(openssl rand -hex 24)
+      cat > /opt/nj-hin/deploy/.env <<ENV
+    POSTGRES_DB=nj_hin
+    POSTGRES_USER=hin
+    POSTGRES_PASSWORD=${PW}
+    API_DOMAIN=hin-api.mhaske.com
+    CORS_ORIGINS=https://mhaske.com,https://www.mhaske.com
+    SOCRATA_API_TOKEN=
+    ENV
+      chmod 600 /opt/nj-hin/deploy/.env
+      chown ubuntu:ubuntu /opt/nj-hin/deploy/.env
+    fi
+
+  # Build and start. First build compiles a few wheels on aarch64; allow ~10 min.
+  - cd /opt/nj-hin && docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env up -d --build 2>&1 | tee /var/log/nj-hin-firstboot.log
+  - echo "nj-hin bootstrap finished $(date -Is)" >> /var/log/nj-hin-firstboot.log
+
+final_message: "nj-hin VM ready after $UPTIME seconds. See /var/log/nj-hin-firstboot.log"
