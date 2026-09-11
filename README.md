@@ -1,10 +1,10 @@
 # NJ High Injury Network Generator
 
-Automated High Injury Network identification for New Jersey municipalities, designed to support Safe Streets and Roads for All (SS4A) grant applications.
+Exploratory crash-network screening for New Jersey municipalities. Results require transportation-safety review and are not grant-certified assessments.
 
 ## Overview
 
-This tool automatically identifies statistically significant high-crash road segments for any New Jersey municipality. It eliminates the technical barrier that prevents small towns from applying for federal safety grants by:
+This tool helps explore candidate high-crash road segments where usable source records are loaded by:
 
 - Pulling and processing state crash data
 - Running spatial analysis to assign crashes to road segments
@@ -14,7 +14,7 @@ This tool automatically identifies statistically significant high-crash road seg
 ## Features
 
 - **Automated Data Pipeline**: Ingests crash data, road networks, municipal boundaries, and census demographics
-- **Statistical Analysis**: Uses Poisson-based significance testing to identify true high-crash corridors
+- **Statistical Analysis**: Count-based Poisson screening, separate severity ranking, and connected same-route corridors
 - **Equity Overlay**: Identifies high-injury segments in vulnerable communities
 - **Web Interface**: Simple UI for selecting municipalities and viewing results
 - **Export Capabilities**: Download maps and data as GeoJSON, CSV, and PDF
@@ -35,16 +35,21 @@ This tool automatically identifies statistically significant high-crash road seg
 
 ### Data Sources
 - NJ DOT Crash Data (NJTR-1 reports)
-- OpenStreetMap road network
+- NJDOT measured public-road network (OpenStreetMap background tiles)
+- NJGIN municipal boundaries
 - US Census Bureau boundaries and demographics
 - CDC Social Vulnerability Index
 
 ## Quick Start
 
+Use [docs/DEPLOY.md](docs/DEPLOY.md) for the Vercel frontend and Railway/Render API. It covers schema initialization, required settings, and remaining real-data limitations. Earlier deployment reports describe historical states, not current readiness guarantees.
+
+See [docs/DATA_PIPELINE.md](docs/DATA_PIPELINE.md) for ingestion and data limitations, and [docs/CORRECTNESS_AND_SAFEGUARDS.md](docs/CORRECTNESS_AND_SAFEGUARDS.md) for corrected statistics, anonymous-use safeguards, and verification. No sign-in is required; recent history is browser-local, while computations and result URLs remain server-side. Generated sample roads are artificial and do not follow the background street map.
+
 ### Prerequisites
 
-- Python 3.9+
-- Node.js 16+
+- Python 3.11 or 3.12
+- Node.js 22
 - PostgreSQL 15+ with PostGIS extension
 
 ### Installation

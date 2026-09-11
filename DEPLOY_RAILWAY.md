@@ -1,5 +1,8 @@
 # Deploy to Railway.app ($5/month)
 
+> Historical deployment guide. Use [docs/DEPLOY.md](docs/DEPLOY.md) for the current Vercel + container setup, required CORS settings, and explicit schema initialization. Pricing and readiness claims below have not been revalidated.
+
+
 **Cost**: $5/month (you get $5 free credit to start = 1 month free!)
 **Time**: 10 minutes
 **Perfect for**: Production deployment for West Windsor
@@ -82,7 +85,7 @@ Railway auto-detects your backend, but let's configure it:
 2. Go to "Settings" tab
 3. Set:
    - **Root Directory**: `backend`
-   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'`
    - **Build Command**: (leave default, Railway auto-detects)
 
 4. Go to "Variables" tab
@@ -109,7 +112,7 @@ Railway auto-detects your backend, but let's configure it:
 4. Go to "Variables" tab
 5. Add:
    ```
-   REACT_APP_API_URL=${{backend.RAILWAY_PUBLIC_DOMAIN}}/api
+   REACT_APP_API_URL=https://${{backend.RAILWAY_PUBLIC_DOMAIN}}/api
    ```
    (Railway auto-substitutes the backend URL)
 
@@ -360,7 +363,7 @@ PORT=<auto-configured>
 
 **Frontend**:
 ```
-REACT_APP_API_URL=${{backend.RAILWAY_PUBLIC_DOMAIN}}/api
+REACT_APP_API_URL=https://${{backend.RAILWAY_PUBLIC_DOMAIN}}/api
 PORT=<auto-configured>
 ```
 

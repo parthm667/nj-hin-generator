@@ -1,7 +1,7 @@
-# Railway Frontend Service Configuration
+# Legacy Railway frontend configuration retained for existing deployments.
 
 [build]
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "npx serve -s build -l $PORT"
+startCommand = "./node_modules/.bin/serve -s build -l $PORT"

@@ -18,7 +18,7 @@ jobs:
           POSTGRES_USER: test_user
           POSTGRES_PASSWORD: test_password
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U test_user -d nj_hin_test"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -26,41 +26,52 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
     - name: Install dependencies
       run: |
         cd backend
-        pip install -r requirements.txt
-        pip install pytest pytest-cov
+        python -m pip install -r requirements-dev.txt
 
-    - name: Run tests
+    - name: Initialize PostGIS schema
       env:
         DATABASE_URL: postgresql://test_user:test_password@localhost:5432/nj_hin_test
       run: |
         cd backend
-        pytest tests/ --cov=app --cov-report=xml
+        python scripts/init_schema.py
 
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./backend/coverage.xml
+    - name: Run tests
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/nj_hin_test
+        TEST_DATABASE_URL: postgresql://test_user:test_password@localhost:5432/nj_hin_test
+        DATA_TEST_DATABASE_URL: postgresql://test_user:test_password@localhost:5432/nj_hin_test
+      run: |
+        cd backend
+        python -m pytest tests/ -q
+
+    - name: Build API container
+      run: docker build -t nj-hin-api:ci backend/
 
   frontend-tests:
     runs-on: ubuntu-latest
+    env:
+      CI: 'true'
+      REACT_APP_API_URL: https://api.example.org/api
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version-file: frontend/.nvmrc
+        cache: npm
+        cache-dependency-path: frontend/package-lock.json
 
     - name: Install dependencies
       run: |
@@ -70,7 +81,7 @@ jobs:
     - name: Run tests
       run: |
         cd frontend
-        npm test -- --coverage --watchAll=false
+        npm test -- --watchAll=false --runInBand
 
     - name: Build
       run: |

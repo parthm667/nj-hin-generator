@@ -1,5 +1,8 @@
 # Deploy to Railway RIGHT NOW - Step by Step
 
+> Historical deployment guide. Use [docs/DEPLOY.md](docs/DEPLOY.md) for the current Vercel + container setup, required CORS settings, and explicit schema initialization. Pricing and readiness claims below have not been revalidated.
+
+
 **Time**: 15 minutes to live deployment
 **Cost**: FREE for first month ($5 credit included)
 
@@ -61,7 +64,7 @@ Railway should have auto-detected your backend. Let's configure it:
 2. Click **"Settings"** tab
 3. Scroll down to **"Service Settings"**
 4. Set **Root Directory**: `backend`
-5. Set **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+5. Set **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'`
 6. Click **"Variables"** tab
 7. Click **"+ New Variable"**
 8. Add this variable:
@@ -263,7 +266,7 @@ You're good for the **first month for FREE**!
 
 Check:
 - Root directory is set to `backend`
-- Start command is exactly: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Start command is exactly: `uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'`
 - PYTHONPATH variable is set to `/app`
 
 ### Frontend can't connect to backend

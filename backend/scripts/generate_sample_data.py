@@ -5,11 +5,18 @@ Generates realistic crash data, municipalities, and road networks for testing
 the application without requiring access to real NJ data sources.
 """
 
-import random
+import argparse
 import json
+import random
 from datetime import datetime, timedelta
-from typing import List, Dict
+from pathlib import Path
+from typing import Dict, List
 import math
+
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+PROJECT_DIR = BACKEND_DIR.parent
+DEFAULT_OUTPUT_DIR = PROJECT_DIR / "data" / "sample"
 
 
 # Real NJ municipalities (sample of major ones)
@@ -114,7 +121,8 @@ def generate_road_segments(municipality: Dict, num_segments: int = 50) -> List[D
         length_miles = segment_length * 69  # 1 degree ≈ 69 miles
 
         segments.append({
-            "osm_id": 1000000 + i,
+            # Stable and unique across the complete synthetic dataset.
+            "osm_id": 1000000 + (municipality["muni_id"] * 1000) + i,
             "road_name": random.choice(ROAD_NAMES),
             "road_type": road_type,
             "road_class": road_class,
@@ -187,7 +195,7 @@ def generate_crashes(
 
             crashes.append({
                 "crash_id": crash_id,
-                "external_id": f"NJ{year}{crash_id:06d}",
+                "external_id": f"SAMPLE-{municipality['muni_id']}-{year}-{crash_id:06d}",
                 "crash_date": crash_date.strftime("%Y-%m-%d"),
                 "crash_time": crash_time,
                 "severity": severity,
@@ -247,18 +255,19 @@ def generate_census_tracts(municipality: Dict, num_tracts: int = 5) -> List[Dict
     return tracts
 
 
-def generate_full_dataset(output_dir: str = "data/sample"):
-    """Generate complete sample dataset."""
-    import os
-    os.makedirs(output_dir, exist_ok=True)
+def generate_full_dataset(output_dir: Path | str = DEFAULT_OUTPUT_DIR, seed: int = 42):
+    """Generate a deterministic, explicitly synthetic sample dataset."""
+    output_dir = Path(output_dir).expanduser().resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    random.seed(seed)
 
-    print("Generating sample NJ dataset...")
+    print(f"Generating synthetic sample NJ dataset (seed={seed})...")
 
     # Generate municipalities
     print("- Generating municipalities...")
     municipalities = generate_municipalities()
 
-    with open(f"{output_dir}/municipalities.json", "w") as f:
+    with (output_dir / "municipalities.json").open("w", encoding="utf-8") as f:
         json.dump(municipalities, f, indent=2)
 
     print(f"  Generated {len(municipalities)} municipalities")
@@ -288,21 +297,36 @@ def generate_full_dataset(output_dir: str = "data/sample"):
         print(f"  {len(tracts)} census tracts")
 
     # Save all data
-    with open(f"{output_dir}/road_segments.json", "w") as f:
+    with (output_dir / "road_segments.json").open("w", encoding="utf-8") as f:
         json.dump(all_segments, f, indent=2)
 
-    with open(f"{output_dir}/crashes.json", "w") as f:
+    with (output_dir / "crashes.json").open("w", encoding="utf-8") as f:
         json.dump(all_crashes, f, indent=2)
 
-    with open(f"{output_dir}/census_tracts.json", "w") as f:
+    with (output_dir / "census_tracts.json").open("w", encoding="utf-8") as f:
         json.dump(all_tracts, f, indent=2)
 
-    print(f"\n✓ Sample dataset generated in {output_dir}/")
+    print(f"\nSynthetic sample dataset generated in {output_dir}/")
     print(f"  - {len(municipalities)} municipalities")
     print(f"  - {len(all_segments)} road segments")
     print(f"  - {len(all_crashes)} crashes")
     print(f"  - {len(all_tracts)} census tracts")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Generate deterministic synthetic data for local development."
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=DEFAULT_OUTPUT_DIR,
+        help=f"Output directory (default: {DEFAULT_OUTPUT_DIR})",
+    )
+    parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    generate_full_dataset()
+    cli_args = parse_args()
+    generate_full_dataset(cli_args.output_dir, cli_args.seed)

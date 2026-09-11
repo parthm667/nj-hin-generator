@@ -2,12 +2,16 @@
 Main FastAPI application for NJ HIN Generator.
 """
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
-from backend.app.config import settings
-from backend.app.routers import municipalities, analysis, export
-from backend.app.models.database import init_db
+from app.config import settings
+from app.routers import municipalities, analysis, export
+from app.models.database import get_db
+from app.services.api_safeguards import RequestBodyLimit, enforce_limits
 import logging
 
 # Configure logging
@@ -22,21 +26,11 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifespan."""
-    # Startup
     logger.info("Starting NJ HIN Generator API...")
-
-    # Initialize database tables
     try:
-        init_db()
-        logger.info("Database initialized")
-    except Exception as e:
-        logger.error(f"Database initialization error: {e}")
-        raise
-
-    yield
-
-    # Shutdown
-    logger.info("Shutting down NJ HIN Generator API...")
+        yield
+    finally:
+        logger.info("Shutting down NJ HIN Generator API...")
 
 
 # Create FastAPI app
@@ -53,10 +47,12 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
+    allow_origin_regex=settings.cors_origin_regex,
+    allow_credentials=settings.cors_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(RequestBodyLimit)
 
 
 # Health check endpoint
@@ -71,12 +67,21 @@ async def root():
 
 
 @app.get("/health")
-async def health_check():
+async def health_check(db: Session = Depends(get_db)):
     """Detailed health check."""
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        logger.warning("Database health check failed")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database unavailable",
+        )
+
     return {
         "status": "healthy",
         "version": settings.app_version,
-        "database": "connected"  # Could add actual DB ping
+        "database": "connected"
     }
 
 
@@ -84,19 +89,19 @@ async def health_check():
 app.include_router(
     municipalities.router,
     prefix="/api/municipalities",
-    tags=["municipalities"]
+    tags=["municipalities"], dependencies=[Depends(enforce_limits)]
 )
 
 app.include_router(
     analysis.router,
     prefix="/api/analysis",
-    tags=["analysis"]
+    tags=["analysis"], dependencies=[Depends(enforce_limits)]
 )
 
 app.include_router(
     export.router,
     prefix="/api/export",
-    tags=["export"]
+    tags=["export"], dependencies=[Depends(enforce_limits)]
 )
 
 
@@ -104,7 +109,7 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "backend.app.main:app",
+        "app.main:app",
         host=settings.api_host,
         port=settings.api_port,
         reload=settings.api_reload

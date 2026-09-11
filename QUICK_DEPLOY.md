@@ -1,5 +1,8 @@
 # 🚀 QUICK DEPLOY - Railway.app
 
+> Historical deployment guide. Use [docs/DEPLOY.md](docs/DEPLOY.md) for the current Vercel + container setup, required CORS settings, and explicit schema initialization. Pricing and readiness claims below have not been revalidated.
+
+
 **Ultra-fast reference** - See DEPLOY_NOW.md for detailed steps
 
 ---
@@ -22,7 +25,7 @@
 ## 4. Configure Backend (3 min)
 **Settings**:
 - Root Directory: `backend`
-- Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'`
 
 **Variables**:
 - Add: `PYTHONPATH` = `/app`

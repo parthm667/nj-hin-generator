@@ -6,8 +6,12 @@ Segments roads into fixed-length pieces for crash assignment.
 """
 
 import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from pathlib import Path
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+PROJECT_DIR = BACKEND_DIR.parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
 import geopandas as gpd
 import requests
@@ -15,9 +19,9 @@ from shapely.geometry import LineString, MultiLineString
 from shapely.ops import linemerge, split
 import logging
 from sqlalchemy.orm import Session
-from backend.app.models.database import SessionLocal, init_db
-from backend.app.models.tables import RoadSegment, Municipality
-from backend.app.config import settings
+from app.models.database import SessionLocal
+from app.models.tables import RoadSegment, Municipality
+from app.config import settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -321,21 +325,18 @@ def main():
     """Main ingestion workflow."""
     logger.info("Starting road network ingestion...")
 
-    # Initialize database
-    init_db()
-
     # Load from preprocessed file
     # In production, you would process OSM PBF file first
-    file_path = 'data/raw/nj_roads.geojson'
+    file_path = PROJECT_DIR / 'data' / 'raw' / 'nj_roads.geojson'
 
-    if not os.path.exists(file_path):
+    if not file_path.exists():
         logger.error(f"Road data file not found: {file_path}")
         logger.info("Please download and preprocess OSM data first.")
         logger.info("See docs/data_preparation.md for instructions")
         return
 
     # Load and process
-    gdf = load_osm_from_file(file_path)
+    gdf = load_osm_from_file(str(file_path))
     gdf = filter_relevant_roads(gdf)
     gdf = classify_roads(gdf)
     gdf = segment_roads(gdf, settings.segment_length_miles)

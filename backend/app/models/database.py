@@ -1,8 +1,7 @@
 from sqlalchemy import create_engine, text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 from geoalchemy2 import Geometry
-from backend.app.config import settings
+from app.config import settings
 
 # Create SQLAlchemy engine
 engine = create_engine(
@@ -10,7 +9,12 @@ engine = create_engine(
     echo=settings.debug,
     pool_pre_ping=True,
     pool_size=10,
-    max_overflow=20
+    max_overflow=5,
+    pool_timeout=10,
+    connect_args={
+        'connect_timeout': 10,
+        'options': '-c statement_timeout=30000 -c lock_timeout=5000',
+    },
 )
 
 # Create SessionLocal class
@@ -37,7 +41,7 @@ def get_db():
 def init_db():
     """
     Initialize database tables.
-    Should be called on application startup.
+    Called explicitly by scripts/init_schema.py, not during API startup.
     """
     Base.metadata.create_all(bind=engine)
 

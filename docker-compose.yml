@@ -1,9 +1,6 @@
-version: '3.8'
-
 services:
   db:
     image: postgis/postgis:15-3.3
-    container_name: nj_hin_db
     environment:
       POSTGRES_DB: nj_hin_db
       POSTGRES_USER: hin_user
@@ -15,40 +12,66 @@ services:
       - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U hin_user -d nj_hin_db"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 12
+
+  schema-init:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://hin_user:hin_password@db:5432/nj_hin_db
+      DEBUG: "false"
+    volumes:
+      - ./backend:/app
+      - ./data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    command: python scripts/init_schema.py
+    restart: "no"
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: nj_hin_backend
     environment:
       DATABASE_URL: postgresql://hin_user:hin_password@db:5432/nj_hin_db
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_NAME: nj_hin_db
-      DATABASE_USER: hin_user
-      DATABASE_PASSWORD: hin_password
       API_HOST: 0.0.0.0
       API_PORT: 8000
-      CORS_ORIGINS: http://localhost:3000
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+      DEBUG: "false"
     volumes:
       - ./backend:/app
       - ./data:/data
     ports:
       - "8000:8000"
     depends_on:
-      db:
-        condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      schema-init:
+        condition: service_completed_successfully
+    command: >-
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      --proxy-headers --forwarded-allow-ips '127.0.0.1'
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://hin_user:hin_password@db:5432/nj_hin_db
+      DEBUG: "false"
+    depends_on:
+      schema-init:
+        condition: service_completed_successfully
+    command: python -m app.worker
+    restart: on-failure
 
   frontend:
+    profiles: ["dev"]
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: nj_hin_frontend
     environment:
       REACT_APP_API_URL: http://localhost:8000/api
     volumes:
@@ -59,6 +82,8 @@ services:
     depends_on:
       - backend
     command: npm start
+    labels:
+      org.nj-hin.environment: development-only
 
 volumes:
   postgres_data:

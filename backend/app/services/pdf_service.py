@@ -1,8 +1,7 @@
 """
 PDF Report Generation Service
 
-Generates professional PDF reports for High Injury Network analyses
-suitable for grant applications (SS4A, HSIP, etc.)
+Generates exploratory screening reports with source limitations.
 """
 
 import io
@@ -23,7 +22,11 @@ from reportlab.platypus import (
 from reportlab.pdfgen import canvas
 
 from sqlalchemy.orm import Session
-from backend.app.models.tables import Analysis, Municipality, Crash, HINSegment
+from app.models.tables import Analysis, Municipality, Crash, HINSegment
+from app.config import settings
+from app.services.crash_service import CrashService
+from app.services.coverage_service import CoverageService
+from xml.sax.saxutils import escape
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +105,7 @@ class PDFReportGenerator:
 
         if analysis.status != 'completed':
             raise ValueError(f"Analysis {analysis_id} is not completed (status: {analysis.status})")
+        CoverageService(self.db).require_current_results(analysis)
 
         # Fetch municipality
         municipality = self.db.query(Municipality).filter(
@@ -167,7 +171,7 @@ class PDFReportGenerator:
         # Municipality
         if municipality:
             subtitle = Paragraph(
-                f"{municipality.name}, {municipality.county} County, New Jersey",
+                f"{escape(municipality.name)}, {escape(municipality.county)} County, New Jersey",
                 self.styles['CustomSubtitle']
             )
             elements.append(subtitle)
@@ -205,10 +209,11 @@ class PDFReportGenerator:
         # Summary text
         summary_text = f"""
         This report presents the results of a High Injury Network (HIN) analysis for
-        {municipality.name if municipality else 'the municipality'}, conducted for the period
+        {escape(municipality.name) if municipality else 'the municipality'}, conducted for the period
         {analysis.start_year} through {analysis.end_year}.
-        The analysis identified roadway segments with elevated crash rates and severity,
-        focusing resources on locations with the greatest potential for safety improvements.
+        The analysis screens roadway segments for elevated recorded crash counts per mile-year.
+        Severity scores are separate descriptive rankings. Candidate locations require
+        professional review before safety investment decisions.
         """
 
         elements.append(Paragraph(summary_text, self.styles['BodyJustify']))
@@ -220,7 +225,7 @@ class PDFReportGenerator:
         findings = [
             f"Total crashes analyzed: {crash_stats['total']:,}",
             f"Fatal crashes: {crash_stats['fatal']}",
-            f"Serious injury crashes: {crash_stats['serious_injury']}",
+            f"Serious injury crashes (classified records only): {crash_stats['serious_injury']}",
             f"Total fatalities: {crash_stats['total_killed']}",
             f"Total injuries: {crash_stats['total_injured']}",
             f"High Injury Network length: {hin_stats['total_miles']:.1f} miles",
@@ -247,6 +252,7 @@ class PDFReportGenerator:
             ['Fatal', f"{crash_stats['fatal']}", f"{crash_stats['fatal_pct']:.1f}%"],
             ['Serious Injury', f"{crash_stats['serious_injury']}", f"{crash_stats['serious_injury_pct']:.1f}%"],
             ['Minor Injury', f"{crash_stats['minor_injury']}", f"{crash_stats['minor_injury_pct']:.1f}%"],
+            ['Injury - detail unknown', f"{crash_stats['injury_unknown']}", f"{crash_stats['injury_unknown_pct']:.1f}%"],
             ['Property Damage', f"{crash_stats['property_damage']}", f"{crash_stats['property_damage_pct']:.1f}%"],
             ['Total', f"{crash_stats['total']}", "100.0%"],
         ]
@@ -291,6 +297,13 @@ class PDFReportGenerator:
         ]))
 
         elements.append(vuln_table)
+        elements.append(Spacer(1, 0.2*inch))
+        elements.append(Paragraph(
+            'Unknown means the source does not provide complete counts. Injury severity '
+            'is not split into serious/minor in NJDOT Accidents archives. Bicycle '
+            'casualties cannot be inferred from involvement flags. Loaded records '
+            'exclude crashes without a usable location; these are not complete crash totals.',
+            self.styles['Normal']))
 
         return elements
 
@@ -302,16 +315,16 @@ class PDFReportGenerator:
 
         # Description
         desc_text = """
-        The High Injury Network represents roadway segments that experience disproportionately
-        high numbers of fatal and serious injury crashes. These segments were identified using
-        statistical methods to determine which locations have crash rates significantly above
-        the expected baseline.
+        These candidate segments have elevated counts of all recorded crashes relative
+        to a municipality-local reference rate. Severity scores are descriptive rankings,
+        not Poisson event counts. This exploratory screening is not an independently
+        validated or grant-certified High Injury Network.
         """
         elements.append(Paragraph(desc_text, self.styles['BodyJustify']))
         elements.append(Spacer(1, 0.2*inch))
 
         # Get significant HIN segments joined to their road geometry/metadata
-        from backend.app.models.tables import RoadSegment
+        from app.models.tables import RoadSegment
         hin_segments = self.db.query(HINSegment, RoadSegment).join(
             RoadSegment, HINSegment.segment_id == RoadSegment.segment_id
         ).filter(
@@ -359,8 +372,9 @@ class PDFReportGenerator:
         elements.append(Paragraph("Methodology", self.styles['SectionHeading']))
 
         method_text = """
-        This analysis follows best practices for High Injury Network identification as
-        outlined in FHWA guidance and used by Vision Zero cities nationwide.
+        This exploratory screening uses loaded, locatable crash records. It is not
+        independently validated for grant eligibility. Traffic exposure, spatial dependence,
+        over-dispersion, and multiple testing are not modeled; professional review is required.
         """
         elements.append(Paragraph(method_text, self.styles['BodyJustify']))
         elements.append(Spacer(1, 0.2*inch))
@@ -369,12 +383,15 @@ class PDFReportGenerator:
 
         steps = [
             "Crash Data Collection: Official crash records from NJ Department of Transportation",
-            "Spatial Processing: Crashes snapped to nearest road segment within 50 meters",
-            "Severity Weighting: Fatal crashes weighted 4x, serious injury 3x, minor injury 2x",
+            f"Spatial Processing: Crashes snapped to the nearest road segment within {analysis.snap_distance_meters:g} meters",
+            "Severity Weighting: Descriptive ranking only; " + ', '.join(
+                f'{name.replace("_", " ")}: {weight}' for name, weight in settings.severity_weights.items()
+            ) + '; unspecified injury detail: 3',
             "Rate Calculation: Crash rates calculated per segment mile per year",
-            "Statistical Testing: Poisson distribution used to identify statistically significant crash rates",
+            "Statistical Testing: One-sided Poisson screening on actual crash counts, minimum 3 crashes. Leave-one-out road-class baseline, then municipality fallback; no reference exposure means no selection.",
             f"Significance Threshold: P-value < {analysis.significance_threshold}",
-            "Network Assembly: Contiguous high-crash segments grouped into corridors"
+            "Network Assembly: Same-route endpoints within 1 meter form connected corridors. Fragments shorter than 0.01 mile are excluded from screening and baseline exposure, not deleted.",
+            "Social vulnerability: Official CDC/ATSDR SVI 2020 national tract rankings where loaded; a contextual snapshot, not a measure for each crash year. Missing scores remain unknown.",
         ]
 
         for step in steps:
@@ -384,8 +401,8 @@ class PDFReportGenerator:
         elements.append(Paragraph("Data Sources", self.styles['Heading3']))
 
         sources = [
-            "Crash Data: NJ Department of Transportation (NJDOT) via NJ Open Data Portal",
-            "Road Network: OpenStreetMap",
+            "Crash Data: NJ Department of Transportation (NJDOT) county/year Accidents archives",
+            "Road Network: NJDOT measured roadway network; route-milepost locations are estimates using that network vintage",
             "Municipal Boundaries: NJ Office of GIS",
         ]
 
@@ -412,64 +429,26 @@ class PDFReportGenerator:
 
     def _get_crash_statistics(self, analysis: Analysis) -> Dict:
         """Get basic crash statistics for the analysis municipality and period."""
-        from sqlalchemy import func, case
-
-        stats = self.db.query(
-            func.count(Crash.crash_id).label('total'),
-            func.sum(case((Crash.severity == 'fatal', 1), else_=0)).label('fatal'),
-            func.sum(case((Crash.severity == 'serious_injury', 1), else_=0)).label('serious_injury'),
-        ).filter(
-            Crash.muni_id == analysis.muni_id,
-            Crash.crash_date >= f"{analysis.start_year}-01-01",
-            Crash.crash_date <= f"{analysis.end_year}-12-31"
-        ).first()
-
-        return {
-            'total': stats.total or 0,
-            'fatal': stats.fatal or 0,
-            'serious_injury': stats.serious_injury or 0,
-            # Per-crash casualty counts are not stored; use analysis summary.
-            'total_killed': analysis.total_fatalities or 0,
-            'total_injured': analysis.total_injuries or 0,
-        }
+        return self._get_detailed_crash_statistics(analysis)
 
     def _get_detailed_crash_statistics(self, analysis: Analysis) -> Dict:
         """Get detailed crash statistics with percentages."""
-        from sqlalchemy import func, case
-
-        stats = self.db.query(
-            func.count(Crash.crash_id).label('total'),
-            func.sum(case((Crash.severity == 'fatal', 1), else_=0)).label('fatal'),
-            func.sum(case((Crash.severity == 'serious_injury', 1), else_=0)).label('serious_injury'),
-            func.sum(case((Crash.severity == 'minor_injury', 1), else_=0)).label('minor_injury'),
-            func.sum(case((Crash.severity == 'property_damage', 1), else_=0)).label('property_damage'),
-            func.sum(case((Crash.ped_involved == True, 1), else_=0)).label('ped_killed'),
-            func.sum(case((Crash.ped_involved == True, 1), else_=0)).label('ped_injured'),
-            func.sum(case((Crash.bike_involved == True, 1), else_=0)).label('bike_killed'),
-            func.sum(case((Crash.bike_involved == True, 1), else_=0)).label('bike_injured'),
-        ).filter(
-            Crash.muni_id == analysis.muni_id,
-            Crash.crash_date >= f"{analysis.start_year}-01-01",
-            Crash.crash_date <= f"{analysis.end_year}-12-31"
-        ).first()
-
-        total = stats.total or 1  # Avoid division by zero
-
-        return {
-            'total': stats.total or 0,
-            'fatal': stats.fatal or 0,
-            'fatal_pct': (stats.fatal or 0) / total * 100,
-            'serious_injury': stats.serious_injury or 0,
-            'serious_injury_pct': (stats.serious_injury or 0) / total * 100,
-            'minor_injury': stats.minor_injury or 0,
-            'minor_injury_pct': (stats.minor_injury or 0) / total * 100,
-            'property_damage': stats.property_damage or 0,
-            'property_damage_pct': (stats.property_damage or 0) / total * 100,
-            'ped_killed': stats.ped_killed or 0,
-            'ped_injured': stats.ped_injured or 0,
-            'bike_killed': stats.bike_killed or 0,
-            'bike_injured': stats.bike_injured or 0,
-        }
+        stats = CrashService(self.db).get_municipality_crash_summary(
+            analysis.muni_id, analysis.start_year, analysis.end_year)
+        total = stats['total_crashes']
+        result = {'total': total}
+        for name in ('fatal', 'serious_injury', 'minor_injury', 'injury_unknown', 'property_damage'):
+            count = stats[f'{name}_crashes']
+            result[name] = count
+            result[f'{name}_pct'] = count / total * 100 if total else 0
+        for target, source in (
+            ('total_killed', 'total_killed'), ('total_injured', 'total_injured'),
+            ('ped_killed', 'pedestrians_killed'), ('ped_injured', 'pedestrians_injured'),
+        ):
+            result[target] = stats[source] if stats[source] is not None else 'Unknown'
+        # The Accidents source does not contain bicycle casualty counts.
+        result['bike_killed'] = result['bike_injured'] = 'Unknown'
+        return result
 
     def _get_hin_statistics(self, analysis: Analysis) -> Dict:
         """Get HIN statistics from the stored analysis summary."""

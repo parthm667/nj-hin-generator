@@ -1,8 +1,21 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, Date, TIMESTAMP, ARRAY, ForeignKey, Index
+from sqlalchemy import (
+    ARRAY,
+    TIMESTAMP,
+    Boolean,
+    CheckConstraint,
+    Column,
+    Date,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import JSONB
 from geoalchemy2 import Geometry
 from datetime import datetime
-from backend.app.models.database import Base
+from app.models.database import Base
 
 
 class Municipality(Base):
@@ -38,6 +51,8 @@ class RoadSegment(Base):
 
     segment_id = Column(Integer, primary_key=True, autoincrement=True)
     osm_id = Column(Integer, index=True)
+    source_id = Column(String(200), nullable=True)
+    sri = Column(String(20), nullable=True)
     road_name = Column(String(200))
     road_type = Column(String(50))  # highway type from OSM (primary, secondary, residential, etc.)
     road_class = Column(String(20))  # Simplified: arterial, collector, local
@@ -55,10 +70,43 @@ class RoadSegment(Base):
         Index('idx_segments_geom', 'geom', postgresql_using='gist'),
         Index('idx_segments_muni', 'muni_id'),
         Index('idx_segments_road_class', 'road_class'),
+        Index('idx_segments_source_id', 'source_id', unique=True),
+        Index('idx_segments_sri', 'sri'),
     )
 
     def __repr__(self):
         return f"<RoadSegment(id={self.segment_id}, name='{self.road_name}', type='{self.road_type}')>"
+
+
+class RoadRoute(Base):
+    """Unsplit NJDOT path retaining calibrated milepost measures."""
+
+    __tablename__ = "road_routes"
+
+    source_id = Column(String(200), primary_key=True)
+    sri = Column(String(20), nullable=False)
+    mp_start = Column(Float, nullable=False)
+    mp_end = Column(Float, nullable=False)
+    geom = Column(
+        Geometry(
+            geometry_type='LINESTRINGM',
+            srid=4326,
+            dimension=3,
+            spatial_index=False,
+        ),
+        nullable=False,
+    )
+
+    __table_args__ = (
+        Index('idx_road_routes_sri', 'sri'),
+        Index('idx_road_routes_geom', 'geom', postgresql_using='gist'),
+    )
+
+    def __repr__(self):
+        return (
+            f"<RoadRoute(source_id='{self.source_id}', sri='{self.sri}', "
+            f"mileposts={self.mp_start}-{self.mp_end})>"
+        )
 
 
 class Crash(Base):
@@ -70,9 +118,14 @@ class Crash(Base):
     external_id = Column(String(50), unique=True)  # ID from source data
     crash_date = Column(Date, nullable=False, index=True)
     crash_time = Column(String(10))
-    severity = Column(String(20), nullable=False, index=True)  # fatal, serious_injury, minor_injury, property_damage
+    # fatal, serious_injury, minor_injury, injury_unknown, property_damage
+    severity = Column(String(20), nullable=False, index=True)
     ped_involved = Column(Boolean, default=False, index=True)
-    bike_involved = Column(Boolean, default=False, index=True)
+    bike_involved = Column(Boolean, nullable=True, index=True)
+    total_killed = Column(Integer, nullable=True)
+    total_injured = Column(Integer, nullable=True)
+    pedestrians_killed = Column(Integer, nullable=True)
+    pedestrians_injured = Column(Integer, nullable=True)
 
     # Location info
     muni_id = Column(Integer, ForeignKey('municipalities.muni_id'), nullable=False)
@@ -103,6 +156,22 @@ class Crash(Base):
         Index('idx_crashes_muni', 'muni_id'),
         Index('idx_crashes_segment', 'segment_id'),
         Index('idx_crashes_severity', 'severity'),
+        CheckConstraint(
+            'total_killed IS NULL OR total_killed >= 0',
+            name='ck_crashes_total_killed_nonnegative',
+        ),
+        CheckConstraint(
+            'total_injured IS NULL OR total_injured >= 0',
+            name='ck_crashes_total_injured_nonnegative',
+        ),
+        CheckConstraint(
+            'pedestrians_killed IS NULL OR pedestrians_killed >= 0',
+            name='ck_crashes_pedestrians_killed_nonnegative',
+        ),
+        CheckConstraint(
+            'pedestrians_injured IS NULL OR pedestrians_injured >= 0',
+            name='ck_crashes_pedestrians_injured_nonnegative',
+        ),
     )
 
     def __repr__(self):
@@ -129,6 +198,8 @@ class CensusTract(Base):
     svi_score = Column(Float)  # CDC Social Vulnerability Index
     svi_percentile = Column(Float)
     ejscreen_score = Column(Float)  # EPA Environmental Justice Screen
+    source_year = Column(Integer)
+    source_name = Column(String(200))
 
     # Geometry
     geom = Column(Geometry(geometry_type='MULTIPOLYGON', srid=4326, spatial_index=False), nullable=False)
@@ -169,6 +240,7 @@ class Analysis(Base):
     # Status
     status = Column(String(20), default='pending')  # pending, running, completed, failed
     error_message = Column(String(500))
+    input_version = Column(JSONB)
 
     # Results summary
     total_crashes = Column(Integer)

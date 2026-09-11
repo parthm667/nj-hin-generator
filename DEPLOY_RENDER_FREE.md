@@ -1,5 +1,8 @@
 # Deploy to Render.com (FREE)
 
+> Historical deployment guide. Use [docs/DEPLOY.md](docs/DEPLOY.md) for the current Vercel + container setup, required CORS settings, and explicit schema initialization. Pricing and readiness claims below have not been revalidated.
+
+
 **Cost**: $0 for 90 days, then $7/month if you want to keep it
 **Time**: 15 minutes
 **Perfect for**: West Windsor demo and grant application
@@ -78,7 +81,7 @@
    - **Root Directory**: `backend`
    - **Runtime**: `Python 3`
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'`
    - **Plan**: **Free**
 
 5. **Environment Variables** - Click "Add Environment Variable" for each:

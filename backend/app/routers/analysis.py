@@ -4,21 +4,29 @@ Analysis API router.
 Endpoints for running HIN analysis and retrieving results.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
-from backend.app.models.database import get_db
-from backend.app.models.tables import Analysis, Municipality
-from backend.app.models.schemas import (
+from app.models.database import get_db
+from app.models.tables import Analysis, Municipality
+from app.models.schemas import (
     AnalysisCreate,
     AnalysisResponse,
     AnalysisDetail,
     AnalysisSummary,
     GeoJSONFeatureCollection
 )
-from backend.app.services.hin_service import HINService
-from backend.app.services.crash_service import CrashService
-from backend.app.services.pdf_service import PDFReportGenerator
+from app.services.hin_service import HINService
+from app.services.crash_service import CrashService
+from app.services.coverage_service import (
+    AnalysisDataConflictError,
+    CoverageService,
+    MissingCrashDataError,
+)
+from app.services.pdf_service import PDFReportGenerator
+from app.services.job_service import JobService, QueueFullError, ClientQuotaError
+from app.config import settings
+from app.services.data_quality import analysis_data_quality
 from typing import List
 import logging
 from datetime import datetime
@@ -28,67 +36,21 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-def run_analysis_background(
-    analysis_id: int,
-    muni_id: int,
-    start_year: int,
-    end_year: int,
-    snap_distance_meters: float,
-    significance_threshold: float
-):
-    """
-    Background task to run analysis.
+def _guard_completed_analysis_results(analysis: Analysis, db: Session) -> None:
+    """Block completed results whose loaded crash records are no longer valid."""
+    if analysis.status != "completed":
+        return
 
-    Args:
-        analysis_id: Analysis ID
-        muni_id: Municipality ID
-        start_year: Start year
-        end_year: End year
-        snap_distance_meters: Crash snap distance
-        significance_threshold: Significance threshold
-    """
-    from backend.app.models.database import SessionLocal
-    import traceback
-
-    db = SessionLocal()
     try:
-        hin_service = HINService(db)
-        hin_service.run_analysis(
-            analysis_id=analysis_id,
-            muni_id=muni_id,
-            start_year=start_year,
-            end_year=end_year,
-            snap_distance_meters=snap_distance_meters,
-            significance_threshold=significance_threshold
-        )
-        logger.info(f"Analysis {analysis_id} completed successfully")
-
-    except Exception as e:
-        logger.error(f"Analysis {analysis_id} failed: {e}")
-        logger.error(traceback.format_exc())
-
-        # Update analysis status to failed
-        try:
-            analysis = db.query(Analysis).filter(
-                Analysis.analysis_id == analysis_id
-            ).first()
-
-            if analysis:
-                analysis.status = 'failed'
-                analysis.error_message = str(e)[:500]
-                db.commit()
-        except Exception as update_error:
-            logger.error(f"Failed to update analysis status: {update_error}")
-            db.rollback()
-
-    finally:
-        db.close()
+        CoverageService(db).require_current_results(analysis)
+    except AnalysisDataConflictError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail) from exc
 
 
 @router.post("/", response_model=AnalysisResponse)
-async def create_analysis(
+def create_analysis(
     request: AnalysisCreate,
-    background_tasks: BackgroundTasks,
+    http_request: Request,
     db: Session = Depends(get_db)
 ):
     """
@@ -96,7 +58,6 @@ async def create_analysis(
 
     Args:
         request: Analysis configuration
-        background_tasks: FastAPI background tasks
         db: Database session
 
     Returns:
@@ -110,6 +71,15 @@ async def create_analysis(
     if not municipality:
         raise HTTPException(status_code=404, detail="Municipality not found")
 
+    try:
+        CoverageService(db).require_years_available(
+            request.muni_id,
+            request.config.start_year,
+            request.config.end_year,
+        )
+    except MissingCrashDataError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail) from exc
+
     # Create analysis record
     analysis = Analysis(
         muni_id=request.muni_id,
@@ -122,58 +92,25 @@ async def create_analysis(
         status='pending'
     )
 
-    db.add(analysis)
-    db.commit()
-    db.refresh(analysis)
-
-    # Queue analysis as background task
-    background_tasks.add_task(
-        run_analysis_background,
-        analysis.analysis_id,
-        request.muni_id,
-        request.config.start_year,
-        request.config.end_year,
-        request.config.snap_distance_meters,
-        request.config.significance_threshold
-    )
+    try:
+        JobService(db).enqueue(
+            analysis, http_request.state.anonymous_client_key,
+            max_pending=settings.max_pending_analyses,
+            max_client_active=settings.max_client_active_analyses,
+        )
+        db.commit()
+        db.refresh(analysis)
+    except (QueueFullError, ClientQuotaError) as exc:
+        db.rollback()
+        raise HTTPException(429, str(exc), headers={'Retry-After': '60'}) from exc
 
     logger.info(f"Created analysis {analysis.analysis_id} for municipality {request.muni_id}")
 
     return analysis
 
 
-@router.get("/", response_model=List[AnalysisResponse])
-async def list_analyses(
-    muni_id: int = None,
-    status: str = None,
-    db: Session = Depends(get_db)
-):
-    """
-    List all analyses.
-
-    Args:
-        muni_id: Optional filter by municipality
-        status: Optional filter by status
-        db: Database session
-
-    Returns:
-        List of analyses
-    """
-    query = db.query(Analysis)
-
-    if muni_id:
-        query = query.filter(Analysis.muni_id == muni_id)
-
-    if status:
-        query = query.filter(Analysis.status == status)
-
-    analyses = query.order_by(Analysis.created_at.desc()).all()
-
-    return analyses
-
-
 @router.get("/{analysis_id}", response_model=AnalysisDetail)
-async def get_analysis(
+def get_analysis(
     analysis_id: int,
     db: Session = Depends(get_db)
 ):
@@ -198,6 +135,7 @@ async def get_analysis(
     municipality = db.query(Municipality).filter(
         Municipality.muni_id == analysis.muni_id
     ).first()
+    assessment = CoverageService(db).assess_analysis(analysis)
 
     result = AnalysisDetail(
         analysis_id=analysis.analysis_id,
@@ -213,14 +151,20 @@ async def get_analysis(
         total_injuries=analysis.total_injuries,
         hin_miles=analysis.hin_miles,
         hin_segment_count=analysis.hin_segment_count,
-        municipality_name=municipality.name if municipality else None
+        municipality_name=municipality.name if municipality else None,
+        data_status=assessment.data_status,
+        data_message=assessment.data_message,
+        available_years=assessment.available_years,
+        missing_years=assessment.missing_years,
+        input_version=analysis.input_version,
+        data_quality=analysis_data_quality(db, analysis) if assessment.data_status == 'ready' and analysis.status == 'completed' else {},
     )
 
     return result
 
 
 @router.get("/{analysis_id}/summary", response_model=AnalysisSummary)
-async def get_analysis_summary(
+def get_analysis_summary(
     analysis_id: int,
     db: Session = Depends(get_db)
 ):
@@ -246,6 +190,7 @@ async def get_analysis_summary(
             status_code=400,
             detail=f"Analysis not completed (status: {analysis.status})"
         )
+    _guard_completed_analysis_results(analysis, db)
 
     # Get crash statistics
     crash_service = CrashService(db)
@@ -256,7 +201,7 @@ async def get_analysis_summary(
     )
 
     # Get HIN statistics
-    from backend.app.models.tables import HINSegment
+    from app.models.tables import HINSegment
     from sqlalchemy import and_
 
     hin_segments = db.query(HINSegment).filter(
@@ -271,9 +216,10 @@ async def get_analysis_summary(
 
     # Calculate vulnerable tract percentage
     vulnerable_segments = [seg for seg in hin_segments if seg.in_vulnerable_tract]
+    known_equity_segments = [seg for seg in hin_segments if seg.in_vulnerable_tract is not None]
     vulnerable_pct = (
-        len(vulnerable_segments) / len(hin_segments) * 100
-        if hin_segments else 0
+        len(vulnerable_segments) / len(known_equity_segments) * 100
+        if known_equity_segments else None
     )
 
     summary = AnalysisSummary(
@@ -284,6 +230,13 @@ async def get_analysis_summary(
         property_damage_crashes=crash_summary['property_damage_crashes'],
         ped_crashes=crash_summary['ped_crashes'],
         bike_crashes=crash_summary['bike_crashes'],
+        injury_unknown_crashes=crash_summary['injury_unknown_crashes'],
+        bike_involvement_unknown_crashes=crash_summary['bike_involvement_unknown_crashes'],
+        total_killed=crash_summary['total_killed'],
+        total_injured=crash_summary['total_injured'],
+        pedestrians_killed=crash_summary['pedestrians_killed'],
+        pedestrians_injured=crash_summary['pedestrians_injured'],
+        casualty_counts_complete=crash_summary['casualty_counts_complete'],
         hin_miles=analysis.hin_miles or 0,
         hin_corridors=len(corridors),
         vulnerable_tract_percentage=vulnerable_pct
@@ -293,7 +246,7 @@ async def get_analysis_summary(
 
 
 @router.get("/{analysis_id}/crashes")
-async def get_analysis_crashes(
+def get_analysis_crashes(
     analysis_id: int,
     severity: str = None,
     ped_only: bool = False,
@@ -320,7 +273,11 @@ async def get_analysis_crashes(
     if not analysis:
         raise HTTPException(status_code=404, detail="Analysis not found")
 
+    _guard_completed_analysis_results(analysis, db)
+
     crash_service = CrashService(db)
+    if bike_only and not analysis_data_quality(db, analysis)['bicycle_data_available']:
+        raise HTTPException(422, 'Bicycle involvement is unavailable for some selected records.')
     geojson = crash_service.get_crashes_geojson(
         muni_id=analysis.muni_id,
         start_year=analysis.start_year,
@@ -334,7 +291,7 @@ async def get_analysis_crashes(
 
 
 @router.get("/{analysis_id}/hin")
-async def get_analysis_hin(
+def get_analysis_hin(
     analysis_id: int,
     hin_type: str = 'general',
     db: Session = Depends(get_db)
@@ -362,7 +319,12 @@ async def get_analysis_hin(
             status_code=400,
             detail=f"Analysis not completed (status: {analysis.status})"
         )
+    _guard_completed_analysis_results(analysis, db)
 
+    if hin_type == 'bicycle' and not analysis_data_quality(db, analysis)['bicycle_data_available']:
+        raise HTTPException(422, 'Bicycle involvement is unavailable for some selected records; bicycle HIN is not supported.')
+    if hin_type not in ('general', 'pedestrian', 'bicycle'):
+        raise HTTPException(422, 'Unknown HIN type')
     hin_service = HINService(db)
     geojson = hin_service.get_hin_geojson(
         analysis_id=analysis_id,
@@ -372,46 +334,8 @@ async def get_analysis_hin(
     return geojson
 
 
-@router.delete("/{analysis_id}")
-async def delete_analysis(
-    analysis_id: int,
-    db: Session = Depends(get_db)
-):
-    """
-    Delete an analysis.
-
-    Args:
-        analysis_id: Analysis ID
-        db: Database session
-
-    Returns:
-        Success message
-    """
-    analysis = db.query(Analysis).filter(
-        Analysis.analysis_id == analysis_id
-    ).first()
-
-    if not analysis:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-
-    # Delete associated HIN segments first
-    from backend.app.models.tables import HINSegment
-
-    db.query(HINSegment).filter(
-        HINSegment.analysis_id == analysis_id
-    ).delete()
-
-    # Delete analysis
-    db.delete(analysis)
-    db.commit()
-
-    logger.info(f"Deleted analysis {analysis_id}")
-
-    return {"message": "Analysis deleted successfully"}
-
-
 @router.get("/{analysis_id}/export/pdf")
-async def export_analysis_pdf(
+def export_analysis_pdf(
     analysis_id: int,
     db: Session = Depends(get_db)
 ):
@@ -437,6 +361,7 @@ async def export_analysis_pdf(
             status_code=400,
             detail=f"Analysis not completed (status: {analysis.status})"
         )
+    _guard_completed_analysis_results(analysis, db)
 
     # Get municipality for filename
     municipality = db.query(Municipality).filter(
@@ -465,4 +390,4 @@ async def export_analysis_pdf(
 
     except Exception as e:
         logger.error(f"Error generating PDF for analysis {analysis_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Error generating PDF: {str(e)}")
+        raise HTTPException(status_code=500, detail='Unable to generate the report. Please try again later.')

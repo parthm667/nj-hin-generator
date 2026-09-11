@@ -1,0 +1,10 @@
+-r requirements-ingest.txt
+
+# Optional ingestion and geospatial tooling. Not installed in the API image.
+geopandas==0.14.2
+pandas==2.1.4
+shapely==2.0.2
+pyproj==3.6.1
+fiona==1.9.5
+# Keep the optional character detector reproducible for legacy scripts.
+chardet==5.2.0

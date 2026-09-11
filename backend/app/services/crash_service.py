@@ -5,14 +5,17 @@ Handles crash-to-segment assignment, severity weighting,
 and crash statistics calculation.
 """
 
-from sqlalchemy.orm import Session
-from sqlalchemy import text, and_, or_, func
-from geoalchemy2.functions import ST_Distance, ST_ClosestPoint
-from backend.app.models.tables import Crash, RoadSegment, Municipality
-from backend.app.config import settings
+import json
 import logging
-from typing import List, Dict, Optional
+import math
 from datetime import datetime
+from typing import Dict, Optional
+
+from sqlalchemy import func, text
+from sqlalchemy.orm import Session
+
+from app.config import settings
+from app.models.tables import Crash
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +26,18 @@ class CrashService:
     def __init__(self, db: Session):
         self.db = db
         self.severity_weights = settings.severity_weights
+
+    @staticmethod
+    def validate_snap_distance(snap_distance_meters: float) -> float:
+        """Return a validated distance suitable for PostGIS geography calls."""
+        try:
+            distance = float(snap_distance_meters)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Snap distance must be a finite nonnegative number") from exc
+
+        if not math.isfinite(distance) or distance < 0:
+            raise ValueError("Snap distance must be a finite nonnegative number")
+        return distance
 
     def snap_crashes_to_segments(
         self,
@@ -44,41 +59,66 @@ class CrashService:
         if snap_distance_meters is None:
             snap_distance_meters = settings.crash_snap_distance_meters
 
+        snap_distance_meters = self.validate_snap_distance(snap_distance_meters)
+
         logger.info(f"Snapping crashes to road segments (max distance: {snap_distance_meters}m)")
 
-        # Query for unassigned crashes (or all if force_resnap)
-        query = self.db.query(Crash).filter(Crash.muni_id == muni_id)
-
-        if not force_resnap:
-            query = query.filter(Crash.segment_id.is_(None))
-
-        crashes = query.all()
-
-        if not crashes:
-            logger.info("No crashes to snap")
-            return 0
-
-        snapped_count = 0
-
-        for crash in crashes:
-            # Find nearest segment using spatial query
-            nearest_segment = self.find_nearest_segment(
-                crash,
-                muni_id,
-                snap_distance_meters
-            )
-
-            if nearest_segment:
-                crash.segment_id = nearest_segment['segment_id']
-                crash.snap_distance = nearest_segment['distance']
-                snapped_count += 1
-
-                if snapped_count % 100 == 0:
-                    self.db.commit()
-                    logger.info(f"Snapped {snapped_count} crashes...")
-
+        result = self.db.execute(
+            text(
+                """
+                WITH candidates AS MATERIALIZED (
+                    SELECT
+                        crash.crash_id,
+                        nearest.segment_id,
+                        nearest.distance
+                    FROM crashes AS crash
+                    LEFT JOIN LATERAL (
+                        SELECT
+                            segment.segment_id,
+                            ST_Distance(
+                                crash.geom::geography,
+                                segment.geom::geography
+                            ) AS distance
+                        FROM road_segments AS segment
+                        WHERE segment.muni_id = :muni_id
+                          AND ST_DWithin(
+                              crash.geom::geography,
+                              segment.geom::geography,
+                              :snap_distance_meters
+                          )
+                        ORDER BY
+                            ST_Distance(
+                                crash.geom::geography,
+                                segment.geom::geography
+                            ),
+                            segment.segment_id
+                        LIMIT 1
+                    ) AS nearest ON TRUE
+                    WHERE crash.muni_id = :muni_id
+                      AND (:force_resnap OR crash.segment_id IS NULL)
+                ),
+                updated AS (
+                    UPDATE crashes AS crash
+                    SET
+                        segment_id = candidates.segment_id,
+                        snap_distance = candidates.distance
+                    FROM candidates
+                    WHERE crash.crash_id = candidates.crash_id
+                    RETURNING crash.segment_id
+                )
+                SELECT COUNT(segment_id) AS snapped_count
+                FROM updated
+                """
+            ),
+            {
+                "muni_id": muni_id,
+                "snap_distance_meters": snap_distance_meters,
+                "force_resnap": force_resnap,
+            },
+        ).one()
         self.db.commit()
-        logger.info(f"Snapped {snapped_count} of {len(crashes)} crashes")
+        snapped_count = int(result.snapped_count)
+        logger.info("Snapped %s crashes", snapped_count)
 
         return snapped_count
 
@@ -99,6 +139,8 @@ class CrashService:
         Returns:
             Dictionary with segment_id and distance, or None
         """
+        max_distance_meters = self.validate_snap_distance(max_distance_meters)
+
         # Use PostGIS spatial query. Reference the crash geometry from the
         # crashes table by id so we don't have to bind a WKBElement (which
         # SQLAlchemy can't pass as a plain parameter).
@@ -114,7 +156,17 @@ class CrashService:
                 ) as distance
             FROM road_segments rs
             WHERE rs.muni_id = :muni_id
-            ORDER BY rs.geom <-> (SELECT geom FROM crash_point)
+              AND ST_DWithin(
+                  (SELECT geom FROM crash_point)::geography,
+                  rs.geom::geography,
+                  :max_distance_meters
+              )
+            ORDER BY
+                ST_Distance(
+                    (SELECT geom FROM crash_point)::geography,
+                    rs.geom::geography
+                ),
+                rs.segment_id
             LIMIT 1
         """)
 
@@ -122,11 +174,12 @@ class CrashService:
             query,
             {
                 'crash_id': crash.crash_id,
-                'muni_id': muni_id
+                'muni_id': muni_id,
+                'max_distance_meters': max_distance_meters,
             }
         ).fetchone()
 
-        if result and result.distance <= max_distance_meters:
+        if result:
             return {
                 'segment_id': result.segment_id,
                 'distance': result.distance
@@ -163,34 +216,49 @@ class CrashService:
         Returns:
             Dictionary with crash statistics
         """
-        # Query crashes for this segment in date range
-        crashes = self.db.query(Crash).filter(
-            and_(
-                Crash.segment_id == segment_id,
-                Crash.crash_date >= datetime(start_year, 1, 1),
-                Crash.crash_date < datetime(end_year + 1, 1, 1)
-            )
-        ).all()
-
-        # Calculate statistics
-        stats = {
-            'total_crashes': len(crashes),
-            'fatal_crashes': sum(1 for c in crashes if c.severity == 'fatal'),
-            'serious_injury_crashes': sum(1 for c in crashes if c.severity == 'serious_injury'),
-            'minor_injury_crashes': sum(1 for c in crashes if c.severity == 'minor_injury'),
-            'property_damage_crashes': sum(1 for c in crashes if c.severity == 'property_damage'),
-            'ped_crashes': sum(1 for c in crashes if c.ped_involved),
-            'bike_crashes': sum(1 for c in crashes if c.bike_involved),
-        }
-
-        # Calculate severity-weighted score
-        severity_score = sum(
-            self.get_crash_severity_weight(c.severity) for c in crashes
-        )
-
-        stats['severity_score'] = severity_score
-
-        return stats
+        row = self.db.execute(
+            text(
+                """
+                SELECT
+                    COUNT(*)::integer AS total_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'fatal')::integer
+                        AS fatal_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'serious_injury')::integer
+                        AS serious_injury_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'minor_injury')::integer
+                        AS minor_injury_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'injury_unknown')::integer
+                        AS injury_unknown_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'property_damage')::integer
+                        AS property_damage_crashes,
+                    COUNT(*) FILTER (WHERE ped_involved IS TRUE)::integer
+                        AS ped_crashes,
+                    COUNT(*) FILTER (WHERE bike_involved IS TRUE)::integer
+                        AS bike_crashes,
+                    COALESCE(SUM(CASE severity
+                        WHEN 'fatal' THEN :fatal_weight
+                        WHEN 'serious_injury' THEN :serious_weight
+                        WHEN 'minor_injury' THEN :minor_weight
+                        WHEN 'property_damage' THEN :property_weight
+                        ELSE 1
+                    END), 0)::integer AS severity_score
+                FROM crashes
+                WHERE segment_id = :segment_id
+                  AND crash_date >= :start_date
+                  AND crash_date < :end_date
+                """
+            ),
+            {
+                "segment_id": segment_id,
+                "start_date": datetime(start_year, 1, 1),
+                "end_date": datetime(end_year + 1, 1, 1),
+                "fatal_weight": self.severity_weights["fatal"],
+                "serious_weight": self.severity_weights["serious_injury"],
+                "minor_weight": self.severity_weights["minor_injury"],
+                "property_weight": self.severity_weights["property_damage"],
+            },
+        ).mappings().one()
+        return dict(row)
 
     def get_municipality_crash_summary(self, muni_id: int, start_year: int, end_year: int) -> Dict:
         """
@@ -204,26 +272,68 @@ class CrashService:
         Returns:
             Dictionary with summary statistics
         """
-        crashes = self.db.query(Crash).filter(
-            and_(
-                Crash.muni_id == muni_id,
-                Crash.crash_date >= datetime(start_year, 1, 1),
-                Crash.crash_date < datetime(end_year + 1, 1, 1)
-            )
-        ).all()
-
-        summary = {
-            'total_crashes': len(crashes),
-            'fatal_crashes': sum(1 for c in crashes if c.severity == 'fatal'),
-            'serious_injury_crashes': sum(1 for c in crashes if c.severity == 'serious_injury'),
-            'minor_injury_crashes': sum(1 for c in crashes if c.severity == 'minor_injury'),
-            'property_damage_crashes': sum(1 for c in crashes if c.severity == 'property_damage'),
-            'ped_crashes': sum(1 for c in crashes if c.ped_involved),
-            'bike_crashes': sum(1 for c in crashes if c.bike_involved),
-            'crashes_with_segments': sum(1 for c in crashes if c.segment_id is not None)
-        }
-
-        return summary
+        row = self.db.execute(
+            text(
+                """
+                SELECT
+                    COUNT(*)::integer AS total_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'fatal')::integer
+                        AS fatal_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'serious_injury')::integer
+                        AS serious_injury_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'minor_injury')::integer
+                        AS minor_injury_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'injury_unknown')::integer
+                        AS injury_unknown_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'property_damage')::integer
+                        AS property_damage_crashes,
+                    COUNT(*) FILTER (WHERE ped_involved IS TRUE)::integer
+                        AS ped_crashes,
+                    COUNT(*) FILTER (WHERE bike_involved IS TRUE)::integer
+                        AS bike_crashes,
+                    COUNT(*) FILTER (WHERE bike_involved IS NULL)::integer
+                        AS bike_involvement_unknown_crashes,
+                    (CASE
+                        WHEN COUNT(*) = COUNT(total_killed)
+                        THEN COALESCE(SUM(total_killed), 0)
+                        ELSE NULL
+                    END)::integer AS total_killed,
+                    (CASE
+                        WHEN COUNT(*) = COUNT(total_injured)
+                        THEN COALESCE(SUM(total_injured), 0)
+                        ELSE NULL
+                    END)::integer AS total_injured,
+                    (CASE
+                        WHEN COUNT(*) = COUNT(pedestrians_killed)
+                        THEN COALESCE(SUM(pedestrians_killed), 0)
+                        ELSE NULL
+                    END)::integer AS pedestrians_killed,
+                    (CASE
+                        WHEN COUNT(*) = COUNT(pedestrians_injured)
+                        THEN COALESCE(SUM(pedestrians_injured), 0)
+                        ELSE NULL
+                    END)::integer AS pedestrians_injured,
+                    (
+                        COUNT(*) = COUNT(total_killed)
+                        AND COUNT(*) = COUNT(total_injured)
+                        AND COUNT(*) = COUNT(pedestrians_killed)
+                        AND COUNT(*) = COUNT(pedestrians_injured)
+                    ) AS casualty_counts_complete,
+                    COUNT(*) FILTER (WHERE segment_id IS NOT NULL)::integer
+                        AS crashes_with_segments
+                FROM crashes
+                WHERE muni_id = :muni_id
+                  AND crash_date >= :start_date
+                  AND crash_date < :end_date
+                """
+            ),
+            {
+                "muni_id": muni_id,
+                "start_date": datetime(start_year, 1, 1),
+                "end_date": datetime(end_year + 1, 1, 1),
+            },
+        ).mappings().one()
+        return dict(row)
 
     def get_crashes_geojson(
         self,
@@ -248,7 +358,10 @@ class CrashService:
         Returns:
             GeoJSON FeatureCollection
         """
-        query = self.db.query(Crash).filter(Crash.muni_id == muni_id)
+        query = self.db.query(
+            Crash,
+            func.ST_AsGeoJSON(Crash.geom).label("geometry"),
+        ).filter(Crash.muni_id == muni_id)
 
         # Apply filters
         if start_year:
@@ -270,27 +383,27 @@ class CrashService:
 
         # Convert to GeoJSON
         features = []
-        for crash in crashes:
-            # Parse WKT geometry to get coordinates
-            geom_wkt = crash.geom
-            # Simplified parsing - in production use shapely or geoalchemy2
-            # Example: "SRID=4326;POINT(-74.123 40.456)"
-            coords_str = geom_wkt.split('POINT(')[1].rstrip(')')
-            lon, lat = map(float, coords_str.split())
-
+        for crash, geometry_json in crashes:
+            geometry = (
+                json.loads(geometry_json)
+                if isinstance(geometry_json, str)
+                else geometry_json
+            )
             feature = {
                 'type': 'Feature',
-                'geometry': {
-                    'type': 'Point',
-                    'coordinates': [lon, lat]
-                },
+                'geometry': geometry,
                 'properties': {
                     'crash_id': crash.crash_id,
                     'date': crash.crash_date.isoformat(),
                     'severity': crash.severity,
                     'ped_involved': crash.ped_involved,
                     'bike_involved': crash.bike_involved,
-                    'road_name': crash.road_name
+                    'total_killed': crash.total_killed,
+                    'total_injured': crash.total_injured,
+                    'pedestrians_killed': crash.pedestrians_killed,
+                    'pedestrians_injured': crash.pedestrians_injured,
+                    'road_name': crash.road_name,
+                    'geocode_quality': getattr(crash, 'geocode_quality', None)
                 }
             }
             features.append(feature)

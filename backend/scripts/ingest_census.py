@@ -6,16 +6,20 @@ Calculates Social Vulnerability Index (SVI) scores.
 """
 
 import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from pathlib import Path
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+PROJECT_DIR = BACKEND_DIR.parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
 import geopandas as gpd
 import pandas as pd
 import requests
 from sqlalchemy.orm import Session
-from backend.app.models.database import SessionLocal, init_db
-from backend.app.models.tables import CensusTract, Municipality
-from backend.app.config import settings
+from app.models.database import SessionLocal
+from app.models.tables import CensusTract, Municipality
+from app.config import settings
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -286,12 +290,9 @@ def main():
     """Main ingestion workflow."""
     logger.info("Starting census data ingestion...")
 
-    # Initialize database
-    init_db()
-
     # Download census boundaries
     gdf = download_census_boundaries(
-        output_path='data/raw/nj_census_tracts.geojson'
+        output_path=str(PROJECT_DIR / 'data' / 'raw' / 'nj_census_tracts.geojson')
     )
 
     # Fetch demographic data

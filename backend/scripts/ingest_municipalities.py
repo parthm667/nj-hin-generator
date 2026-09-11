@@ -1,186 +1,271 @@
 #!/usr/bin/env python3
-"""
-NJ Municipality Boundaries Ingestion
+"""Load official NJGIN municipal boundaries into PostGIS."""
 
-Downloads NJ municipal boundaries from the Socrata API
-and loads them into the PostgreSQL database.
+from __future__ import annotations
 
-Data Source: https://data.nj.gov/
-"""
-
-import os
-import sys
+import argparse
+from dataclasses import asdict, dataclass
+import json
 import logging
-import requests
 from pathlib import Path
-from typing import List, Dict
+import sys
+from typing import Any, Iterable, Mapping
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
+from sqlalchemy import text
 from sqlalchemy.orm import Session
-from app.models.database import SessionLocal
-from app.models.tables import Municipality
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
+from app.models.database import SessionLocal
+from scripts.arcgis_client import ArcGISClient, ArcGISResponseError
+
+
+LOGGER = logging.getLogger(__name__)
+LAYER_URL = (
+    "https://services2.arcgis.com/XVOqAjTOJ5P6ngMu/ArcGIS/rest/services/"
+    "NJ_Municipal_Boundaries_3424/FeatureServer/0"
+)
+EXPECTED_MUNICIPALITIES = 564
+OUT_FIELDS = ("OBJECTID", "MUN_CODE", "MUN_LABEL", "COUNTY", "MUN_TYPE", "NAME")
+
+
+@dataclass(frozen=True)
+class MunicipalityRecord:
+    muni_code: str
+    name: str
+    county: str
+    muni_type: str
+    geometry: dict[str, Any]
+
+    @property
+    def geometry_json(self) -> str:
+        return json.dumps(self.geometry, separators=(",", ":"))
+
+
+@dataclass
+class MunicipalityReport:
+    source_count: int = 0
+    fetched: int = 0
+    accepted: int = 0
+    rejected: int = 0
+    inserted: int = 0
+    updated: int = 0
+    rejection_details: list[str] | None = None
+
+    def __post_init__(self) -> None:
+        if self.rejection_details is None:
+            self.rejection_details = []
+
+
+def _multipolygon_geojson(geometry: Mapping[str, Any]) -> dict[str, Any]:
+    geometry_type = geometry.get("type")
+    coordinates = geometry.get("coordinates")
+    if geometry_type == "Polygon":
+        coordinates = [coordinates]
+    elif geometry_type != "MultiPolygon":
+        raise ValueError(f"expected Polygon or MultiPolygon, got {geometry_type!r}")
+    if not isinstance(coordinates, list) or not coordinates:
+        raise ValueError("boundary has no polygon coordinates")
+    return {"type": "MultiPolygon", "coordinates": coordinates}
+
+
+def normalize_municipality(feature: Mapping[str, Any]) -> MunicipalityRecord:
+    """Validate one NJGIN GeoJSON feature and normalize its database values."""
+    properties = feature.get("properties")
+    geometry_data = feature.get("geometry")
+    if not isinstance(properties, Mapping) or not isinstance(geometry_data, Mapping):
+        raise ValueError("feature lacks properties or geometry")
+
+    muni_code = str(properties.get("MUN_CODE") or "").strip()
+    name = str(properties.get("MUN_LABEL") or properties.get("NAME") or "").strip()
+    county = str(properties.get("COUNTY") or "").strip().title()
+    muni_type = str(properties.get("MUN_TYPE") or "").strip()
+    if not muni_code or not name or not county or not muni_type:
+        raise ValueError("feature lacks MUN_CODE, municipality name, COUNTY, or MUN_TYPE")
+
+    try:
+        geometry = _multipolygon_geojson(geometry_data)
+    except Exception as exc:
+        raise ValueError(f"invalid boundary geometry: {exc}") from exc
+    return MunicipalityRecord(muni_code, name, county, muni_type, geometry)
 
 
 class MunicipalityIngester:
-    """Ingests municipality boundaries from NJ Open Data Portal."""
+    """Fetch, validate, and idempotently upsert statewide boundaries."""
 
-    # Socrata API endpoint for NJ municipalities
-    BASE_URL = "https://data.nj.gov/resource/k9xb-zgh4.json"
+    def __init__(self, client: ArcGISClient | None = None) -> None:
+        self.client = client or ArcGISClient(LAYER_URL)
 
-    def __init__(self, api_token: str = None):
-        """Initialize the ingester."""
-        self.api_token = api_token
-        self.session = requests.Session()
-
-        if api_token:
-            self.session.headers.update({'X-App-Token': api_token})
-
-    def fetch_municipalities(self) -> List[Dict]:
-        """
-        Fetch all NJ municipalities from Socrata API.
-
-        Returns:
-            List of municipality records
-        """
-        params = {
-            '$limit': 1000,  # NJ has 565 municipalities
-            '$order': 'mun ASC',
-        }
-
-        logger.info("Fetching municipalities from NJ Open Data Portal...")
-
-        try:
-            response = self.session.get(self.BASE_URL, params=params)
-            response.raise_for_status()
-
-            data = response.json()
-            logger.info(f"Fetched {len(data)} municipalities")
-
-            return data
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error fetching municipality data: {e}")
-            raise
-
-    def load_to_db(self, municipalities: List[Dict], db: Session) -> int:
-        """
-        Load municipalities to database.
-
-        Args:
-            municipalities: List of municipality records
-            db: Database session
-
-        Returns:
-            Number of municipalities loaded
-        """
-        logger.info("Loading municipalities to database...")
-
-        loaded_count = 0
-
-        for muni_data in municipalities:
-            try:
-                # Extract fields
-                muni_code = muni_data.get('mun_code')
-                muni_name = muni_data.get('mun')
-                county_name = muni_data.get('county')
-
-                if not muni_code or not muni_name:
-                    continue
-
-                # Check if already exists
-                existing = db.query(Municipality).filter(
-                    Municipality.muni_code == muni_code
-                ).first()
-
-                if existing:
-                    continue
-
-                # Extract geometry if available
-                geom_wkt = None
-                if 'the_geom' in muni_data:
-                    geom_data = muni_data['the_geom']
-                    if geom_data and 'coordinates' in geom_data:
-                        # Convert to WKT format
-                        geom_wkt = self._geojson_to_wkt(geom_data)
-
-                # Create municipality record
-                municipality = Municipality(
-                    muni_code=muni_code,
-                    name=muni_name,
-                    county=county_name,
-                    geom=geom_wkt
-                )
-
-                db.add(municipality)
-                loaded_count += 1
-
-                if loaded_count % 100 == 0:
-                    db.commit()
-                    logger.info(f"Loaded {loaded_count} municipalities...")
-
-            except Exception as e:
-                logger.error(f"Error loading municipality {muni_data.get('mun')}: {e}")
-                continue
-
-        db.commit()
-        logger.info(f"Successfully loaded {loaded_count} municipalities")
-        return loaded_count
-
-    def _geojson_to_wkt(self, geojson: Dict) -> str:
-        """Convert GeoJSON geometry to WKT format."""
-        from shapely.geometry import shape
-
-        try:
-            geom = shape(geojson)
-            return f"SRID=4326;{geom.wkt}"
-        except Exception as e:
-            logger.warning(f"Error converting GeoJSON to WKT: {e}")
-            return None
-
-
-def main():
-    """Main ingestion workflow."""
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Ingest NJ municipalities')
-    parser.add_argument('--api-token', type=str, default=None,
-                        help='Socrata API token (optional)')
-
-    args = parser.parse_args()
-
-    # Get API token from environment if not provided
-    api_token = args.api_token or os.getenv('SOCRATA_API_TOKEN')
-
-    if not api_token:
-        logger.warning(
-            "No API token provided. Get token at: https://data.nj.gov/profile/app_tokens"
+    def fetch_municipalities(self) -> tuple[list[MunicipalityRecord], MunicipalityReport]:
+        self.client.metadata(
+            geometry_type="esriGeometryPolygon",
+            required_fields=OUT_FIELDS,
         )
+        source_count = self.client.count()
+        if source_count != EXPECTED_MUNICIPALITIES:
+            LOGGER.warning(
+                "Municipality source count changed from observed baseline %s to %s; "
+                "continuing with dynamic pagination validation",
+                EXPECTED_MUNICIPALITIES,
+                source_count,
+            )
 
-    logger.info("Starting municipality data ingestion...")
+        report = MunicipalityReport(source_count=source_count)
+        records: list[MunicipalityRecord] = []
+        seen_codes: set[str] = set()
+        for index, feature in enumerate(
+            self.client.iter_features(out_fields=OUT_FIELDS, output_format="geojson")
+        ):
+            report.fetched += 1
+            try:
+                record = normalize_municipality(feature)
+                if record.muni_code in seen_codes:
+                    raise ValueError(f"duplicate MUN_CODE {record.muni_code}")
+                seen_codes.add(record.muni_code)
+                records.append(record)
+                report.accepted += 1
+            except ValueError as exc:
+                report.rejected += 1
+                report.rejection_details.append(f"feature {index}: {exc}")
 
-    # Initialize ingester
-    ingester = MunicipalityIngester(api_token=api_token)
+        if report.fetched != source_count:
+            raise ArcGISResponseError(
+                f"municipality pagination mismatch: source reported {source_count}, fetched {report.fetched}"
+            )
+        if report.rejected:
+            raise ArcGISResponseError(
+                f"rejected {report.rejected} municipality features: "
+                + "; ".join(report.rejection_details[:5])
+            )
+        return records, report
 
-    # Fetch municipalities
-    municipalities = ingester.fetch_municipalities()
+    @staticmethod
+    def load_to_db(
+        municipalities: Iterable[MunicipalityRecord], db: Session, report: MunicipalityReport
+    ) -> MunicipalityReport:
+        records = list(municipalities)
+        existing = set(
+            db.execute(
+                text("SELECT muni_code FROM municipalities WHERE muni_code = ANY(:codes)"),
+                {"codes": [record.muni_code for record in records]},
+            ).scalars()
+        )
+        db.execute(
+            text(
+                """
+                CREATE TEMP TABLE IF NOT EXISTS staged_municipalities (
+                    muni_code varchar(20) PRIMARY KEY,
+                    name varchar(100) NOT NULL,
+                    county varchar(50) NOT NULL,
+                    geometry_json text NOT NULL
+                ) ON COMMIT DROP
+                """
+            )
+        )
+        db.execute(text("TRUNCATE staged_municipalities"))
+        stage_statement = text(
+            """
+            INSERT INTO staged_municipalities (muni_code, name, county, geometry_json)
+            VALUES (:muni_code, :name, :county, :geometry_json)
+            """
+        )
+        values = [
+            {
+                "name": record.name,
+                "county": record.county,
+                "muni_code": record.muni_code,
+                "geometry_json": record.geometry_json,
+            }
+            for record in records
+        ]
+        if values:
+            db.execute(stage_statement, values)
 
-    if not municipalities:
-        logger.error("No municipalities found")
-        return
+        invalid = db.execute(
+            text(
+                """
+                WITH normalized AS (
+                    SELECT muni_code,
+                           ST_Multi(ST_CollectionExtract(ST_MakeValid(
+                               ST_SetSRID(ST_GeomFromGeoJSON(geometry_json), 4326)
+                           ), 3)) AS geom
+                    FROM staged_municipalities
+                )
+                SELECT muni_code FROM normalized
+                WHERE ST_IsEmpty(geom) OR NOT ST_IsValid(geom)
+                """
+            )
+        ).scalars().all()
+        if invalid:
+            raise ValueError(f"invalid municipality geometries after repair: {invalid[:5]}")
 
-    # Load to database
+        statement = text(
+            """
+            INSERT INTO municipalities (name, county, muni_code, geom)
+            SELECT name, county, muni_code,
+                   ST_Multi(ST_CollectionExtract(ST_MakeValid(
+                       ST_SetSRID(ST_GeomFromGeoJSON(geometry_json), 4326)
+                   ), 3))
+            FROM staged_municipalities
+            ON CONFLICT (muni_code) DO UPDATE SET
+                name = EXCLUDED.name,
+                county = EXCLUDED.county,
+                geom = EXCLUDED.geom
+            """
+        )
+        if values:
+            db.execute(statement)
+        report.updated = len(existing)
+        report.inserted = len(records) - report.updated
+        return report
+
+
+def _write_report(path: Path | None, report: MunicipalityReport) -> None:
+    payload = json.dumps(asdict(report), indent=2, sort_keys=True)
+    LOGGER.info("Municipality ingestion report:\n%s", payload)
+    if path:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(payload + "\n", encoding="utf-8")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Ingest official NJGIN municipal boundaries")
+    parser.add_argument("--cache-dir", type=Path)
+    parser.add_argument("--offline", action="store_true")
+    parser.add_argument("--refresh-cache", action="store_true")
+    parser.add_argument("--report", type=Path)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    if args.offline and not args.cache_dir:
+        LOGGER.error("--offline requires --cache-dir")
+        return 2
+    client = ArcGISClient(
+        LAYER_URL,
+        cache_dir=args.cache_dir,
+        offline=args.offline,
+        refresh_cache=args.refresh_cache,
+    )
+    ingester = MunicipalityIngester(client)
     db = SessionLocal()
     try:
-        loaded = ingester.load_to_db(municipalities, db)
-        logger.info(f"Successfully loaded {loaded} municipalities")
+        records, report = ingester.fetch_municipalities()
+        with db.begin():
+            ingester.load_to_db(records, db, report)
+        _write_report(args.report, report)
+        return 0
+    except Exception:
+        db.rollback()
+        LOGGER.exception("Municipality ingestion failed")
+        return 1
     finally:
         db.close()
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    raise SystemExit(main())

@@ -1,13 +1,13 @@
 # Setup Guide
 
-Complete setup instructions for the NJ High Injury Network Generator.
+Local setup instructions for the NJ High Injury Network Generator. For Vercel and container hosting, follow [DEPLOY.md](DEPLOY.md).
 
 ## Prerequisites
 
 ### Required Software
 
-- **Python 3.9+**: Backend runtime
-- **Node.js 16+**: Frontend development
+- **Python 3.11 or 3.12**: Backend runtime
+- **Node.js 22**: Frontend development
 - **PostgreSQL 15+**: Database with PostGIS extension
 - **Git**: Version control
 
@@ -66,11 +66,8 @@ SELECT PostGIS_version();
 Create `backend/.env` file:
 ```
 DATABASE_URL=postgresql://hin_user:secure_password_here@localhost:5432/nj_hin_db
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_NAME=nj_hin_db
-DATABASE_USER=hin_user
-DATABASE_PASSWORD=secure_password_here
+DEBUG=false
+CORS_ORIGINS=http://localhost:3000
 ```
 
 ## Backend Setup
@@ -100,6 +97,7 @@ venv\Scripts\activate
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
+# For offline ingestion, also install requirements-scripts.txt.
 ```
 
 ### 4. Configure Environment
@@ -113,7 +111,7 @@ cp .env.example .env
 
 ```bash
 # Run from backend directory with venv activated
-python -c "from app.models.database import init_db, init_postgis; init_postgis(); init_db()"
+python scripts/init_schema.py
 ```
 
 ### 6. Verify Setup
@@ -141,7 +139,7 @@ Should return:
 
 ```bash
 cd frontend
-npm install
+npm ci
 ```
 
 ### 2. Configure Environment
@@ -174,70 +172,11 @@ Creates optimized build in `build/` directory.
 
 ## Data Ingestion
 
-### 1. Municipal Boundaries
+Use [DATA_PIPELINE.md](DATA_PIPELINE.md) for the official NJGIN boundaries, measured NJDOT road network, and county/year NJDOT Accidents archives. It explains the important difference between reported coordinates and route/milepost-derived locations, as well as missing-data limitations.
 
-Downloads automatically from NJ GIS Open Data:
+Load boundaries → roads → crashes into a clean real-data database with the current `ingest_all_real_data.py` orchestrator. The official pipeline does not require GDAL. Legacy Socrata and OSM instructions are superseded; the old generic CSV and census scripts are not part of this verified workflow.
 
-```bash
-cd backend
-source venv/bin/activate
-python scripts/ingest_municipalities.py
-```
-
-### 2. Road Network
-
-Requires downloading NJ OSM extract from Geofabrik:
-
-```bash
-# Download NJ extract
-wget https://download.geofabrik.de/north-america/us/new-jersey-latest.osm.pbf
-
-# Extract roads using ogr2ogr
-ogr2ogr -f GeoJSON data/raw/nj_roads.geojson \
-  new-jersey-latest.osm.pbf lines \
-  -where "highway IS NOT NULL"
-
-# Ingest into database
-python scripts/ingest_roads.py
-```
-
-### 3. Crash Data
-
-Requires access to NJ crash data. Options:
-
-#### Option A: NJ Open Data Portal
-```bash
-# Set NJ crash data URL in .env
-NJ_CRASH_DATA_URL=https://data.nj.gov/resource/YOUR_DATASET_ID.json
-
-# Run ingestion
-python scripts/ingest_crashes.py
-```
-
-#### Option B: Manual CSV Files
-Place crash CSV files in `data/raw/` directory:
-- `nj_crashes_2017.csv`
-- `nj_crashes_2018.csv`
-- etc.
-
-Then run:
-```bash
-python scripts/ingest_crashes.py
-```
-
-### 4. Census Data
-
-Requires Census API key (free from census.gov):
-
-```bash
-# Add to .env
-CENSUS_API_KEY=your_census_api_key_here
-
-# Run ingestion
-python scripts/ingest_census.py
-```
-
-Get API key: https://api.census.gov/data/key_signup.html
+For synthetic demonstrations only, use the explicit sample-data commands in [DEPLOY.md](DEPLOY.md#load-data-explicitly). Never mix sample fixtures with real crash data. Census/equity ingestion is optional and remains a separate job; an absent overlay does not indicate low vulnerability.
 
 ## Verification
 
@@ -301,5 +240,5 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:3001
 
 - [User Guide](USER_GUIDE.md) - How to use the application
 - [Data Sources](DATA_SOURCES.md) - Where to get data
-- [Deployment](DEPLOYMENT.md) - Production deployment
+- [Deployment](DEPLOY.md) - Production deployment
 - [API Documentation](http://localhost:8000/docs) - Interactive API docs

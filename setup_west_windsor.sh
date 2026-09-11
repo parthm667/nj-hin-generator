@@ -1,109 +1,64 @@
-#!/bin/bash
-# West Windsor Township - Complete Setup Script
+#!/usr/bin/env bash
+# Legacy West Windsor real-data ingestion helper.
+# Phase 1 guarantees import compatibility; source/API redesign remains Phase 2.
 
-set -e  # Exit on error
+set -euo pipefail
 
-echo "============================================================"
-echo "West Windsor Township - Real Data Ingestion"
-echo "============================================================"
-echo ""
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$PROJECT_DIR"
 
-# Colors for output
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+VENV_DIR="${VENV_DIR:-backend/venv}"
+DATABASE_URL="${DATABASE_URL:-postgresql://hin_user:hin_password@localhost:5432/nj_hin_db}"
+export DATABASE_URL
 
-# Check if we're in the right directory
-if [ ! -f "docker-compose.yml" ]; then
-    echo -e "${RED}Error: Must run from project root${NC}"
-    exit 1
-fi
-
-# Step 1: Database Setup
-echo -e "${YELLOW}[STEP 1/4] Setting up PostgreSQL database...${NC}"
-echo ""
-
-if command -v docker &> /dev/null; then
-    echo "Using Docker for PostgreSQL..."
-    docker-compose up -d postgres
-    echo "Waiting for PostgreSQL to start..."
-    sleep 10
+echo "Installing optional ingestion dependencies into $VENV_DIR..."
+if [[ -x "$VENV_DIR/bin/python" ]]; then
+  VENV_PYTHON="$VENV_DIR/bin/python"
+elif [[ -x "$VENV_DIR/Scripts/python.exe" ]]; then
+  VENV_PYTHON="$VENV_DIR/Scripts/python.exe"
 else
-    echo -e "${YELLOW}Docker not found. Please start PostgreSQL manually:${NC}"
-    echo "  sudo systemctl start postgresql"
-    echo "  sudo -u postgres psql -c \"CREATE DATABASE hin_db;\""
-    echo "  sudo -u postgres psql -c \"CREATE USER hin_user WITH PASSWORD 'hin_password';\""
-    echo "  sudo -u postgres psql -c \"GRANT ALL PRIVILEGES ON DATABASE hin_db TO hin_user;\""
-    echo ""
-    read -p "Press Enter after PostgreSQL is running..."
+  "$PYTHON_BIN" -m venv "$VENV_DIR"
+  if [[ -x "$VENV_DIR/bin/python" ]]; then
+    VENV_PYTHON="$VENV_DIR/bin/python"
+  else
+    VENV_PYTHON="$VENV_DIR/Scripts/python.exe"
+  fi
+fi
+"$VENV_PYTHON" -m pip install -r backend/requirements-scripts.txt
+
+echo "Starting the Compose PostGIS service named 'db'..."
+docker compose up -d db
+db_ready=false
+for _ in {1..30}; do
+  if docker compose exec -T db pg_isready -U hin_user -d nj_hin_db >/dev/null 2>&1; then
+    db_ready=true
+    break
+  fi
+  sleep 2
+done
+if [[ "$db_ready" != true ]]; then
+  echo "PostGIS service 'db' did not become ready within 60 seconds." >&2
+  exit 1
 fi
 
-# Step 2: Initialize Database Schema
-echo ""
-echo -e "${YELLOW}[STEP 2/4] Initializing database schema...${NC}"
-echo ""
+"$VENV_PYTHON" backend/scripts/init_schema.py
 
-cd backend
-python3 -c "from app.models.database import init_db; init_db()"
-echo -e "${GREEN}✓ Database schema created${NC}"
-
-# Step 3: Check for API Token
-echo ""
-echo -e "${YELLOW}[STEP 3/4] Checking API token...${NC}"
-echo ""
-
-if [ -z "$SOCRATA_API_TOKEN" ]; then
-    echo -e "${YELLOW}Warning: No SOCRATA_API_TOKEN found${NC}"
-    echo "Rate limits will apply (1000 requests/hour)"
-    echo ""
-    echo "To get a free token:"
-    echo "  1. Visit: https://data.nj.gov/profile/app_tokens"
-    echo "  2. Sign up and create a token"
-    echo "  3. Export: export SOCRATA_API_TOKEN='your_token'"
-    echo ""
-    read -p "Continue anyway? (y/n) " -n 1 -r
-    echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
-else
-    echo -e "${GREEN}✓ API token configured${NC}"
+if [[ -z "${SOCRATA_API_TOKEN:-}" ]]; then
+  echo "SOCRATA_API_TOKEN is not set; unauthenticated source rate limits apply." >&2
 fi
 
-# Step 4: Ingest Real Data
-echo ""
-echo -e "${YELLOW}[STEP 4/4] Ingesting West Windsor data...${NC}"
-echo "This will take approximately 25-35 minutes"
-echo ""
-
-cd scripts
-
-python3 ingest_all_real_data.py \
+echo "Running the legacy real-data pipeline. Phase 1 does not guarantee source compatibility."
+"$VENV_PYTHON" backend/scripts/ingest_all_real_data.py \
   --municipality "West Windsor" \
   --county "Mercer" \
   --start-year 2017 \
   --end-year 2021
 
-# Success!
-echo ""
-echo "============================================================"
-echo -e "${GREEN}✓ WEST WINDSOR SETUP COMPLETE!${NC}"
-echo "============================================================"
-echo ""
-echo "Next steps:"
-echo "  1. Start backend:"
-echo "     cd backend"
-echo "     uvicorn app.main:app --reload"
-echo ""
-echo "  2. In another terminal, start frontend:"
-echo "     cd frontend"
-echo "     npm install  # First time only"
-echo "     npm start"
-echo ""
-echo "  3. Access application:"
-echo "     Frontend: http://localhost:3000"
-echo "     API Docs: http://localhost:8000/docs"
-echo ""
-echo "  4. Create analysis for West Windsor via UI"
-echo ""
+real_crash_count="$(docker compose exec -T db psql -U hin_user -d nj_hin_db -Atc "SELECT COUNT(*) FROM crashes WHERE external_id NOT LIKE 'SAMPLE-%' AND crash_date BETWEEN DATE '2017-01-01' AND DATE '2021-12-31';")"
+if (( real_crash_count == 0 )); then
+  echo "Legacy pipeline completed without loading any real crash rows." >&2
+  exit 1
+fi
+
+echo "Legacy pipeline database check found $real_crash_count real crash rows."

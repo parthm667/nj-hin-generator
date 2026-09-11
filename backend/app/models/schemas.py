@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 from datetime import date, datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 from enum import Enum
 
 
@@ -9,6 +9,7 @@ class SeverityLevel(str, Enum):
     FATAL = "fatal"
     SERIOUS_INJURY = "serious_injury"
     MINOR_INJURY = "minor_injury"
+    INJURY_UNKNOWN = "injury_unknown"
     PROPERTY_DAMAGE = "property_damage"
 
 
@@ -69,6 +70,14 @@ class MunicipalityDetail(MunicipalityResponse):
     latest_analysis: Optional[datetime] = None
 
 
+class MunicipalityCoverageResponse(BaseModel):
+    """Years containing positive counts of loaded crash records."""
+    muni_id: int
+    available_years: List[int]
+    crash_counts_by_year: Dict[str, int]
+    total_crashes: int
+
+
 # Crash Schemas
 
 class CrashBase(BaseModel):
@@ -76,7 +85,7 @@ class CrashBase(BaseModel):
     crash_date: date
     severity: SeverityLevel
     ped_involved: bool = False
-    bike_involved: bool = False
+    bike_involved: Optional[bool] = None
     road_name: Optional[str] = None
 
 
@@ -149,6 +158,12 @@ class AnalysisDetail(AnalysisResponse):
     hin_miles: Optional[float] = 0
     hin_segment_count: Optional[int] = 0
     municipality_name: Optional[str] = None
+    data_status: Literal["ready", "no_data", "missing_years", "stale"] = "ready"
+    data_message: Optional[str] = None
+    available_years: List[int] = Field(default_factory=list)
+    missing_years: List[int] = Field(default_factory=list)
+    data_quality: Dict[str, Any] = Field(default_factory=dict)
+    input_version: Optional[Dict[str, Any]] = None
 
 
 class AnalysisSummary(BaseModel):
@@ -157,12 +172,19 @@ class AnalysisSummary(BaseModel):
     fatal_crashes: int
     serious_injury_crashes: int
     minor_injury_crashes: int
+    injury_unknown_crashes: int = 0
+    bike_involvement_unknown_crashes: int = 0
+    total_killed: Optional[int] = None
+    total_injured: Optional[int] = None
+    pedestrians_killed: Optional[int] = None
+    pedestrians_injured: Optional[int] = None
+    casualty_counts_complete: bool = False
     property_damage_crashes: int
     ped_crashes: int
     bike_crashes: int
     hin_miles: float
     hin_corridors: int
-    vulnerable_tract_percentage: float
+    vulnerable_tract_percentage: Optional[float]
 
 
 # HIN Segment Schemas

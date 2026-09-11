@@ -6,16 +6,20 @@ Source: https://www.state.nj.us/transportation/refdata/accident/
 """
 
 import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from pathlib import Path
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+PROJECT_DIR = BACKEND_DIR.parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
 import pandas as pd
 import requests
 from datetime import datetime
 from sqlalchemy.orm import Session
-from backend.app.models.database import SessionLocal, init_db
-from backend.app.models.tables import Crash, Municipality
-from backend.app.config import settings
+from app.models.database import SessionLocal
+from app.models.tables import Crash, Municipality
+from app.config import settings
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -315,9 +319,6 @@ def main():
     """Main ingestion workflow."""
     logger.info("Starting crash data ingestion...")
 
-    # Initialize database
-    init_db()
-
     # Download or load crash data
     # For multiple years:
     years = range(2017, 2023)  # Last 5 years
@@ -325,16 +326,16 @@ def main():
     db = SessionLocal()
     try:
         for year in years:
-            file_path = f'data/raw/nj_crashes_{year}.csv'
+            file_path = PROJECT_DIR / 'data' / 'raw' / f'nj_crashes_{year}.csv'
 
             # Try to load from file, or download if not exists
-            if os.path.exists(file_path):
-                df = load_crash_data_from_csv(file_path)
+            if file_path.exists():
+                df = load_crash_data_from_csv(str(file_path))
             else:
                 logger.info(f"File not found: {file_path}")
                 logger.info("Attempting to download...")
                 try:
-                    df = download_crash_data(year, file_path)
+                    df = download_crash_data(year, str(file_path))
                 except Exception as e:
                     logger.error(f"Could not download data for {year}: {e}")
                     continue

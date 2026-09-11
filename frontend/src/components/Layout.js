@@ -1,15 +1,17 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MapPin, Menu, X } from 'lucide-react';
+import { API_DOCS_URL } from '../services/api';
 
 function Layout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const location = useLocation();
+  const isAnalysisRoute = location.pathname.startsWith('/analysis/');
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className={`${isAnalysisRoute ? 'h-dvh overflow-hidden' : 'min-h-screen'} flex flex-col bg-gray-50`}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="shrink-0 bg-white border-b border-gray-200">
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -35,7 +37,7 @@ function Layout({ children }) {
                 Home
               </Link>
               <a
-                href="http://localhost:8000/docs"
+                href={API_DOCS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
@@ -74,7 +76,7 @@ function Layout({ children }) {
                 Home
               </Link>
               <a
-                href="http://localhost:8000/docs"
+                href={API_DOCS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-sm font-medium text-gray-600"
@@ -87,7 +89,7 @@ function Layout({ children }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className={isAnalysisRoute ? 'flex flex-1 min-h-0 min-w-0 overflow-hidden' : 'flex-1'}>
         {children}
       </main>
     </div>

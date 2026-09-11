@@ -1,0 +1,3 @@
+# Official NJGIN/NJDOT pipeline: PostGIS does the spatial processing.
+-r requirements.txt
+requests==2.34.2
