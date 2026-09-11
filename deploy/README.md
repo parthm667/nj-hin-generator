@@ -20,7 +20,7 @@ so the browser only ever talks to `mhaske.com` and CORS is moot.
 3. Point the `hin-api` A record at the public IP. Caddy fetches a certificate
    on the first request.
 4. First boot takes ~10 minutes (aarch64 wheel builds). Watch with
-   `tail -f /var/log/nj-hin-firstboot.log`.
+   `tail -f /var/log/nj-hin/build.log` or open https://hin-api.mhaske.com/_boot/ in a browser`.
 
 ## Operating
 

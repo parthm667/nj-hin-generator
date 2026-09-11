@@ -52,10 +52,10 @@ services:
       - "8000"
 
   caddy:
+    # Deliberately no depends_on: Caddy comes up first so /_boot/ can serve the
+    # first-boot build log while the backend image is still building.
     image: caddy:2-alpine
     restart: unless-stopped
-    depends_on:
-      - backend
     ports:
       - "80:80"
       - "443:443"
@@ -63,6 +63,7 @@ services:
       API_DOMAIN: ${API_DOMAIN}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - /var/log/nj-hin:/srv/logs:ro
       - caddy_data:/data
       - caddy_config:/config
 

@@ -3,11 +3,19 @@
 {$API_DOMAIN} {
 	encode zstd gzip
 
+	# First-boot / rebuild logs, readable without SSH (plain text, no secrets).
+	handle_path /_boot/* {
+		root * /srv/logs
+		file_server browse
+	}
+
 	# Long-running exports (PDF) can take a while; don't cut them off.
-	reverse_proxy backend:8000 {
-		transport http {
-			read_timeout 300s
-			write_timeout 300s
+	handle {
+		reverse_proxy backend:8000 {
+			transport http {
+				read_timeout 300s
+				write_timeout 300s
+			}
 		}
 	}
 

@@ -64,8 +64,13 @@ runcmd:
       chown ubuntu:ubuntu /opt/nj-hin/deploy/.env
     fi
 
-  # Build and start. First build compiles a few wheels on aarch64; allow ~10 min.
-  - cd /opt/nj-hin && docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env up -d --build 2>&1 | tee /var/log/nj-hin-firstboot.log
-  - echo "nj-hin bootstrap finished $(date -Is)" >> /var/log/nj-hin-firstboot.log
+  # Bring Caddy up first so the build log is readable at https://API_DOMAIN/_boot/
+  # while the backend image builds; then build + start everything.
+  - mkdir -p /var/log/nj-hin
+  - cd /opt/nj-hin && docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env up -d caddy 2>&1 | tee /var/log/nj-hin/caddy.log
+  - cd /opt/nj-hin && docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env up -d --build 2>&1 | tee /var/log/nj-hin/build.log
+  - docker ps -a > /var/log/nj-hin/ps.txt 2>&1
+  - cp /var/log/cloud-init-output.log /var/log/nj-hin/cloud-init-output.log
+  - echo "nj-hin bootstrap finished $(date -Is)" | tee -a /var/log/nj-hin/build.log
 
-final_message: "nj-hin VM ready after $UPTIME seconds. See /var/log/nj-hin-firstboot.log"
+final_message: "nj-hin VM ready after $UPTIME seconds. See /var/log/nj-hin/build.log"
