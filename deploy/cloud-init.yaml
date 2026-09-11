@@ -32,8 +32,27 @@ write_files:
         psql)    $COMPOSE exec db psql -U "$(grep ^POSTGRES_USER deploy/.env | cut -d= -f2)" "$(grep ^POSTGRES_DB deploy/.env | cut -d= -f2)" ;;
         ingest)  shift; $COMPOSE exec backend bash deploy/ingest-mercer.sh "$@" ;;
         run)     shift; $COMPOSE exec backend "$@" ;;
-        *) echo "usage: hin {up|update|logs [svc]|ps|shell|psql|ingest|run <cmd>}"; exit 1 ;;
+        sync)    bash deploy/autoupdate.sh ;;
+        *) echo "usage: hin {up|update|sync|logs [svc]|ps|shell|psql|ingest|run <cmd>}"; exit 1 ;;
       esac
+
+  - path: /etc/systemd/system/hin-autoupdate.service
+    content: |
+      [Unit]
+      Description=nj-hin: pull main, rebuild if changed, run one-shot jobs
+      After=docker.service
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/bash /opt/nj-hin/deploy/autoupdate.sh
+  - path: /etc/systemd/system/hin-autoupdate.timer
+    content: |
+      [Unit]
+      Description=nj-hin auto-update every 3 minutes
+      [Timer]
+      OnBootSec=2min
+      OnUnitActiveSec=3min
+      [Install]
+      WantedBy=timers.target
 
 runcmd:
   # Oracle's Ubuntu image ships an iptables INPUT chain that rejects everything
@@ -70,6 +89,9 @@ runcmd:
   - cd /opt/nj-hin && docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env up -d caddy 2>&1 | tee /var/log/nj-hin/caddy.log
   - cd /opt/nj-hin && docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env up -d --build 2>&1 | tee /var/log/nj-hin/build.log
   - docker ps -a > /var/log/nj-hin/ps.txt 2>&1
+  # From here on, a push to main redeploys within ~3 minutes (deploy/autoupdate.sh).
+  - systemctl daemon-reload
+  - systemctl enable --now hin-autoupdate.timer
   - cp /var/log/cloud-init-output.log /var/log/nj-hin/cloud-init-output.log
   - echo "nj-hin bootstrap finished $(date -Is)" | tee -a /var/log/nj-hin/build.log
 

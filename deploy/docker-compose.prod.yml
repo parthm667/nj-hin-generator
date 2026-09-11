@@ -9,7 +9,10 @@ name: nj-hin
 
 services:
   db:
-    image: postgis/postgis:16-3.4
+    # imresamu/postgis is a multi-arch build (amd64 + arm64) of the official
+    # docker-postgis image; postgis/postgis itself is amd64-only and will not
+    # start on the Ampere A1 VM.
+    image: imresamu/postgis:16-3.4
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
