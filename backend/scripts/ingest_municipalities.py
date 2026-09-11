@@ -28,45 +28,67 @@ logger = logging.getLogger(__name__)
 
 
 class MunicipalityIngester:
-    """Ingests municipality boundaries from NJ Open Data Portal."""
+    """Ingests municipality boundaries from NJGIN (NJ Office of GIS)."""
 
-    # Socrata API endpoint for NJ municipalities
-    BASE_URL = "https://data.nj.gov/resource/k9xb-zgh4.json"
+    # NJGIN "Municipal Boundaries of NJ" feature service. Attributes include
+    # MUN (e.g. "WEST WINDSOR TWP" - the same naming NJDOT crash records use),
+    # MUN_CODE (4-digit DCA code) and COUNTY. Geometry is requested in WGS84.
+    BASE_URL = ("https://services2.arcgis.com/XVOqAjTOJ5P6ngMu/arcgis/rest/services/"
+                "NJ_Municipal_Boundaries_3424/FeatureServer/0/query")
+    PAGE_SIZE = 100
 
     def __init__(self, api_token: str = None):
-        """Initialize the ingester."""
+        """Initialize the ingester (api_token kept for CLI compatibility; unused)."""
         self.api_token = api_token
         self.session = requests.Session()
 
-        if api_token:
-            self.session.headers.update({'X-App-Token': api_token})
-
     def fetch_municipalities(self) -> List[Dict]:
         """
-        Fetch all NJ municipalities from Socrata API.
+        Fetch all NJ municipalities with boundaries from the NJGIN feature service.
 
         Returns:
-            List of municipality records
+            List of flat records: {mun, mun_code, county, the_geom}
         """
-        params = {
-            '$limit': 1000,  # NJ has 565 municipalities
-            '$order': 'mun ASC',
-        }
+        logger.info("Fetching municipalities from NJGIN feature service...")
+        records: List[Dict] = []
+        offset = 0
 
-        logger.info("Fetching municipalities from NJ Open Data Portal...")
+        while True:
+            params = {
+                'where': '1=1',
+                'outFields': 'MUN,COUNTY,MUN_CODE,MUN_LABEL',
+                'outSR': 4326,
+                'f': 'geojson',
+                'resultOffset': offset,
+                'resultRecordCount': self.PAGE_SIZE,
+                'orderByFields': 'MUN_CODE',
+            }
+            try:
+                response = self.session.get(self.BASE_URL, params=params, timeout=120)
+                response.raise_for_status()
+                data = response.json()
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Error fetching municipality data: {e}")
+                raise
 
-        try:
-            response = self.session.get(self.BASE_URL, params=params)
-            response.raise_for_status()
+            features = data.get('features', [])
+            for feat in features:
+                props = feat.get('properties') or {}
+                records.append({
+                    'mun': props.get('MUN'),
+                    'mun_label': props.get('MUN_LABEL'),
+                    'mun_code': props.get('MUN_CODE'),
+                    'county': props.get('COUNTY'),
+                    'the_geom': feat.get('geometry'),
+                })
 
-            data = response.json()
-            logger.info(f"Fetched {len(data)} municipalities")
+            logger.info(f"  fetched {len(records)} so far")
+            if len(features) < self.PAGE_SIZE:
+                break
+            offset += self.PAGE_SIZE
 
-            return data
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error fetching municipality data: {e}")
-            raise
+        logger.info(f"Fetched {len(records)} municipalities")
+        return records
 
     def load_to_db(self, municipalities: List[Dict], db: Session) -> int:
         """
@@ -91,6 +113,9 @@ class MunicipalityIngester:
                 county_name = muni_data.get('county')
 
                 if not muni_code or not muni_name:
+                    continue
+                if not muni_data.get('the_geom'):
+                    logger.warning(f"Skipping {muni_name}: no boundary geometry")
                     continue
 
                 # Check if already exists
@@ -136,8 +161,12 @@ class MunicipalityIngester:
         """Convert GeoJSON geometry to WKT format."""
         from shapely.geometry import shape
 
+        from shapely.geometry import MultiPolygon, Polygon
+
         try:
             geom = shape(geojson)
+            if isinstance(geom, Polygon):
+                geom = MultiPolygon([geom])
             return f"SRID=4326;{geom.wkt}"
         except Exception as e:
             logger.warning(f"Error converting GeoJSON to WKT: {e}")
