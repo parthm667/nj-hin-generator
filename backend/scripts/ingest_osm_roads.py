@@ -18,12 +18,13 @@ from typing import Optional
 import geopandas as gpd
 from shapely.geometry import LineString
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Import through the repo root so the models are registered once, under the
+# same `backend.app` package the API and the other scripts use.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from sqlalchemy.orm import Session
-from app.models.database import SessionLocal
-from app.models.tables import RoadSegment, Municipality
+from backend.app.models.database import SessionLocal
+from backend.app.models.tables import RoadSegment, Municipality
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
