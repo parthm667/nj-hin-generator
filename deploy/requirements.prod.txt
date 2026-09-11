@@ -17,7 +17,8 @@ shapely==2.0.2
 pyproj==3.6.1
 rtree==1.1.0
 pyogrio==0.7.2
-fiona==1.9.5
+# fiona intentionally omitted: no aarch64 wheel and it fails to compile
+# against Debian's GDAL. geopandas falls back to the pyogrio engine.
 
 pandas==2.1.4
 numpy==1.26.3
