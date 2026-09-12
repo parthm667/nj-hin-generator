@@ -5,9 +5,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "build",
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/nj-hin/api/(.*)", "destination": "https://hin-api.mhaske.com/api/$1" },
+    { "source": "/nj-hin/static/(.*)", "destination": "/static/$1" },
+    { "source": "/nj-hin/:file(.*\\..*)", "destination": "/:file" },
+    { "source": "/nj-hin/(.*)", "destination": "/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

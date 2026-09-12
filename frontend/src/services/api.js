@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+// In production the app is served under mhaske.com/nj-hin and the API is
+// proxied at /nj-hin/api (see vercel.json), so a relative base works everywhere.
+export const API_BASE_URL =
+  process.env.REACT_APP_API_URL ||
+  (process.env.NODE_ENV === 'production' ? '/nj-hin/api' : 'http://localhost:8000/api');
 export const API_DOCS_URL = `${API_BASE_URL.replace(/\/+$/, '').replace(/\/api$/, '')}/docs`;
 
 const api = axios.create({

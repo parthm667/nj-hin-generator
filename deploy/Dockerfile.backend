@@ -1,33 +1,28 @@
-# Production image for the NJ HIN API.
-# Build context is the repository root so that `backend.app.*` imports resolve
-# the same way they do in development (repo root on sys.path).
+# Backend image for the Oracle VM: API, worker and the official-data ingestion
+# scripts share one image. Build context is the repo root.
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PYTHONPATH=/srv:/srv/backend
+    PORT=8000
 
-# gdal for ogr2ogr / fiona, libpq for psycopg2.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        gcc g++ \
-        gdal-bin libgdal-dev \
-        libpq-dev \
-        libgeos-dev libproj-dev \
-        curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl \
+ && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /srv
+WORKDIR /app
 
-COPY deploy/requirements.prod.txt deploy/requirements.prod.txt
-RUN pip install -r deploy/requirements.prod.txt
+# requirements-ingest = API runtime + requests (the official NJGIN/NJDOT
+# pipeline does its spatial work in PostGIS, so no GDAL/fiona is needed).
+COPY backend/requirements.txt backend/requirements-ingest.txt ./
+RUN python -m pip install --no-cache-dir -r requirements-ingest.txt
 
-COPY backend/ backend/
-COPY data/ data/
-COPY deploy/ deploy/
+COPY backend/ ./
+# Downloaded NJDOT archives and reports live on a volume mounted here.
+RUN mkdir -p /srv/data/raw /srv/data/processed
 
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s \
-    CMD curl -fsS http://localhost:8000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -fsS http://localhost:8000/health || exit 1
 
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips \"${FORWARDED_ALLOW_IPS:-127.0.0.1}\" --limit-concurrency 32 --timeout-keep-alive 5"]

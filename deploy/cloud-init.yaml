@@ -28,10 +28,10 @@ write_files:
         update)  git pull --ff-only && $COMPOSE up -d --build && $COMPOSE image prune -f ;;
         logs)    shift; $COMPOSE logs -f --tail=200 "$@" ;;
         ps)      $COMPOSE ps ;;
-        shell)   $COMPOSE exec backend bash ;;
+        shell)   $COMPOSE exec api bash ;;
         psql)    $COMPOSE exec db psql -U "$(grep ^POSTGRES_USER deploy/.env | cut -d= -f2)" "$(grep ^POSTGRES_DB deploy/.env | cut -d= -f2)" ;;
-        ingest)  shift; $COMPOSE exec backend bash deploy/ingest-mercer.sh "$@" ;;
-        run)     shift; $COMPOSE exec backend "$@" ;;
+        ingest)  shift; $COMPOSE exec -T api python scripts/ingest_all_real_data.py --cache-dir /srv/data/raw --report /srv/data/processed/real-data-manifest.json "$@" ;;
+        run)     shift; $COMPOSE exec api "$@" ;;
         sync)    bash deploy/autoupdate.sh ;;
         *) echo "usage: hin {up|update|sync|logs [svc]|ps|shell|psql|ingest|run <cmd>}"; exit 1 ;;
       esac
@@ -71,13 +71,14 @@ runcmd:
   - |
     if [ ! -f /opt/nj-hin/deploy/.env ]; then
       PW=$(openssl rand -hex 24)
+      RL=$(openssl rand -hex 32)
       cat > /opt/nj-hin/deploy/.env <<ENV
     POSTGRES_DB=nj_hin
     POSTGRES_USER=hin
     POSTGRES_PASSWORD=${PW}
     API_DOMAIN=hin-api.mhaske.com
     CORS_ORIGINS=https://mhaske.com,https://www.mhaske.com
-    SOCRATA_API_TOKEN=
+    ANONYMOUS_RATE_LIMIT_SECRET=${RL}
     ENV
       chmod 600 /opt/nj-hin/deploy/.env
       chown ubuntu:ubuntu /opt/nj-hin/deploy/.env

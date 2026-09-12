@@ -11,7 +11,7 @@
 
 	# Long-running exports (PDF) can take a while; don't cut them off.
 	handle {
-		reverse_proxy backend:8000 {
+		reverse_proxy api:8000 {
 			transport http {
 				read_timeout 300s
 				write_timeout 300s
