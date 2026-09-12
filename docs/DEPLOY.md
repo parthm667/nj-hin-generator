@@ -62,6 +62,16 @@ Run a separate worker service from the same image with `python -m app.worker`, t
 
 Before public launch, configure HTTPS ingress, edge rate/connection limits, restricted database networking, and a non-owner runtime role. Configure alerts for growing/old pending jobs, failed workers, HTTP errors, and failed backups. These host-specific controls cannot be verified by a local test. Keep source caches/manifests alongside encrypted off-host database backups, set retention, and rehearse restoration. See the local restore evidence and commands in [CORRECTNESS_AND_SAFEGUARDS.md](CORRECTNESS_AND_SAFEGUARDS.md).
 
+## PDF reports and LaTeX
+
+PDF export compiles `backend/app/templates/ss4a_report.tex` with `pdflatex` and embeds an offline vector network map. Both backend Dockerfiles install `texlive-latex-base`, `texlive-latex-recommended`, and `lmodern`; rebuild the backend image when deploying this change. Python dependencies alone are insufficient. For a native installation, install those TeX Live packages or a MiKTeX distribution with the corresponding packages and put `pdflatex` on the API process's `PATH`. Verify with `pdflatex --version` and the PDF smoke test below. Package installation during a request is disabled for MiKTeX.
+
+Each report compiles twice in a temporary directory with shell escape disabled. Compilation has a 60-second limit per pass and a maximum of two simultaneous compilations per API process. A missing compiler or failed compilation returns an export error; there is no alternate PDF layout. Report source values are escaped as literal LaTeX text. The editable template and evidence formatting are maintained in `backend/app/templates/ss4a_report.tex` and `backend/app/services/report_latex.py`.
+
+The report contains annual crash history, network concentration, corridor evidence, data-quality notes, and an SS4A project-development worksheet. Its program references are explicitly dated to FY2026. Update and verify the cited USDOT guidance when preparing reports for a later solicitation. Generated figures do not certify a complete Action Plan, a fatal-and-serious-injury HIN, or funding eligibility. Unknown casualty and vulnerability values must remain distinguishable from zero.
+
+The analysis page also offers **Download editable LaTeX**. `GET /api/analysis/{analysis_id}/export/latex` returns a ZIP containing `report.tex`, `network.pdf`, and compilation instructions, generated from the same evidence as the PDF. Import the files into a LaTeX editor to revise the draft. The archive requires no TeX compiler on the server, but has the same analysis freshness and completion checks as PDF export.
+
 ## Vercel frontend
 
 | Setting | Value |
