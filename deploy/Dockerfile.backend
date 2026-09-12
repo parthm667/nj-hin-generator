@@ -1,0 +1,33 @@
+# Production image for the NJ HIN API.
+# Build context is the repository root so that `backend.app.*` imports resolve
+# the same way they do in development (repo root on sys.path).
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONPATH=/srv:/srv/backend
+
+# gdal for ogr2ogr / fiona, libpq for psycopg2.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        gcc g++ \
+        gdal-bin libgdal-dev \
+        libpq-dev \
+        libgeos-dev libproj-dev \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /srv
+
+COPY deploy/requirements.prod.txt deploy/requirements.prod.txt
+RUN pip install -r deploy/requirements.prod.txt
+
+COPY backend/ backend/
+COPY data/ data/
+COPY deploy/ deploy/
+
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s \
+    CMD curl -fsS http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

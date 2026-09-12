@@ -1,0 +1,26 @@
+# Caddy obtains and renews a Let's Encrypt certificate for $API_DOMAIN
+# automatically once the DNS A record points at this VM.
+{$API_DOMAIN} {
+	encode zstd gzip
+
+	# First-boot / rebuild logs, readable without SSH (plain text, no secrets).
+	handle_path /_boot/* {
+		root * /srv/logs
+		file_server browse
+	}
+
+	# Long-running exports (PDF) can take a while; don't cut them off.
+	handle {
+		reverse_proxy backend:8000 {
+			transport http {
+				read_timeout 300s
+				write_timeout 300s
+			}
+		}
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
