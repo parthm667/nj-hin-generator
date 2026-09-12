@@ -8,6 +8,7 @@ import {
   X, Info, FileText
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
+import AnalysisMapView, { isMapCoordinate } from '../components/AnalysisMapView';
 
 const toLeafletPoint = ([longitude, latitude]) => [latitude, longitude];
 
@@ -85,6 +86,7 @@ const getDataIssue = (analysis) => {
 function AnalysisPage() {
   const { analysisId } = useParams();
   const [sidePanelOpen, setSidePanelOpen] = useState(true);
+  const [resetKey, setResetKey] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadingCSV, setDownloadingCSV] = useState(null);
   const closePanelButtonRef = useRef(null);
@@ -287,14 +289,15 @@ function AnalysisPage() {
   return (
     <div className="relative h-full min-h-0 min-w-0 flex-1 overflow-hidden">
       {/* Map Container */}
-      <div className="absolute inset-0 z-0">
+      <div className={`absolute inset-0 z-0 ${sidePanelOpen ? 'md:right-96' : ''}`}>
         {mapDataReady ? (
           <MapContainer
             center={getMapCenter()}
             zoom={13}
             style={{ height: '100%', width: '100%' }}
-            zoomControl={false}
+            zoomControl={true}
           >
+            <AnalysisMapView crashData={crashData} hinData={hinData} sidePanelOpen={sidePanelOpen} resetKey={resetKey} />
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -303,7 +306,7 @@ function AnalysisPage() {
             {/* Crash Points */}
             {crashData.features?.map((feature, idx) => {
               const coordinates = feature.geometry?.coordinates;
-              if (feature.geometry?.type !== 'Point' || !coordinates?.length) return null;
+              if (feature.geometry?.type !== 'Point' || !isMapCoordinate(coordinates)) return null;
 
               const properties = feature.properties || {};
               return (
@@ -420,6 +423,11 @@ function AnalysisPage() {
                 {mapDataLoading ? 'Loading map data...' : 'Analysis in progress...'}
               </p>
             </div>
+          </div>
+        )}
+        {mapDataReady && (
+          <div className="absolute top-3 bottom-6 left-14 z-[1000] max-w-[calc(100%-4rem)] flex flex-col md:flex-row items-start gap-2 pointer-events-none">
+            <button onClick={() => setResetKey(key => key + 1)} className="shrink-0 min-h-[44px] rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium shadow-md hover:bg-gray-50 pointer-events-auto">Reset view</button>
           </div>
         )}
       </div>

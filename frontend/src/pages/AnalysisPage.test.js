@@ -19,6 +19,7 @@ jest.mock('../services/api', () => ({
 }));
 
 jest.mock('react-leaflet', () => ({
+  useMap: () => mockMap,
   MapContainer: ({ children }) => <div data-testid="map">{children}</div>,
   TileLayer: () => null,
   CircleMarker: ({ center, fillColor, children }) => (
@@ -43,6 +44,12 @@ jest.mock('react-leaflet', () => ({
   ),
   Popup: ({ children }) => <div>{children}</div>,
 }));
+
+const mockMap = {
+  fitBounds: jest.fn(),
+  invalidateSize: jest.fn(),
+  getContainer: () => document.createElement('div'),
+};
 
 const completedAnalysis = {
   analysis_id: 42,
@@ -84,6 +91,25 @@ const emptyFeatureCollection = {
 };
 
 let queryClient;
+
+test('fits every result including multiline segments and resets the full extent', async () => {
+  analysisApi.get.mockResolvedValue({ data: completedAnalysis });
+  analysisApi.getCrashes.mockResolvedValue({ data: { features: [
+    { geometry: { type: 'Point', coordinates: [-74.5, 40.1] }, properties: { severity: 'fatal' } },
+  ] } });
+  analysisApi.getHIN.mockResolvedValue({ data: { features: [
+    { geometry: { type: 'MultiLineString', coordinates: [[[-74.3, 40.3], [-74.0, 40.6]]] } },
+  ] } });
+  renderAnalysisPage();
+  await screen.findByTestId('map');
+  expect(mockMap.fitBounds).toHaveBeenLastCalledWith(
+    [[40.1, -74.5], [40.3, -74.3], [40.6, -74]],
+    expect.objectContaining({ paddingBottomRight: [24, 24], maxZoom: 16 })
+  );
+  mockMap.fitBounds.mockClear();
+  fireEvent.click(screen.getByRole('button', { name: 'Reset view' }));
+  expect(mockMap.fitBounds).toHaveBeenCalledTimes(1);
+});
 
 function renderAnalysisPage() {
   queryClient = new QueryClient({
