@@ -1,0 +1,255 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype,graphicx,booktabs,longtable,array}
+\usepackage[hidelinks,breaklinks=true]{hyperref}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\emergencystretch}{2em}
+\renewcommand{\arraystretch}{1.15}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
+\hypersetup{pdftitle={@@NAME: SS4A safety analysis evidence},pdfauthor={NJ High Injury Network Generator}}
+\begin{document}
+\begin{center}
+{\Large\bfseries Road Safety Analysis and SS4A Funding Evidence}\par
+\vspace{4pt}
+{\large @@NAME}\par
+@@COUNTY County, New Jersey\par
+Observation period: @@START--@@END
+\end{center}
+\vspace{4pt}
+\textbf{Purpose.} This technical report supplies evidence for the safety-analysis
+and initial project-development portions of a Safe Streets and Roads for All
+(SS4A) submission. It is an input to a locally developed Comprehensive Safety
+Action Plan; it is not a completed plan and does not establish funding eligibility.
+The program references in this report concern the FY2026 guidance. The applicable
+solicitation and local plan must be checked before submission.\cite{nofo,actionplan}
+
+\section{Safety problem and study scope}
+The observation period covers @@START--@@END. The loaded, locatable records contain
+@@TOTAL crashes. Recorded person totals are @@KILLED killed and @@INJURED injured.
+``Unknown'' or ``Not available'' is not zero. Fatal crashes count incidents;
+fatalities count people. Injury totals are not counts of seriously injured people.
+
+\subsection{Draft problem statement for local review}
+The following paragraph can be adapted for a safety narrative after checking the
+source coverage, local geography and reported figures:
+\begin{quote}
+@@NARRATIVE
+\end{quote}
+
+\subsection{Interpretation for SS4A}
+The current algorithm selects roadway segments using \emph{all recorded crash
+counts}. The FY2026 SS4A definition of a High Injury Network concerns concentrations
+of fatal and serious-injury motor-vehicle crashes.\cite{nofo} The network in this
+report is therefore described as a \emph{screening network}; it must not be presented
+as a verified fatal-and-serious-injury network. There are @@UNKNOWN_SEVERITY records
+whose injury detail is unknown in this dataset. Such records cannot be reclassified
+as either serious or minor injuries without further source evidence.
+
+The study covers loaded roads assigned to the municipal boundary. It does not
+establish municipal ownership, roadway jurisdiction, traffic volumes, population
+exposure, or completeness of the jurisdiction's road inventory.
+
+\clearpage
+\section{Crash burden and data coverage}
+\subsection{Annual crash history}
+@@ANNUAL
+Annual counts describe the records loaded for each year. A zero loaded count does
+not demonstrate a crash-free year; available records do not demonstrate that every
+month or archive record is present. Changes between years may reflect coverage or
+location processing as well as underlying conditions. No causal or exposure-adjusted
+trend is inferred here.
+
+\subsection{Crash severity}
+@@SEVERITY
+Recorded serious-injury crashes are not the number of seriously injured people.
+NJDOT Accidents archives do not consistently provide the serious/minor injury
+detail needed for a complete fatal-and-serious-injury analysis. Reconcile the
+unknown category with validated source records before using a serious-injury total
+in a funding narrative.
+\newpage
+\subsection{Road-user involvement}
+@@USERS
+Pedestrian and bicycle involvement categories may overlap. People killed or injured
+are subsets of all people, not additional totals to sum. Recorded bicycle ``yes''
+counts are not a complete bicycle crash count when involvement is unknown for other
+records. Bicycle casualty totals are not inferred from involvement flags.
+
+\subsection{Location quality and completeness}
+@@LOCATIONS
+Only crashes with usable stored locations are represented. Route-milepost locations
+are estimates using the loaded roadway network. Successfully locating a record is
+different from assigning it to a road segment: unmatched crashes remain in the
+municipal totals but do not contribute to segment rates.
+
+The current analysis does not retain a complete, period-specific accounting of
+source records rejected before loading, duplicate removals, records excluded outside
+the boundary, or missing source archives. Those quantities must be obtained from
+the applicable ingestion reports and original archives. They are not reported as
+zero. Preserve those source reports with the application working papers.
+
+\clearpage
+\section{Network concentration and corridor evidence}
+\subsection{Network concentration}
+@@NETWORK
+``Eligible loaded roadway miles'' excludes fragments shorter than 0.01 mile, as in
+the screening calculation. It is not the mileage of all public roads or of roads
+owned by the municipality. The two crash shares above have different denominators:
+\emph{all loaded crashes} includes unmatched crashes; \emph{assigned crashes} includes
+only records with a road assignment. Each crash contributes once to a selected
+segment. Selected miles are based on unique segment identifiers, not a sum of
+overlapping corridor buffers.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.8\linewidth]{network.pdf}
+\caption{Selected all-crash screening network and loaded roadway context.
+Numbered locations identify the ranked segments in Appendix~\ref{segments}.
+Unnumbered selected segments may also be shown.}
+\end{figure}
+
+\clearpage
+\subsection{Corridor evidence}
+@@CORRIDORS
+``Fatal'' and ``Serious'' count recorded crash incidents. Corridor totals and those
+severity counts are saved analysis results; injury-detail-unknown counts come from
+the corresponding loaded, assigned records. ``Rate'' means assigned
+crashes per segment mile per year, calculated across the corridor. This is not an
+exposure-adjusted risk rate. Stored connected same-route groups are used where
+available; an ungrouped segment is kept separate. Names and road ownership require
+local verification. The table is ordered by crash count to aid review, not by a
+benefit-cost score or a finalized investment priority.
+
+For each location being considered, compare the recorded pattern with the original
+crash reports, roadway conditions, traffic speeds and volumes, crossing movements,
+and pedestrian/bicycle facilities. Document the site visit and identify the road
+owner before selecting a treatment. This analysis does not establish which design
+change will reduce crashes or by how much.
+
+\section{Community context}
+@@EQUITY
+The stored overlay uses CDC/ATSDR SVI 2020 national tract information where loaded.
+The current join assigns the first intersecting tract ordered by tract identifier;
+it is not a length-weighted corridor average. An unknown stored flag remains unknown.
+The selected-mile figure above the 75th percentile is geographic context, not an
+estimate of the share of crash victims with a particular demographic characteristic.
+SVI 2020 is a snapshot, not a contemporaneous measure for every crash year.
+
+Local review should identify schools, transit stops, community destinations,
+accessibility barriers and other relevant conditions with dated sources. Those
+features are not inferred from crash locations or tract scores in this report.
+Record who was consulted, what concerns they raised and how those findings changed
+the proposed priorities. No engagement or community support is asserted here.
+
+\clearpage
+\section{Material for the SS4A application team}
+\subsection{Action Plan components}
+Table~\ref{components} relates this output to the seven components in the FY2026
+USDOT Action Plan guidance.\cite{actionplan} Local documents, adoption status and the
+applicable eligibility worksheet still require review.
+\begin{small}
+\begin{longtable}{@{}L{100pt}L{144pt}L{182pt}@{}}
+\caption{Evidence supplied and local material still needed.}\label{components}\\
+\toprule Component & Contribution of this report & Local material still required \\\midrule\endfirsthead
+\toprule Component & Contribution of this report & Local material still required \\\midrule\endhead
+\bottomrule\endfoot
+Leadership commitment and goal setting & Dated safety evidence; no adopted commitment. & Official commitment to eliminate roadway fatalities and serious injuries, with an adopted target date. \\
+Planning structure & Reproducible analysis record. & Accountable committee or task force and responsibility for development, implementation and monitoring. \\
+Safety analysis & Loaded crash history, screening network, corridor evidence and source limitations. & Validate fatal/serious-injury records, coverage, location patterns and relevant local conditions. \\
+Engagement and collaboration & Candidate locations to discuss. & Engagement record, stakeholder participation, interagency coordination and documented effect on priorities. \\
+Policy and process changes & No policy audit is performed. & Review existing standards, policies and procedures; identify changes and implementation steps. \\
+Strategy and project selections & Initial analytical screening. & Evidence-linked treatments, transparent prioritization, responsible owners and short-, medium- and long-term timeframes. \\
+Progress and transparency & A baseline that can be reproduced. & Performance measures, annual accessible public reporting and online publication of the plan. \\
+\end{longtable}
+\end{small}
+
+\newpage
+\subsection{Project development worksheet}
+Complete one worksheet for each candidate project selected after local review.
+``To be completed locally'' is an unfilled field, not evidence that a requirement
+has been met. Connect the project location and proposed scope to a documented safety
+problem.\cite{implementation}
+\begin{small}
+\begin{longtable}{@{}L{140pt}L{290pt}@{}}
+\caption{Project information to develop and verify locally.}\\
+\toprule Item & Local entry / supporting document \\\midrule\endfirsthead
+\toprule Item & Local entry / supporting document \\\midrule\endhead
+\bottomrule\endfoot
+Project name and limits & To be completed locally: road, endpoints, length, map and referenced segment IDs. \\
+Sponsor and road owner & To be completed locally: responsible entity, jurisdiction and any required agreements. \\
+Safety problem & Adapt the factual narrative and cite the relevant annual, corridor and crash-source evidence. Confirm severity detail. \\
+Proposed scope & To be completed locally: engineering-reviewed treatment, supporting design criteria and relationship to the observed pattern. \\
+Project selection & To be completed locally: prioritization criteria, alternatives, community input and adopted-plan reference. \\
+Design and feasibility & To be completed locally: design stage, field review, permits, environmental review, right-of-way and utility needs. \\
+Cost estimate & To be completed locally: itemized quantities, unit costs, contingencies, estimate date and preparation basis. No costs are generated here. \\
+Funding and match & To be completed locally: eligible project cost, requested federal share, non-federal sources and commitments, checked against the applicable notice. \\
+Delivery schedule & To be completed locally: design, approvals, procurement and construction milestones with accountable parties. \\
+Operations and maintenance & To be completed locally: owner, responsibilities and recurring resource needs. \\
+Expected results & To be completed locally: evidence-supported benefits and evaluation method. No crash-reduction or benefit-cost estimate is generated here. \\
+Monitoring & To be completed locally: baseline period, comparable follow-up data, responsible party and public reporting schedule. \\
+\end{longtable}
+\end{small}
+
+The FY2026 NOFO limits the federal share to 80 percent of eligible costs.\cite{nofo}
+This is a dated reference, not an eligibility or match calculation. The FY2026
+application period closed on May 26, 2026; confirm the applicable solicitation
+before preparing a request. Do not assume a future round uses the same rules.
+
+\subsection{Application-specific fatality measures}
+USDOT's FY2026 application instructions use 2019--2023 motor-vehicle roadway
+fatalities for the average annual fatality-rate calculation.\cite{fatalityrate}
+This report's user-selected period and loaded local records are not automatically
+that measure. Verify the specified geography, fatality source and population
+denominator separately. The app has not calculated the SS4A application fatality
+rate, a benefit-cost ratio or a complete serious-injury person total.
+
+\clearpage
+\section{Methods and reproducibility}
+Loaded crashes with usable locations are assigned to the nearest road segment
+within @@SNAP meters. Segment rates use actual assigned crash counts divided by
+segment miles and the number of selected years. A one-sided Poisson screening test
+uses a leave-one-out road-class reference rate, then a municipality fallback.
+Selection requires at least three crashes and a p-value below @@THRESHOLD; no
+reference exposure means no selection. Fragments shorter than 0.01 mile are excluded
+from screening and reference exposure. Same-route endpoints within one meter form
+connected corridor groups. Severity weighting is a separate descriptive measure,
+not the Poisson event count or the ranking used in this report.
+
+Traffic-volume exposure, spatial dependence, over-dispersion and multiple testing
+are not modeled. This is exploratory screening and requires transportation-safety
+review. Crash records come from loaded NJDOT county/year Accidents archives;
+road geometry comes from the loaded NJDOT measured network and municipal boundaries
+from NJ Office of GIS. Source completeness and network vintage must be checked in
+the ingestion records.
+
+\textbf{Analysis ID:} @@ANALYSIS_ID. \textbf{Method:} @@METHOD.\par
+\textbf{Run created:} @@RUN_DATE. \textbf{Report generated:} @@GENERATED.
+@@VERSIONS
+
+\clearpage
+\appendix
+\section{Ranked segment detail}\label{segments}
+The map numbers refer to this table, which is ordered by crash rate rather than the
+corridor table's total crash count. Rates are recorded crashes per mile per year.
+Only the top ten segments are listed; retain the full CSV/GeoJSON export as a
+working attachment when developing a project.
+@@SEGMENTS
+
+\begin{thebibliography}{9}
+\raggedright
+\bibitem{actionplan} U.S. Department of Transportation. \emph{Comprehensive Safety Action Plans.}
+Updated March 27, 2026. \url{https://www.transportation.gov/grants/ss4a/comprehensive-safety-action-plans}.
+\bibitem{nofo} U.S. Department of Transportation. \emph{Safe Streets and Roads for All: FY2026 Notice of Funding Opportunity.}
+Issued March 27, 2026. \url{https://www.transportation.gov/sites/dot.gov/files/2026-03/SS4A-FY26-NOFO.pdf}.
+\bibitem{implementation} U.S. Department of Transportation. \emph{Implementation Grants.}
+Updated April 7, 2026. \url{https://www.transportation.gov/grants/ss4a/implementation-grants}.
+\bibitem{fatalityrate} U.S. Department of Transportation. \emph{Calculating Average Annual Fatality Rate for SS4A.}
+Updated March 27, 2026. \url{https://www.transportation.gov/grants/ss4a/calculating-average-annual-fatality-rate-ss4a}.
+\end{thebibliography}
+\end{document}

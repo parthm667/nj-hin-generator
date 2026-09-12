@@ -34,9 +34,10 @@ def test_summary_counts_people_not_crashes_and_preserves_unknown(metric_db):
 
 
 def test_methodology_reports_actual_snap_distance_and_exploratory_limit():
-    report = PDFReportGenerator(None)
-    elements = report._build_methodology(SimpleNamespace(snap_distance_meters=125, significance_threshold=0.05))
-    content = ' '.join(getattr(item,'text','') for item in elements)
+    from app.services.report_latex import render_report_tex
+    content = render_report_tex(
+        SimpleNamespace(start_year=2020, end_year=2021, snap_distance_meters=125, significance_threshold=0.05),
+        None, {'total': 0}, {}, [], {})
     assert '125' in content
     assert 'exploratory' in content.lower()
     assert '4x' not in content
