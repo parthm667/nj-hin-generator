@@ -10,6 +10,15 @@ import {
 import 'leaflet/dist/leaflet.css';
 import AnalysisMapView, { isMapCoordinate } from '../components/AnalysisMapView';
 
+const SEVERITIES = [
+  ['fatal', 'Fatal', '#dc2626'],
+  ['serious_injury', 'Serious injury', '#ea580c'],
+  ['minor_injury', 'Minor injury', '#f59e0b'],
+  ['injury_unknown', 'Unknown injury detail', '#7c3aed'],
+  ['property_damage', 'Property damage', '#3b82f6'],
+  ['other', 'Other / unknown', '#6b7280'],
+];
+
 const toLeafletPoint = ([longitude, latitude]) => [latitude, longitude];
 
 const getLinePositions = (geometry) => {
@@ -86,6 +95,9 @@ const getDataIssue = (analysis) => {
 function AnalysisPage() {
   const { analysisId } = useParams();
   const [sidePanelOpen, setSidePanelOpen] = useState(true);
+  const [showCrashes, setShowCrashes] = useState(true);
+  const [showHIN, setShowHIN] = useState(true);
+  const [severity, setSeverity] = useState('all');
   const [resetKey, setResetKey] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadingCSV, setDownloadingCSV] = useState(null);
@@ -304,11 +316,13 @@ function AnalysisPage() {
             />
 
             {/* Crash Points */}
-            {crashData.features?.map((feature, idx) => {
+            {showCrashes && crashData.features?.map((feature, idx) => {
               const coordinates = feature.geometry?.coordinates;
               if (feature.geometry?.type !== 'Point' || !isMapCoordinate(coordinates)) return null;
 
               const properties = feature.properties || {};
+              const category = SEVERITIES.some(([value]) => value === properties.severity) ? properties.severity : 'other';
+              if (severity !== 'all' && category !== severity) return null;
               return (
                 <CircleMarker
                   key={feature.id || `crash-${idx}`}
@@ -339,7 +353,7 @@ function AnalysisPage() {
             })}
 
             {/* High Injury Network */}
-            {hinData.features?.map((feature, idx) => {
+            {showHIN && hinData.features?.map((feature, idx) => {
               const positions = getLinePositions(feature.geometry);
               if (!positions?.length) return null;
 
@@ -427,6 +441,28 @@ function AnalysisPage() {
         )}
         {mapDataReady && (
           <div className="absolute top-3 bottom-6 left-14 z-[1000] max-w-[calc(100%-4rem)] flex flex-col md:flex-row items-start gap-2 pointer-events-none">
+            <details className="min-h-0 max-h-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-md text-sm max-w-64 pointer-events-auto">
+              <summary className="cursor-pointer px-3 py-2 min-h-[44px] font-medium text-gray-900">Layers &amp; legend</summary>
+              <div className="p-3 pt-0 space-y-3">
+                <label className="flex items-center gap-2 min-h-[44px]"><input type="checkbox" checked={showCrashes} onChange={event => setShowCrashes(event.target.checked)} />Show crashes</label>
+                <label className="block">
+                  <span className="block mb-1">Crash severity</span>
+                  <select value={severity} onChange={event => setSeverity(event.target.value)} disabled={!showCrashes} className="w-full border border-gray-300 rounded p-2 bg-white disabled:bg-gray-100">
+                    <option value="all">All severities</option>
+                    {SEVERITIES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  </select>
+                </label>
+                <ul aria-label="Crash point legend" className="space-y-1">
+                  {SEVERITIES.map(([value, label, color]) => <li key={value} className="flex items-center gap-2 text-xs"><span aria-hidden="true" className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />{label}</li>)}
+                </ul>
+                <label className="flex items-center gap-2 min-h-[44px] border-t pt-2"><input type="checkbox" checked={showHIN} onChange={event => setShowHIN(event.target.checked)} />Show HIN</label>
+                <p className="text-xs text-gray-600">HIN lines: crashes per mile/year</p>
+                <ul aria-label="HIN line legend" className="space-y-1">
+                  {[[0, '5 or fewer'], [6, 'More than 5 to 10'], [11, 'More than 10']].map(([rate, label]) => <li key={rate} className="flex items-center gap-2 text-xs"><span aria-hidden="true" className="w-5 border-t-4" style={{ borderColor: getHINColor(rate) }} />{label}</li>)}
+                </ul>
+                <p className="text-xs text-gray-500">Filters affect the map only. Statistics and exports include all results.</p>
+              </div>
+            </details>
             <button onClick={() => setResetKey(key => key + 1)} className="shrink-0 min-h-[44px] rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium shadow-md hover:bg-gray-50 pointer-events-auto">Reset view</button>
           </div>
         )}

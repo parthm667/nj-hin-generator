@@ -92,7 +92,31 @@ const emptyFeatureCollection = {
 
 let queryClient;
 
-test('fits every result including multiline segments and resets the full extent', async () => {
+test('filters crash severity independently of the HIN layer and restores hidden layers', async () => {
+  analysisApi.get.mockResolvedValue({ data: completedAnalysis });
+  analysisApi.getCrashes.mockResolvedValue({ data: { features: [
+    { geometry: { type: 'Point', coordinates: [-74.5, 40.1] }, properties: { severity: 'fatal' } },
+    { geometry: { type: 'Point', coordinates: [-74.4, 40.2] }, properties: { severity: 'minor_injury' } },
+  ] } });
+  analysisApi.getHIN.mockResolvedValue({ data: { features: [
+    { geometry: { type: 'LineString', coordinates: [[-74.5, 40.1], [-74.3, 40.3]] } },
+  ] } });
+  renderAnalysisPage();
+  expect(await screen.findAllByTestId('crash-marker')).toHaveLength(2);
+  fireEvent.change(screen.getByLabelText('Crash severity'), { target: { value: 'fatal' } });
+  expect(screen.getAllByTestId('crash-marker')).toHaveLength(1);
+  expect(screen.getByTestId('hin-line')).toBeInTheDocument();
+  fireEvent.click(screen.getByLabelText('Show crashes'));
+  expect(screen.queryByTestId('crash-marker')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByLabelText('Show HIN'));
+  expect(screen.queryByTestId('hin-line')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByLabelText('Show crashes'));
+  expect(screen.getAllByTestId('crash-marker')).toHaveLength(1);
+  fireEvent.change(screen.getByLabelText('Crash severity'), { target: { value: 'all' } });
+  expect(screen.getAllByTestId('crash-marker')).toHaveLength(2);
+});
+
+test('fits every result including multiline segments and resets the full extent after filtering', async () => {
   analysisApi.get.mockResolvedValue({ data: completedAnalysis });
   analysisApi.getCrashes.mockResolvedValue({ data: { features: [
     { geometry: { type: 'Point', coordinates: [-74.5, 40.1] }, properties: { severity: 'fatal' } },
@@ -107,6 +131,8 @@ test('fits every result including multiline segments and resets the full extent'
     expect.objectContaining({ paddingBottomRight: [24, 24], maxZoom: 16 })
   );
   mockMap.fitBounds.mockClear();
+  fireEvent.click(screen.getByLabelText('Show HIN'));
+  expect(mockMap.fitBounds).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Reset view' }));
   expect(mockMap.fitBounds).toHaveBeenCalledTimes(1);
 });
