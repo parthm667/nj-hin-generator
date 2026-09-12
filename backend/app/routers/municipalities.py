@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/", response_model=List[MunicipalityResponse])
+@router.get("", response_model=List[MunicipalityResponse])
 async def list_municipalities(
     county: str = None,
     db: Session = Depends(get_db)

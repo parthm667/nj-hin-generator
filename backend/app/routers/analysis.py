@@ -85,7 +85,7 @@ def run_analysis_background(
         db.close()
 
 
-@router.post("/", response_model=AnalysisResponse)
+@router.post("", response_model=AnalysisResponse)
 async def create_analysis(
     request: AnalysisCreate,
     background_tasks: BackgroundTasks,
@@ -142,7 +142,7 @@ async def create_analysis(
     return analysis
 
 
-@router.get("/", response_model=List[AnalysisResponse])
+@router.get("", response_model=List[AnalysisResponse])
 async def list_analyses(
     muni_id: int = None,
     status: str = None,
