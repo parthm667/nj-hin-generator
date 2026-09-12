@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends curl \
+ && apt-get install -y --no-install-recommends curl texlive-latex-base texlive-latex-recommended lmodern \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
