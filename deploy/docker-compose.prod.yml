@@ -71,6 +71,9 @@ services:
     environment:
       <<: *backend-env
     command: ["python", "-m", "app.worker"]
+    # The image's HTTP healthcheck does not apply to the worker process.
+    healthcheck:
+      disable: true
     volumes:
       - hindata:/srv/data
 
