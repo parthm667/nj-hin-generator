@@ -49,7 +49,10 @@ function Layout({ children }) {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
+              className="md:hidden p-2 min-h-11 min-w-11 rounded-lg text-gray-600 hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
             >
               {mobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -62,7 +65,7 @@ function Layout({ children }) {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200">
+          <div id="mobile-navigation" className="md:hidden border-t border-gray-200">
             <nav className="px-4 py-4 space-y-3">
               <Link
                 to="/"
