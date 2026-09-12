@@ -5,7 +5,13 @@ import axios from 'axios';
 export const API_BASE_URL =
   process.env.REACT_APP_API_URL ||
   (process.env.NODE_ENV === 'production' ? '/nj-hin/api' : 'http://localhost:8000/api');
-export const API_DOCS_URL = `${API_BASE_URL.replace(/\/+$/, '').replace(/\/api$/, '')}/docs`;
+// Swagger UI is served by the API host itself; it cannot live under the
+// /nj-hin subpath because it fetches /openapi.json from the site root.
+export const API_DOCS_URL =
+  process.env.REACT_APP_API_DOCS_URL ||
+  (API_BASE_URL.startsWith('/')
+    ? 'https://hin-api.mhaske.com/docs'
+    : `${API_BASE_URL.replace(/\/+$/, '').replace(/\/api$/, '')}/docs`);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
