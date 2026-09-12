@@ -108,13 +108,22 @@ async def get_municipality_summary(
     from datetime import datetime
 
     crash_service = CrashService(db)
-    current_year = datetime.now().year
 
-    summary = crash_service.get_municipality_crash_summary(
-        muni_id,
-        current_year - 5,
-        current_year - 1
-    )
+    # Default to the years we actually hold data for; NJDOT publishes with a
+    # multi-year lag, so a "last five calendar years" window can miss it all.
+    from sqlalchemy import func, extract
+    from backend.app.models.tables import Crash
+    lo, hi = db.query(
+        func.min(extract('year', Crash.crash_date)),
+        func.max(extract('year', Crash.crash_date)),
+    ).filter(Crash.muni_id == muni_id).one()
+    if lo is None:
+        current_year = datetime.now().year
+        lo, hi = current_year - 5, current_year - 1
+
+    summary = crash_service.get_municipality_crash_summary(muni_id, int(lo), int(hi))
+    summary['start_year'] = int(lo)
+    summary['end_year'] = int(hi)
 
     summary['municipality_name'] = municipality.name
     summary['county'] = municipality.county
