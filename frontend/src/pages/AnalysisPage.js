@@ -101,6 +101,7 @@ function AnalysisPage() {
   const [severity, setSeverity] = useState('all');
   const [resetKey, setResetKey] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloadingLaTeX, setIsDownloadingLaTeX] = useState(false);
   const [downloadingCSV, setDownloadingCSV] = useState(null);
   const closePanelButtonRef = useRef(null);
   const openPanelButtonRef = useRef(null);
@@ -254,6 +255,27 @@ function AnalysisPage() {
       alert('Error downloading PDF. Please try again.');
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handleDownloadLaTeX = async () => {
+    setIsDownloadingLaTeX(true);
+    try {
+      const response = await exportApi.downloadLaTeX(analysisId);
+      const blob = new Blob([response.data], { type: 'application/zip' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `HIN_Analysis_${analysis.municipality_name?.replace(/\s+/g, '_')}_${analysis.start_year}-${analysis.end_year}_LaTeX.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading LaTeX source:', error);
+      alert('Error downloading LaTeX source. Please try again.');
+    } finally {
+      setIsDownloadingLaTeX(false);
     }
   };
 
@@ -693,6 +715,9 @@ function AnalysisPage() {
 
                 {/* Export Buttons */}
                 <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Safety evidence and project-development material for your SS4A draft.
+                  </p>
                   <button
                     onClick={handleDownloadPDF}
                     disabled={isDownloading}
@@ -704,7 +729,17 @@ function AnalysisPage() {
                       <FileText className="w-5 h-5" />
                     )}
                     <span className="font-medium">
-                      {isDownloading ? 'Generating PDF...' : 'Download PDF Report'}
+                      {isDownloading ? 'Generating PDF...' : 'Download SS4A PDF'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={handleDownloadLaTeX}
+                    disabled={isDownloadingLaTeX}
+                    className="w-full flex items-center justify-center space-x-2 border border-primary text-primary hover:bg-blue-50 disabled:border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed py-3 px-4 rounded-lg transition-colors"
+                  >
+                    {isDownloadingLaTeX && <Loader2 className="w-5 h-5 animate-spin" />}
+                    <span className="font-medium">
+                      {isDownloadingLaTeX ? 'Preparing LaTeX source...' : 'Download editable LaTeX'}
                     </span>
                   </button>
                   <button

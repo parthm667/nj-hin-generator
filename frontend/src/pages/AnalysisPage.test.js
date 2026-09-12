@@ -14,6 +14,7 @@ jest.mock('../services/api', () => ({
   },
   exportApi: {
     downloadPDF: jest.fn(),
+    downloadLaTeX: jest.fn(),
     downloadCSV: jest.fn(),
   },
 }));
@@ -429,9 +430,39 @@ test('does not present a legacy completed analysis with zero crashes as valid re
   expect(await screen.findByText('No usable crash data')).toBeInTheDocument();
   expect(screen.queryByText('Completed')).not.toBeInTheDocument();
   expect(screen.queryByText('Crash Statistics')).not.toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Download PDF Report' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Download SS4A PDF' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Download editable LaTeX' })).not.toBeInTheDocument();
   expect(analysisApi.getCrashes).not.toHaveBeenCalled();
   expect(analysisApi.getHIN).not.toHaveBeenCalled();
+});
+
+test('downloads editable LaTeX as a ZIP without leaving analysis details', async () => {
+  analysisApi.get.mockResolvedValue({ data: completedAnalysis });
+  analysisApi.getCrashes.mockResolvedValue({ data: emptyFeatureCollection });
+  analysisApi.getHIN.mockResolvedValue({ data: emptyFeatureCollection });
+  exportApi.downloadLaTeX.mockResolvedValue({ data: new Blob(['source']) });
+  Object.defineProperty(window.URL, 'createObjectURL', {
+    configurable: true, value: jest.fn(() => 'blob:latex'),
+  });
+  Object.defineProperty(window.URL, 'revokeObjectURL', {
+    configurable: true, value: jest.fn(),
+  });
+  let downloaded;
+  const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () {
+    downloaded = { filename: this.download, href: this.href };
+  });
+  try {
+    renderAnalysisPage();
+    fireEvent.click(await screen.findByRole('button', { name: 'Download editable LaTeX' }));
+    await waitFor(() => expect(downloaded).toEqual({
+      filename: 'HIN_Analysis_Example_Township_2019-2023_LaTeX.zip', href: 'blob:latex',
+    }));
+    expect(exportApi.downloadLaTeX).toHaveBeenCalledWith('42');
+    expect(window.URL.revokeObjectURL).toHaveBeenCalledWith('blob:latex');
+    expect(screen.getByText('Analysis Details')).toBeInTheDocument();
+  } finally {
+    clickSpy.mockRestore();
+  }
 });
 
 test('shows an out-of-date completed analysis as an amber rerun state', async () => {

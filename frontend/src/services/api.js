@@ -58,6 +58,9 @@ export const exportApi = {
   downloadPDF: (analysisId) => {
     return api.get(`/analysis/${analysisId}/export/pdf`, { responseType: 'blob' });
   },
+  downloadLaTeX: (analysisId) => {
+    return api.get(`/analysis/${analysisId}/export/latex`, { responseType: 'blob' });
+  },
   downloadCSV: (analysisId, dataType) => {
     return api.get(`/export/${analysisId}/csv`, {
       params: { data_type: dataType },

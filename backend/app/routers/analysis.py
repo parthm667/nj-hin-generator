@@ -334,6 +334,31 @@ def get_analysis_hin(
     return geojson
 
 
+@router.get("/{analysis_id}/export/latex")
+def export_analysis_latex(
+    analysis_id: int,
+    db: Session = Depends(get_db)
+):
+    """Download editable report text and its vector map as a ZIP archive."""
+    analysis = db.query(Analysis).filter(Analysis.analysis_id == analysis_id).first()
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    if analysis.status != 'completed':
+        raise HTTPException(status_code=400, detail=f"Analysis not completed (status: {analysis.status})")
+    _guard_completed_analysis_results(analysis, db)
+    try:
+        source_archive = PDFReportGenerator(db).generate_latex_archive(analysis_id)
+        filename = f"HIN_Analysis_{analysis_id}_{analysis.start_year}-{analysis.end_year}_LaTeX.zip"
+        return Response(
+            content=source_archive,
+            media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+    except Exception as exc:
+        logger.error("Error generating LaTeX source for analysis %s: %s", analysis_id, exc)
+        raise HTTPException(status_code=500, detail='Unable to generate the report source. Please try again later.') from exc
+
+
 @router.get("/{analysis_id}/export/pdf")
 def export_analysis_pdf(
     analysis_id: int,

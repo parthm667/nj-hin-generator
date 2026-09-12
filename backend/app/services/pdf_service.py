@@ -1,6 +1,7 @@
 """LaTeX reports with stored analysis evidence and an offline vector map."""
 
 import io
+import zipfile
 from reportlab.pdfgen.canvas import Canvas
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -21,6 +22,31 @@ class PDFReportGenerator:
     def generate_report(self, analysis_id: int) -> bytes:
         source, assets = self._collect_report_sources(analysis_id)
         return compile_latex(source, assets)
+
+    def generate_latex_archive(self, analysis_id: int) -> bytes:
+        """Download the same editable evidence and map without running TeX."""
+        source, assets = self._collect_report_sources(analysis_id)
+        instructions = (
+            'Editable NJ HIN / SS4A report source\n\n'
+            'Extract all files into one folder. Edit report.tex as needed and keep\n'
+            'network.pdf beside it. The map reflects the saved analysis; editing\n'
+            'the text does not rerun the analysis or validate local additions.\n\n'
+            'Install a LaTeX distribution with pdflatex, the recommended LaTeX\n'
+            'packages, and Latin Modern fonts. On Debian/Ubuntu these are:\n'
+            'texlive-latex-base texlive-latex-recommended lmodern\n\n'
+            'From this folder run both commands to resolve references:\n'
+            'pdflatex -no-shell-escape -interaction=nonstopmode -halt-on-error report.tex\n'
+            'pdflatex -no-shell-escape -interaction=nonstopmode -halt-on-error report.tex\n\n'
+            'The output is report.pdf. Review all local edits, source limitations,\n'
+            'and the applicable SS4A solicitation before sharing or submitting.\n'
+        )
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr('report.tex', source.encode('utf-8'))
+            for name, data in assets.items():
+                archive.writestr(name, data)
+            archive.writestr('README.txt', instructions.encode('utf-8'))
+        return buffer.getvalue()
 
     def _collect_report_sources(self, analysis_id: int):
         analysis = self.db.query(Analysis).filter(Analysis.analysis_id == analysis_id).first()
