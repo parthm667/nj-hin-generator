@@ -163,7 +163,7 @@ class OSMRoadIngester:
             GeoDataFrame of road segments
         """
         logger.info(f"Loading roads from {geojson_file}...")
-        roads = gpd.read_file(geojson_file)
+        roads = gpd.read_file(geojson_file, engine="pyogrio")  # fiona 1.10 breaks geopandas 0.14 auto-detection
 
         logger.info(f"Loaded {len(roads)} roads")
 
