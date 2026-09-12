@@ -95,6 +95,7 @@ const getDataIssue = (analysis) => {
 function AnalysisPage() {
   const { analysisId } = useParams();
   const [sidePanelOpen, setSidePanelOpen] = useState(true);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
   const [showCrashes, setShowCrashes] = useState(true);
   const [showHIN, setShowHIN] = useState(true);
   const [severity, setSeverity] = useState('all');
@@ -301,7 +302,7 @@ function AnalysisPage() {
   return (
     <div className="relative h-full min-h-0 min-w-0 flex-1 overflow-hidden">
       {/* Map Container */}
-      <div className={`absolute inset-0 z-0 ${sidePanelOpen ? 'md:right-96' : ''}`}>
+      <div className={`absolute top-0 left-0 right-0 z-0 md:bottom-0 ${sidePanelOpen ? 'md:right-96' : ''} ${sidePanelOpen ? mobileExpanded ? 'bottom-[55%]' : 'bottom-[104px]' : 'bottom-0'}`}>
         {mapDataReady ? (
           <MapContainer
             center={getMapCenter()}
@@ -470,20 +471,27 @@ function AnalysisPage() {
 
       {/* Side Panel */}
       <div
+        id="analysis-details"
         aria-hidden={!sidePanelOpen}
         inert={sidePanelOpen ? undefined : ''}
-        className={`absolute top-0 right-0 z-10 h-full w-full sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
-          sidePanelOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`absolute bottom-0 right-0 z-10 ${mobileExpanded ? 'h-[55%]' : 'h-[104px]'} md:top-0 md:h-full w-full md:w-96 bg-white shadow-2xl rounded-t-2xl md:rounded-none transform transition-transform duration-300 ease-in-out ${
+          sidePanelOpen ? 'translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:translate-x-full'
         }`}
       >
         <div className="h-full min-h-0 flex flex-col">
           {/* Panel Header */}
-          <div className="shrink-0 flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Analysis Details</h2>
+          <div className="shrink-0 flex items-center justify-between gap-2 p-3 md:p-6 border-b border-gray-200">
+            <div className="min-w-0">
+              <h2 className="text-lg font-semibold text-gray-900">Analysis Details</h2>
+              <p className="md:hidden text-xs text-gray-600 truncate">{analysis.municipality_name} &middot; {analysis.start_year}&ndash;{analysis.end_year}</p>
+            </div>
+            <button onClick={() => setMobileExpanded(expanded => !expanded)} aria-expanded={mobileExpanded} aria-controls="analysis-details-content" className="md:hidden text-xs font-medium text-primary min-h-[44px] px-2">{mobileExpanded ? 'Collapse details' : 'Expand details'}</button>
             <button
               ref={closePanelButtonRef}
               onClick={closeSidePanel}
               aria-label="Close analysis details"
+              aria-controls="analysis-details"
+              aria-expanded="true"
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <X className="w-5 h-5 text-gray-600" />
@@ -492,10 +500,11 @@ function AnalysisPage() {
 
           {/* Panel Content */}
           <div
+            id="analysis-details-content"
             role="region"
             aria-label="Analysis details content"
             tabIndex="0"
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+            className={`${mobileExpanded ? '' : 'hidden md:block'} min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary`}
           >
             {/* Status Card */}
             <div className={`${statusDisplay.bg} rounded-lg p-4`}>
@@ -762,7 +771,9 @@ function AnalysisPage() {
           ref={openPanelButtonRef}
           onClick={openSidePanel}
           aria-label="Open analysis details"
-          className="absolute top-4 right-4 z-20 p-3 bg-white shadow-lg rounded-lg hover:bg-gray-50 transition-colors"
+          aria-controls="analysis-details"
+          aria-expanded="false"
+          className="absolute bottom-8 right-4 md:bottom-auto md:top-4 z-20 p-3 bg-white shadow-lg rounded-lg hover:bg-gray-50 transition-colors"
         >
           <Info className="w-5 h-5 text-gray-600" />
         </button>

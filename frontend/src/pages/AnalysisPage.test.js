@@ -137,6 +137,18 @@ test('fits every result including multiline segments and resets the full extent 
   expect(mockMap.fitBounds).toHaveBeenCalledTimes(1);
 });
 
+test('expands and collapses mobile details without hiding the map', async () => {
+  analysisApi.get.mockResolvedValue({ data: completedAnalysis });
+  analysisApi.getCrashes.mockResolvedValue({ data: emptyFeatureCollection });
+  analysisApi.getHIN.mockResolvedValue({ data: emptyFeatureCollection });
+  renderAnalysisPage();
+  const expand = await screen.findByRole('button', { name: 'Expand details' });
+  expect(expand).toHaveAttribute('aria-expanded', 'false');
+  fireEvent.click(expand);
+  expect(screen.getByRole('button', { name: 'Collapse details' })).toHaveAttribute('aria-expanded', 'true');
+  expect(screen.getByTestId('map')).toBeInTheDocument();
+});
+
 function renderAnalysisPage() {
   queryClient = new QueryClient({
     defaultOptions: {
