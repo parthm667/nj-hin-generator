@@ -19,7 +19,9 @@ jest.mock('../services/api', () => ({
   },
 }));
 
-jest.mock('react-leaflet', () => ({
+jest.mock('react-leaflet', () => {
+  const React = require('react');
+  return {
   useMap: () => mockMap,
   MapContainer: ({ children }) => <div data-testid="map">{children}</div>,
   TileLayer: () => null,
@@ -43,10 +45,17 @@ jest.mock('react-leaflet', () => ({
       {children}
     </div>
   ),
-  Popup: ({ children }) => <div>{children}</div>,
-}));
+  Popup: React.forwardRef(({ children }, ref) => {
+    React.useImperativeHandle(ref, () => ({ options: {}, update: jest.fn() }));
+    return <div>{children}</div>;
+  }),
+  };
+});
 
 const mockMap = {
+  getSize: () => ({ x: 800, y: 600 }),
+  on: jest.fn(),
+  off: jest.fn(),
   fitBounds: jest.fn(),
   invalidateSize: jest.fn(),
   getContainer: () => document.createElement('div'),
@@ -434,6 +443,28 @@ test('does not present a legacy completed analysis with zero crashes as valid re
   expect(screen.queryByRole('button', { name: 'Download editable LaTeX' })).not.toBeInTheDocument();
   expect(analysisApi.getCrashes).not.toHaveBeenCalled();
   expect(analysisApi.getHIN).not.toHaveBeenCalled();
+});
+
+test('passes recorded event details into the incident card and expandable source panel', async () => {
+  analysisApi.get.mockResolvedValue({ data: completedAnalysis });
+  analysisApi.getHIN.mockResolvedValue({ data: emptyFeatureCollection });
+  analysisApi.getCrashes.mockResolvedValue({ data: { type: 'FeatureCollection', features: [{
+    type: 'Feature', geometry: { type: 'Point', coordinates: [-74.5, 40.1] },
+    properties: {
+      crash_id: 92856, date: '2017-10-10', time: '0000', severity: 'fatal', road_name: 'NJ 27',
+      total_killed: 1, total_injured: 0, pedestrians_killed: 1, pedestrians_injured: 0,
+      bike_involved: null, external_id: 'NJDOT:2017:MERCER:92856',
+      light_condition: '06', route_number: '11060001__', geocode_quality: 'route_milepost',
+    },
+  }] } });
+  renderAnalysisPage();
+  const card = await screen.findByRole('region', { name: 'Crash incident details' });
+  expect(within(card).getByText('Crash on NJ 27: 1 person killed and 0 people injured.')).toBeInTheDocument();
+  expect(within(card).getByText('12:00 AM')).toBeInTheDocument();
+  expect(within(card).getByText('Dark — continuous streetlighting')).toBeInTheDocument();
+  fireEvent.click(within(card).getByRole('button', { name: 'Source and location' }));
+  expect(within(card).getByText('NJDOT:2017:MERCER:92856')).toBeInTheDocument();
+  expect(within(card).getByText('Route identifier').nextElementSibling).toHaveTextContent('11060001__');
 });
 
 test('downloads editable LaTeX as a ZIP without leaving analysis details', async () => {

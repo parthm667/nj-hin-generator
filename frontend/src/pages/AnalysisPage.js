@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import AnalysisMapView, { isMapCoordinate } from '../components/AnalysisMapView';
+import CrashPopup from '../components/CrashPopup';
 
 const SEVERITIES = [
   ['fatal', 'Fatal', '#dc2626'],
@@ -356,21 +357,7 @@ function AnalysisPage() {
                   weight={1}
                   fillOpacity={0.7}
                 >
-                  <Popup>
-                    <div className="text-sm">
-                      <p className="font-medium mb-1">
-                        {formatSeverity(properties.severity)}
-                      </p>
-                      <p className="text-gray-600">
-                        {properties.date}
-                      </p>
-                      {properties.road_name && (
-                        <p className="text-gray-600 mt-1">
-                          {properties.road_name}
-                        </p>
-                      )}
-                    </div>
-                  </Popup>
+                  <CrashPopup properties={properties} severityLabel={formatSeverity(properties.severity)} />
                 </CircleMarker>
               );
             })}
