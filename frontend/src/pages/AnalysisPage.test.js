@@ -102,6 +102,21 @@ const emptyFeatureCollection = {
 
 let queryClient;
 
+test('explains dashboard provenance and processed locations without claiming GPS precision', async () => {
+  analysisApi.get.mockResolvedValue({ data: { ...completedAnalysis, data_quality: {
+    ...completedAnalysis.data_quality, dashboard_crashes: 12, dashboard_conflict_crashes: 2,
+    geocode_counts: { dashboard_current: 8, dashboard_calculated: 4 },
+  } } });
+  analysisApi.getCrashes.mockResolvedValue({ data: emptyFeatureCollection });
+  analysisApi.getHIN.mockResolvedValue({ data: emptyFeatureCollection });
+  renderAnalysisPage();
+  expect(await screen.findByText(/12 loaded crashes in this analysis have dashboard provenance/i)).toBeInTheDocument();
+  expect(screen.getByText(/8 crash positions use NJDOT processed current coordinates/i)).toBeInTheDocument();
+  expect(screen.getByText(/4 crash positions use NJDOT calculated coordinates/i)).toBeInTheDocument();
+  expect(screen.getByText(/Some records lack an unambiguous injury rating/i)).toBeInTheDocument();
+  expect(screen.queryByText('Other location methods')).not.toBeInTheDocument();
+});
+
 test('possible injury has a distinct legend, popup label and filter', async () => {
   analysisApi.get.mockResolvedValue({ data: completedAnalysis });
   analysisApi.getCrashes.mockResolvedValue({ data: { features: [

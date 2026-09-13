@@ -19,6 +19,36 @@ jest.mock('react-leaflet', () => {
 
 afterEach(() => { mockPopupOpen = true; });
 
+test('shows recorded dashboard circumstances and honest conflict and location labels', () => {
+  render(<CrashPopup severityLabel="UNKNOWN INJURY DETAIL" properties={{
+    severity: 'injury_unknown', source_name: 'NJDOT dashboard', dashboard_id: '1001',
+    weather: 'Rain', crash_type: 'Rear End', first_harmful_event: 'Other Motor Vehicle',
+    intersection_name: 'MAIN ST', at_intersection: 'Y', speed_limit: '25', vehicle_count: '0',
+    surface_condition: 'Wet', document_locator: 'D123', source_street_name: 'SECOND ST',
+    source_retrieved_at: '2026-09-13T00:00:00Z', source_url: 'https://example.org/public.csv',
+    location_method: 'dashboard_calculated', severity_conflict: true,
+  }} />);
+  for (const text of ['Rain', 'Rear End', 'Other Motor Vehicle', 'MAIN ST', 'Wet']) {
+    expect(screen.getByText(text)).toBeInTheDocument();
+  }
+  expect(screen.getByText(/severity rating and casualty evidence disagree/i)).toBeInTheDocument();
+  expect(screen.queryByText('Injury severity was not specified in this record.')).not.toBeInTheDocument();
+  expect(screen.getByText('Vehicles').nextElementSibling).toHaveTextContent('0');
+  expect(screen.getByText('Speed limit').nextElementSibling).toHaveTextContent('25 mph');
+  userEvent.click(screen.getByRole('button', { name: 'Source and location' }));
+  expect(screen.getByText('NJDOT dashboard')).toBeInTheDocument();
+  expect(screen.getByText('Dashboard record ID').nextElementSibling).toHaveTextContent('1001');
+  expect(screen.getByText('Document locator').nextElementSibling).toHaveTextContent('D123');
+  expect(screen.getByText('Location method').nextElementSibling).toHaveTextContent('NJDOT calculated position');
+  expect(screen.getByText(/subject to revision/i)).toBeInTheDocument();
+  expect(screen.queryByText('Reported coordinates')).not.toBeInTheDocument();
+});
+
+test.each(['0', '', '-5', '999', 'unknown'])('does not display placeholder speed %p as a speed limit', (speed) => {
+  render(<CrashPopup severityLabel="FATAL" properties={{ source_name: 'NJDOT dashboard', speed_limit: speed }} />);
+  expect(screen.getByText('Speed limit').nextElementSibling).toHaveTextContent('Not recorded');
+});
+
 test('does not read or format incident details until its popup content opens', () => {
   mockPopupOpen = false;
   const properties = { get date() { throw new Error('Closed popup formatted a crash date'); } };

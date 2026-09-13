@@ -5,6 +5,7 @@ from pathlib import Path
 from string import Template
 
 from app.services.methodology import METHOD_VERSION
+from app.services.dashboard_details import DASHBOARD_NOTE, LOCATION_LABELS
 
 
 class ReportTemplate(Template):
@@ -46,6 +47,15 @@ def table(headers, rows, columns, caption):
 
 def render_report_tex(analysis, municipality, stats, hin_stats, ranked_segments, evidence):
     evidence = evidence or {}
+    sources = evidence.get('sources', {})
+    source_note = 'Dashboard source counts are not available for this report.'
+    if sources.get('dashboard_crashes') is not None:
+        source_note = (f"{number(sources['dashboard_crashes'])} of {number(sources.get('total_crashes'))} loaded crashes "
+                       'have dashboard provenance within this municipality and selected period. ')
+        if sources['dashboard_crashes']:
+            source_note += escape_latex(DASHBOARD_NOTE) + ' '
+            source_note += (f"{number(sources.get('dashboard_conflict_crashes'))} dashboard records have inconsistent or incomplete "
+                            'source fields; retain these limitations when interpreting severity and person totals.')
     network = evidence.get('network', {})
     name = escape_latex(municipality.name if municipality else 'Municipality')
     county = escape_latex(municipality.county if municipality else 'Not recorded')
@@ -122,7 +132,7 @@ def render_report_tex(analysis, municipality, stats, hin_stats, ranked_segments,
         ('Bicyclists killed', 'bike_killed'), ('Bicyclists injured', 'bike_injured')]]
     users = table(['Measure', 'Recorded count'], user_rows, 'L{340pt}R{95pt}', 'Road-user involvement and person counts.')
     locations = evidence.get('locations', [])
-    location_rows = [[escape_latex(r['method'].replace('_', ' ')), number(r['count'])] for r in locations]
+    location_rows = [[escape_latex(LOCATION_LABELS.get(r['method'], r['method'].replace('_', ' '))), number(r['count'])] for r in locations]
     location_table = table(['Stored location method', 'Loaded crashes'], location_rows,
                            'L{340pt}R{95pt}', 'Location methods recorded for the selected period.') if locations else 'Location-method counts are not available.'
     equity = evidence.get('equity', {})
@@ -155,7 +165,7 @@ def render_report_tex(analysis, municipality, stats, hin_stats, ranked_segments,
                   TOTAL=number(stats.get('total')), KILLED=number(killed), INJURED=number(injured),
                   UNKNOWN_SEVERITY=number(stats.get('injury_unknown')), NARRATIVE=narrative,
                   ANNUAL=annual_table, SEVERITY=severity_table, NETWORK=network_table,
-                  CORRIDORS=corridors, USERS=users, LOCATIONS=location_table, EQUITY=equity_table,
+                  CORRIDORS=corridors, USERS=users, LOCATIONS=location_table, SOURCE_NOTE=source_note, EQUITY=equity_table,
                   SEGMENTS=segments, VERSIONS=version_table, METHOD=escape_latex(METHOD_VERSION),
                   SNAP=number(analysis.snap_distance_meters), THRESHOLD=number(analysis.significance_threshold, 3))
     template = Path(__file__).resolve().parents[1] / 'templates' / 'ss4a_report.tex'

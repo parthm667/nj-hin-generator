@@ -6,6 +6,7 @@ and crash statistics calculation.
 """
 
 import json
+from app.services.dashboard_details import dashboard_details
 import logging
 import math
 from datetime import datetime
@@ -413,7 +414,8 @@ class CrashService:
                     'pedestrians_killed': crash.pedestrians_killed,
                     'pedestrians_injured': crash.pedestrians_injured,
                     'road_name': crash.road_name,
-                    'geocode_quality': getattr(crash, 'geocode_quality', None)
+                    'geocode_quality': getattr(crash, 'geocode_quality', None),
+                    **dashboard_details(crash),
                 }
             }
             features.append(feature)

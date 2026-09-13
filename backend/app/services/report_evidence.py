@@ -7,6 +7,7 @@ The stored corridor results are not recomputed or reclassified as an FSI HIN.
 from datetime import date
 
 from sqlalchemy import text
+from app.services.dashboard_details import dashboard_source_coverage
 
 
 _PERIOD = """
@@ -76,7 +77,7 @@ def _assemble_evidence(start_year, end_year, annual, totals, corridors, location
 
 
 def collect_report_evidence(db, analysis):
-    """Collect bounded aggregates for the saved analysis using four SELECTs.
+    """Collect bounded aggregates for the saved analysis using five SELECTs.
 
     Annual and network casualties remain NULL if any contributing record lacks
     that count, including when there are no contributing records. Equity uses
@@ -193,6 +194,8 @@ def collect_report_evidence(db, analysis):
         GROUP BY COALESCE(NULLIF(BTRIM(geocode_quality), ''), 'unknown')
         ORDER BY count DESC, method
     """), params).mappings().all()
-    return _assemble_evidence(
+    result = _assemble_evidence(
         analysis.start_year, analysis.end_year, annual, totals, corridors, locations,
     )
+    result['sources'] = dashboard_source_coverage(db, analysis)
+    return result

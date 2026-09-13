@@ -4,6 +4,11 @@ import { Popup, useMap } from 'react-leaflet';
 const textValue = (value) => typeof value === 'string' ? value.trim() : '';
 const knownCount = (value) => Number.isInteger(value) && value >= 0;
 const countLabel = (value) => knownCount(value) ? value.toLocaleString('en-US') : 'Not recorded';
+const speedLabel = (value) => {
+  const recorded = textValue(value);
+  const speed = /^\d{1,3}$/.test(recorded) ? Number(recorded) : NaN;
+  return speed > 0 && speed <= 100 ? `${speed} mph` : 'Not recorded';
+};
 
 export function formatCrashDate(value) {
   const match = typeof value === 'string' && /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
@@ -85,7 +90,17 @@ function CrashDetails({ properties, severityLabel, popupRef }) {
   const sourceRecord = textValue(properties.external_id);
   const njdotSource = /^NJDOT:\d{4}:[A-Z_]+:[^\s:]+$/.test(sourceRecord);
   const estimated = properties.geocode_quality === 'route_milepost';
-  const reported = properties.geocode_quality === 'reported';
+  const dashboard = properties.source_name === 'NJDOT dashboard';
+  const locationMethods = {
+    dashboard_current: 'NJDOT processed current position',
+    dashboard_calculated: 'NJDOT calculated position',
+    reported: 'Reported coordinates',
+    route_milepost: 'Route and milepost estimate',
+    historical_validated: 'Previously validated historical position',
+  };
+  const locationMethod = dashboard ? properties.location_method : properties.geocode_quality;
+  const locationLabel = Object.prototype.hasOwnProperty.call(locationMethods, locationMethod)
+    ? locationMethods[locationMethod] : 'Unavailable';
   const personRows = [
     ['All people killed', properties.total_killed],
     ['All people injured', properties.total_injured],
@@ -93,12 +108,28 @@ function CrashDetails({ properties, severityLabel, popupRef }) {
     ['Pedestrians injured', properties.pedestrians_injured],
   ];
   const sourceRows = [
-    ['Source', njdotSource ? 'NJDOT crash archive' : 'Not recorded'],
+    ['Source', dashboard ? 'NJDOT dashboard' : njdotSource ? 'NJDOT crash archive' : 'Not recorded'],
     ['Source record ID', sourceRecord || 'Not recorded'],
     ['Local crash ID', properties.crash_id ?? 'Not recorded'],
     ['Route identifier', textValue(properties.route_number) || 'Not recorded'],
-    ['Location method', estimated ? 'Route and milepost estimate' : reported ? 'Reported coordinates' : 'Unavailable'],
+    ['Location method', locationLabel],
   ];
+  if (dashboard) sourceRows.push(
+    ['Dashboard record ID', textValue(properties.dashboard_id) || 'Not recorded'],
+    ['Document locator', textValue(properties.document_locator) || 'Not recorded'],
+    ['Source street name', textValue(properties.source_street_name) || 'Not recorded'],
+    ['Source severity rating', textValue(properties.source_severity_rating) || 'Not recorded'],
+    ['Source URL', textValue(properties.source_url) || 'Not recorded'],
+    ['Retrieved at', textValue(properties.source_retrieved_at) || 'Not recorded'],
+  );
+  const circumstances = dashboard ? [
+    ['Weather', properties.weather], ['Crash type', properties.crash_type],
+    ['First harmful event', properties.first_harmful_event],
+    ['Intersection road', properties.intersection_name],
+    ['At intersection', properties.at_intersection === 'Y' ? 'Yes' : properties.at_intersection === 'N' ? 'No' : properties.at_intersection],
+    ['Speed limit', speedLabel(properties.speed_limit)], ['Vehicles', properties.vehicle_count],
+    ['Road surface condition', properties.surface_condition],
+  ].filter(([, value]) => textValue(value)) : [];
 
   return (
       <section
@@ -119,7 +150,13 @@ function CrashDetails({ properties, severityLabel, popupRef }) {
             Possible injury is the recorded crash category (KABCO C). It does not confirm a minor or serious injury.
           </p>
         )}
-        {properties.severity === 'injury_unknown' && (
+        {properties.severity_conflict === true && (
+          <p className="!my-2 text-xs text-amber-800">The source severity rating and casualty evidence disagree. Review the source record before interpreting the injury category.</p>
+        )}
+        {properties.source_conflict === true && properties.severity_conflict !== true && (
+          <p className="!my-2 text-xs text-amber-800">Some fields in this source record disagree. Review the source details.</p>
+        )}
+        {properties.severity === 'injury_unknown' && properties.severity_conflict !== true && (
           <p className="!my-2 text-xs text-gray-600">Injury severity was not specified in this record.</p>
         )}
         <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1.5 border-t border-gray-200 pt-3">
@@ -133,6 +170,15 @@ function CrashDetails({ properties, severityLabel, popupRef }) {
         <p className="!my-2 text-xs leading-relaxed text-gray-500">
           Pedestrian counts are included in the all-person totals above; do not add them again.
         </p>
+        {circumstances.length > 0 && <div className="mt-3 border-t border-gray-200 pt-3">
+          <h4 className="mb-2 font-medium">Recorded circumstances</h4>
+          <dl className="grid grid-cols-2 gap-x-3 gap-y-2" style={{ overflowWrap: 'anywhere' }}>
+            {circumstances.map(([label, value]) => <React.Fragment key={label}>
+              <dt className="text-gray-600">{label}</dt>
+              <dd className="text-right">{value}</dd>
+            </React.Fragment>)}
+          </dl>
+        </div>}
         <dl className="grid grid-cols-2 gap-x-3 gap-y-2 border-t border-gray-200 pt-3">
           <dt className="text-gray-600">Bicycle involvement</dt>
           <dd className="text-right">{properties.bike_involved === true ? 'Yes' : properties.bike_involved === false ? 'No' : 'Unknown'}</dd>
@@ -161,6 +207,9 @@ function CrashDetails({ properties, severityLabel, popupRef }) {
             </dl>
             {estimated && <p className="!mb-0 !mt-3 text-xs leading-relaxed text-gray-600">
               Position estimated from a route and milepost; it may not identify the exact crash site.
+            </p>}
+            {dashboard && <p className="!mb-0 !mt-3 text-xs leading-relaxed text-gray-600">
+              Dashboard records are provisional and subject to revision. Locations come from NJDOT; calculated positions are estimates.
             </p>}
           </>}
         </div>

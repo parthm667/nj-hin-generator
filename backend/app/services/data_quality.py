@@ -2,6 +2,7 @@
 from sqlalchemy import text
 from app.services.crash_service import CrashService
 from app.services.version_service import METHOD_VERSION
+from app.services.dashboard_details import DASHBOARD_NOTE, dashboard_source_coverage
 
 
 def analysis_data_quality(db, analysis):
@@ -15,13 +16,17 @@ def analysis_data_quality(db, analysis):
         ARRAY_AGG(DISTINCT tract.source_year) FILTER (WHERE tract.source_year IS NOT NULL)
         FROM census_tracts tract JOIN municipalities muni ON ST_Intersects(tract.geom,muni.geom)
         WHERE muni.muni_id=:muni'''), {'muni': analysis.muni_id}).one()
+    sources = dashboard_source_coverage(db, analysis)
     return {
         'method_version': METHOD_VERSION,
-        'injury_detail_available': stats['injury_unknown_crashes'] == 0,
+        'injury_detail_available': stats['injury_unknown_crashes'] == 0 and sources['dashboard_severity_conflict_crashes'] == 0,
         'bicycle_data_available': stats['bike_involvement_unknown_crashes'] == 0,
         'casualty_counts_complete': stats['casualty_counts_complete'],
         'svi_available': svi[0] > 0,
         'svi_years': sorted(svi[1] or []),
         'geocode_counts': geocodes,
+        'dashboard_crashes': sources['dashboard_crashes'],
+        'dashboard_conflict_crashes': sources['dashboard_conflict_crashes'],
+        'dashboard_note': DASHBOARD_NOTE if sources['dashboard_crashes'] else None,
         'coverage_note': 'Loaded years are not a completeness guarantee. Records without usable locations are excluded. Route-milepost positions are estimates using the loaded road network. Unknown values are not zero.',
     }

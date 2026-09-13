@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.models.database import get_db
 from app.models.tables import Analysis
 from app.models.schemas import ReportRequest
+from app.services.dashboard_details import DASHBOARD_CSV_FIELDS
 from app.services.coverage_service import (
     AnalysisDataConflictError,
     CoverageService,
@@ -102,7 +103,7 @@ def export_csv(
         collection = CrashService(db).get_crashes_geojson(analysis.muni_id, analysis.start_year, analysis.end_year)
         fields = ['crash_id', 'date', 'severity', 'ped_involved', 'bike_involved',
                   'total_killed', 'total_injured', 'pedestrians_killed', 'pedestrians_injured',
-                  'road_name', 'geocode_quality', 'longitude', 'latitude']
+                  'road_name', 'geocode_quality', 'longitude', 'latitude', *DASHBOARD_CSV_FIELDS]
     else:
         collection = HINService(db).get_hin_geojson(analysis_id)
         fields = ['hin_id', 'segment_id', 'road_name', 'crash_count', 'crash_rate',

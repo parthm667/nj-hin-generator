@@ -310,10 +310,16 @@ function AnalysisPage() {
   const geocodeCounts = dataQuality.geocode_counts || {};
   const reportedLocationCount = formatQualityCount(geocodeCounts.reported);
   const estimatedLocationCount = formatQualityCount(geocodeCounts.route_milepost);
+  const currentDashboardLocations = formatQualityCount(geocodeCounts.dashboard_current);
+  const calculatedDashboardLocations = formatQualityCount(geocodeCounts.dashboard_calculated);
+  const dashboardCrashCount = formatQualityCount(dataQuality.dashboard_crashes);
+  const hasDashboardRecords = dataQuality.dashboard_crashes > 0;
   const otherLocationCounts = Object.entries(geocodeCounts).filter(
     ([method, count]) => (
       method !== 'reported'
       && method !== 'route_milepost'
+      && method !== 'dashboard_current'
+      && method !== 'dashboard_calculated'
       && formatQualityCount(count) !== null
     )
   );
@@ -587,6 +593,12 @@ function AnalysisPage() {
                     <div>
                       <h4 className="font-medium text-gray-900">Crash locations</h4>
                       <div className="mt-1 space-y-1">
+                        {currentDashboardLocations !== null && (
+                          <p>{currentDashboardLocations} crash positions use NJDOT processed current coordinates.</p>
+                        )}
+                        {calculatedDashboardLocations !== null && (
+                          <p>{calculatedDashboardLocations} crash positions use NJDOT calculated coordinates.</p>
+                        )}
                         {reportedLocationCount !== null && (
                           <p>
                             {reportedLocationCount} {geocodeCounts.reported === 1 ? 'crash uses' : 'crashes use'} coordinates reported in the source records.
@@ -597,7 +609,7 @@ function AnalysisPage() {
                             {estimatedLocationCount} {geocodeCounts.route_milepost === 1 ? 'crash location is an estimate' : 'crash locations are estimates'} based on road names and mile markers.
                           </p>
                         )}
-                        {reportedLocationCount === null && estimatedLocationCount === null && (
+                        {reportedLocationCount === null && estimatedLocationCount === null && currentDashboardLocations === null && calculatedDashboardLocations === null && (
                           <p>Reported-coordinate and estimated-location counts are not available for this analysis.</p>
                         )}
                         {reportedLocationCount === null && estimatedLocationCount !== null && (
@@ -608,6 +620,15 @@ function AnalysisPage() {
                         )}
                       </div>
                     </div>
+
+                    {hasDashboardRecords && <div>
+                      <h4 className="font-medium text-gray-900">Dashboard source</h4>
+                      <p className="mt-1">{dashboardCrashCount} loaded crashes in this analysis have dashboard provenance.</p>
+                      <p className="mt-1">Dashboard records are provisional and subject to revision. Locations come from NJDOT; calculated positions are estimates.</p>
+                      {dataQuality.dashboard_conflict_crashes > 0 && (
+                        <p className="mt-1">{formatQualityCount(dataQuality.dashboard_conflict_crashes)} records have inconsistent or incomplete source fields; review their source details before interpreting these counts.</p>
+                      )}
+                    </div>}
 
                     <div>
                       <h4 className="font-medium text-gray-900">People killed or injured</h4>
@@ -628,7 +649,9 @@ function AnalysisPage() {
                         {dataQuality.injury_detail_available === true
                           ? 'The included records distinguish serious from minor injuries.'
                           : dataQuality.injury_detail_available === false
-                            ? 'The source does not consistently distinguish serious from minor injuries, so this detail is limited.'
+                            ? hasDashboardRecords
+                              ? 'Some records lack an unambiguous injury rating. Source ratings and casualty evidence may disagree; review the recorded source details.'
+                              : 'The source does not consistently distinguish serious from minor injuries, so this detail is limited.'
                             : "Serious and minor injury detail isn't available for this analysis."}
                       </p>
                     </div>
