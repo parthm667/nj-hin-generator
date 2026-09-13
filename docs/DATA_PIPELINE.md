@@ -1,5 +1,7 @@
 # Official NJ data pipeline
 
+For acquisition, reconciliation, and production import of the newer public dashboard through 2025, see [DASHBOARD_IMPORT.md](DASHBOARD_IMPORT.md).
+
 ## Sources and map coordinates
 
 Municipalities come from the [NJGIN Municipal Boundaries layer](https://services2.arcgis.com/XVOqAjTOJ5P6ngMu/ArcGIS/rest/services/NJ_Municipal_Boundaries_3424/FeatureServer/0), using `MUN_CODE`, `MUN_LABEL`, and `COUNTY`. The layer returned 564 features during the September 10, 2026 source check. A source count is not a guarantee that every municipality has usable crash records.
