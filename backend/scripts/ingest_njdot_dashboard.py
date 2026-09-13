@@ -447,6 +447,9 @@ def process_stage(connection, stage_path, *, apply=False, batch_size=1000,
             batch = [json.loads(row[0]) for row in cursor.fetchmany(batch_size)]
             if not batch:
                 break
+            for record in batch:
+                if not 2019 <= record['year'] <= 2025 or date.fromisoformat(record['crash_date']).year != record['year']:
+                    raise ValueError('out_of_scope_staged_record')
             matches = {row['dashboard_id']: row for row in connection.execute(
                 MATCH_SQL, {'records': json.dumps(batch)}
             ).mappings()}

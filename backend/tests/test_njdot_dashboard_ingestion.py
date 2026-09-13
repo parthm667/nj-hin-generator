@@ -269,6 +269,19 @@ def test_incomplete_cache_is_recovered_and_never_used_for_mutation(tmp_path):
         assert stage.execute('SELECT count(*) FROM records').fetchone()[0] == 1
 
 
+def test_reconciliation_refuses_out_of_scope_staged_date_before_database_access(tmp_path):
+    path = tmp_path / 'crashes.csv'
+    stage_path = tmp_path / 'stage.sqlite'
+    write_csv(path, [source_row()])
+    dashboard.stage_csv(path, stage_path, municipalities())
+    with closing(sqlite3.connect(stage_path)) as stage, stage:
+        payload = json.loads(stage.execute('SELECT payload FROM records').fetchone()[0])
+        payload['crash_date'] = '2026-01-01'
+        stage.execute('UPDATE records SET payload=?', (json.dumps(payload),))
+    with pytest.raises(ValueError, match='out_of_scope_staged_record'):
+        dashboard.process_stage(None, stage_path, apply=True)
+
+
 def test_late_malformed_csv_aborts_full_validation(tmp_path):
     path = tmp_path / 'crashes.csv'
     write_csv(path, [source_row()])
