@@ -4,6 +4,17 @@ set -euo pipefail
 cd /opt/nj-hin
 : "${COMPOSE:?COMPOSE must be exported by deploy/autoupdate.sh}"
 
+$COMPOSE run --rm -T --no-deps api python - <<'PREFLIGHT'
+import shutil
+
+required = 20 * 1024**3
+available = shutil.disk_usage('/srv/data').free
+capacity = f'{available / 1024**3:.1f} GiB available; 20.0 GiB required'
+print(f'Dashboard import storage: {capacity}', flush=True)
+if available < required:
+    raise SystemExit(f'Insufficient disk space: {capacity}')
+PREFLIGHT
+
 echo "== $(date -Is) acquiring and validating public NJDOT dashboard crashes through 2025"
 $COMPOSE run --rm -T --no-deps api \
   python -u scripts/download_njdot_dashboard.py \

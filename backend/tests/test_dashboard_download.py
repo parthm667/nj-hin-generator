@@ -5,6 +5,8 @@ import io
 import json
 from pathlib import Path
 import subprocess
+import shutil
+from types import SimpleNamespace
 
 import pytest
 import requests
@@ -205,3 +207,24 @@ def test_runonce_accepts_manifest_with_unknown_retrieval_time(monkeypatch, retri
     else:
         assert "--retrieved-at" not in argv
     assert "--apply" in argv and "--allow-new-historical" in argv
+
+
+@pytest.mark.parametrize("free_gib", [19, 20])
+def test_runonce_checks_storage_before_acquisition(monkeypatch, capsys, free_gib):
+    wrapper = Path(__file__).parents[2] / "deploy/run-once/09-import-dashboard-through-2025.sh"
+    script = wrapper.read_text()
+    assert "<<'PREFLIGHT'" in script
+    assert script.index("<<'PREFLIGHT'") < script.index("scripts/download_njdot_dashboard.py")
+    body = script.split("<<'PREFLIGHT'\n", 1)[1].split("\nPREFLIGHT\n", 1)[0]
+    checked = []
+    def storage(path):
+        checked.append(path)
+        return SimpleNamespace(free=free_gib*1024**3)
+    monkeypatch.setattr(shutil, "disk_usage", storage)
+    if free_gib < 20:
+        with pytest.raises(SystemExit, match="19.0 GiB available.*20.0 GiB required"):
+            exec(compile(body, str(wrapper), "exec"), {})
+    else:
+        exec(compile(body, str(wrapper), "exec"), {})
+    assert checked == ["/srv/data"]
+    assert f"{free_gib:.1f} GiB available" in capsys.readouterr().out
