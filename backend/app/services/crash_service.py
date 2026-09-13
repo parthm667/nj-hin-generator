@@ -395,6 +395,10 @@ class CrashService:
                 'properties': {
                     'crash_id': crash.crash_id,
                     'date': crash.crash_date.isoformat(),
+                    'time': crash.crash_time,
+                    'light_condition': crash.light_condition,
+                    'external_id': crash.external_id,
+                    'route_number': crash.route_number,
                     'severity': crash.severity,
                     'ped_involved': crash.ped_involved,
                     'bike_involved': crash.bike_involved,

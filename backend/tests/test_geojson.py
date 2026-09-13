@@ -40,6 +40,10 @@ def test_crash_geojson_uses_database_geometry_and_preserves_properties():
     crash = SimpleNamespace(
         crash_id=7,
         crash_date=date(2024, 5, 17),
+        crash_time="0000",
+        light_condition="06",
+        external_id="NJDOT:2024:MERCER:12345",
+        route_number="11060001__",
         severity="serious_injury",
         ped_involved=True,
         bike_involved=None,
@@ -65,6 +69,10 @@ def test_crash_geojson_uses_database_geometry_and_preserves_properties():
                 "properties": {
                     "crash_id": 7,
                     "date": "2024-05-17",
+                    "time": "0000",
+                    "light_condition": "06",
+                    "external_id": "NJDOT:2024:MERCER:12345",
+                    "route_number": "11060001__",
                     "severity": "serious_injury",
                     "ped_involved": True,
                     "bike_involved": None,
@@ -79,6 +87,45 @@ def test_crash_geojson_uses_database_geometry_and_preserves_properties():
         ],
     }
     assert "ST_AsGeoJSON" in str(database.projections[-1])
+
+
+def test_crash_details_preserve_nulls_and_remain_scoped_to_municipality_and_period():
+    from geoalchemy2 import Geometry
+    from sqlalchemy import Column, LargeBinary, MetaData, Table
+    from app.models.tables import Crash
+
+    engine = create_engine("sqlite://")
+    metadata = MetaData()
+    crashes = Table("crashes", metadata, *[
+        Column(column.name, LargeBinary() if isinstance(column.type, Geometry) else column.type,
+               primary_key=column.primary_key)
+        for column in Crash.__table__.columns
+    ])
+    with engine.connect() as connection:
+        raw = connection.connection.driver_connection
+        raw.create_function("AsEWKB", 1, lambda value: value)
+        raw.create_function("AsGeoJSON", 1, lambda value: '{"type":"Point","coordinates":[-74.6,40.3]}')
+        metadata.create_all(connection)
+        connection.execute(crashes.insert(), [
+            {"crash_id": identity, "muni_id": municipality, "crash_date": crash_date,
+             "severity": "injury_unknown", "total_killed": 0}
+            for identity, municipality, crash_date in [
+                (1, 11, date(2024, 6, 1)), (2, 12, date(2024, 6, 1)),
+                (3, 11, date(2023, 6, 1)), (4, 11, date(2025, 6, 1)),
+            ]
+        ])
+        with Session(bind=connection) as database:
+            result = CrashService(database).get_crashes_geojson(11, 2024, 2024)
+            assert len(result["features"]) == 1
+            properties = result["features"][0]["properties"]
+            assert properties["crash_id"] == 1
+            assert properties["total_killed"] == 0
+            assert properties["total_injured"] is None
+            assert properties["bike_involved"] is None
+            for field in ("time", "light_condition", "external_id", "route_number"):
+                assert field in properties
+                assert properties[field] is None
+    engine.dispose()
 
 
 def test_hin_geojson_uses_database_geometry_and_preserves_properties():
