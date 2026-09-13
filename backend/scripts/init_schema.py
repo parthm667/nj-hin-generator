@@ -52,7 +52,7 @@ def install_versions(connection):
           RETURN NULL;
         END $$'''))
     definitions = (
-        ('crashes', 'crashes', 'external_id, crash_date, crash_time, severity, ped_involved, bike_involved, muni_id, geom, geocode_quality, road_name, route_number, total_killed, total_injured, pedestrians_killed, pedestrians_injured'),
+        ('crashes', 'crashes', 'external_id, dashboard_id, source_metadata, crash_date, crash_time, severity, ped_involved, bike_involved, muni_id, geom, geocode_quality, road_name, route_number, weather_condition, light_condition, total_killed, total_injured, pedestrians_killed, pedestrians_injured'),
         ('road_segments', 'roads', 'geom, length_miles, road_name, road_class, road_type, muni_id, sri, source_id'),
         ('municipalities', 'boundaries', 'geom, name, county, muni_code'),
         ('census_tracts', 'svi', 'geom, svi_percentile, svi_score'),
@@ -67,6 +67,9 @@ def install_versions(connection):
 
 
 CORRECTNESS_ADDITIONS = (
+    'ALTER TABLE crashes ADD COLUMN IF NOT EXISTS dashboard_id varchar(64)',
+    'ALTER TABLE crashes ADD COLUMN IF NOT EXISTS source_metadata jsonb',
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_crashes_dashboard_id ON crashes(dashboard_id)',
     'ALTER TABLE hin_segments ADD COLUMN IF NOT EXISTS crash_count_possible_injury integer NOT NULL DEFAULT 0',
     'ALTER TABLE analyses ADD COLUMN IF NOT EXISTS input_version jsonb',
     'ALTER TABLE crashes ADD COLUMN IF NOT EXISTS total_killed integer CHECK (total_killed >= 0)',

@@ -116,6 +116,8 @@ class Crash(Base):
 
     crash_id = Column(Integer, primary_key=True, autoincrement=True)
     external_id = Column(String(50), unique=True)  # ID from source data
+    dashboard_id = Column(String(64), nullable=True)
+    source_metadata = Column(JSONB, nullable=True)
     crash_date = Column(Date, nullable=False, index=True)
     crash_time = Column(String(10))
     # fatal, serious_injury, minor_injury, possible_injury, injury_unknown, property_damage
@@ -152,6 +154,7 @@ class Crash(Base):
     # Indexes
     __table_args__ = (
         Index('idx_crashes_geom', 'geom', postgresql_using='gist'),
+        Index('idx_crashes_dashboard_id', 'dashboard_id', unique=True),
         Index('idx_crashes_date', 'crash_date'),
         Index('idx_crashes_muni', 'muni_id'),
         Index('idx_crashes_segment', 'segment_id'),

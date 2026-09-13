@@ -628,6 +628,9 @@ class NJDOTCrashIngester:
                     "pedestrians_killed": insert_statement.excluded.pedestrians_killed,
                     "pedestrians_injured": insert_statement.excluded.pedestrians_injured,
                 },
+                # The dashboard has finer KABCO severity and refreshed counts.
+                # Historical archives must not regress those enriched records.
+                where=Crash.dashboard_id.is_(None),
             )
             database.execute(statement)
             report.loaded += len(unique_rows) - len(existing_ids)
@@ -726,6 +729,7 @@ class NJDOTCrashIngester:
                     )
                 FROM input
                 WHERE crash.external_id = input.external_id
+                  AND crash.dashboard_id IS NULL
                 RETURNING crash.external_id
                 """
             ),

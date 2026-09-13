@@ -91,13 +91,14 @@ def test_crash_geojson_uses_database_geometry_and_preserves_properties():
 
 def test_crash_details_preserve_nulls_and_remain_scoped_to_municipality_and_period():
     from geoalchemy2 import Geometry
-    from sqlalchemy import Column, LargeBinary, MetaData, Table
+    from sqlalchemy import Column, JSON, LargeBinary, MetaData, Table
+    from sqlalchemy.dialects.postgresql import JSONB
     from app.models.tables import Crash
 
     engine = create_engine("sqlite://")
     metadata = MetaData()
     crashes = Table("crashes", metadata, *[
-        Column(column.name, LargeBinary() if isinstance(column.type, Geometry) else column.type,
+        Column(column.name, LargeBinary() if isinstance(column.type, Geometry) else JSON() if isinstance(column.type, JSONB) else column.type,
                primary_key=column.primary_key)
         for column in Crash.__table__.columns
     ])
