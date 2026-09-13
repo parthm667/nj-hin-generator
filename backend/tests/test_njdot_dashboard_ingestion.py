@@ -3,6 +3,9 @@ import csv
 import json
 import sqlite3
 import os
+import subprocess
+import sys
+from pathlib import Path
 from argparse import Namespace
 from contextlib import closing, contextmanager
 
@@ -442,3 +445,39 @@ def test_postgis_expected_source_count_failure_never_mutates_crashes(dashboard_d
     report = json.loads(args.report.read_text())
     assert report['status'] == 'failed'
     assert report['database_committed'] is False
+
+
+def test_cli_database_failure_omits_parameters_and_driver_secrets_from_log_and_report(tmp_path):
+    report_path = tmp_path / 'report.json'
+    script = '''
+from sqlalchemy.exc import StatementError
+from scripts import ingest_njdot_dashboard as dashboard
+class DriverError(Exception):
+    pgcode = '23505'
+class FailingEngine:
+    def connect(self):
+        raise StatementError('DB_SECRET_SENTINEL', 'SQL_TEXT_SENTINEL',
+                             {'records': 'RAW_ROW_SENTINEL'}, DriverError('DRIVER_SECRET_SENTINEL'))
+run_import = dashboard.run_import
+dashboard.run_import = lambda args: run_import(args, database_engine=FailingEngine())
+raise SystemExit(dashboard.main())
+'''
+    env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1]))
+    result = subprocess.run([sys.executable, '-c', script, '--input-csv', str(tmp_path / 'input.csv'),
+                             '--report', str(report_path)], env=env, capture_output=True, text=True, timeout=20)
+    assert result.returncode == 1
+    report = json.loads(report_path.read_text())
+    combined = result.stdout + result.stderr + json.dumps(report)
+    for sentinel in ('DB_SECRET_SENTINEL', 'SQL_TEXT_SENTINEL', 'RAW_ROW_SENTINEL', 'DRIVER_SECRET_SENTINEL'):
+        assert sentinel not in combined
+    assert 'Traceback' not in combined
+    assert report['error'] == 'Database error: StatementError (SQLSTATE 23505)'
+    assert report['error'] in result.stderr
+    assert report['status'] == 'failed'
+    assert report['database_committed'] is False
+
+
+def test_failure_messages_preserve_known_validation_codes_but_not_arbitrary_exception_text():
+    assert dashboard.failure_message(ValueError('no_eligible_records_after_validation')) == 'no_eligible_records_after_validation'
+    assert dashboard.failure_message(ValueError('expected_count_mismatch: expected 4, observed 3')) == 'expected_count_mismatch: expected 4, observed 3'
+    assert 'SECRET_ROW' not in dashboard.failure_message(RuntimeError('unexpected record SECRET_ROW'))

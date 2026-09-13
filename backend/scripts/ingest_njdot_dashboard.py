@@ -30,6 +30,7 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from app.models.database import engine
 from scripts.ingest_njdot_crashes import (
     NJ_BOUNDS, _atomic_json, build_external_id, normalize_county_name,
@@ -537,6 +538,35 @@ def _validated_stage(csv_path, stage_path, lookup, args):
         building.unlink(missing_ok=True)
 
 
+_PUBLIC_FAILURE_REASONS = frozenset((
+    'stage_already_exists', 'missing_or_duplicate_columns',
+    'source_changed_during_validation', 'empty_csv',
+    'batch_size must be between 1 and 10000', 'out_of_scope_staged_record',
+    'municipality_changed_after_validation', 'mutation_count_mismatch',
+    'no_eligible_records_after_validation', 'municipalities_changed_after_validation',
+    'database_count_mismatch', 'out_of_scope_year_changed',
+))
+
+
+def failure_message(exc):
+    """Public diagnostics never include SQL, batch parameters, or driver text."""
+    name = type(exc).__name__[:64]
+    if isinstance(exc, (SQLAlchemyError, sqlite3.Error)):
+        original = getattr(exc, 'orig', None)
+        sqlstate = getattr(original, 'sqlstate', None) or getattr(original, 'pgcode', None)
+        suffix = f' (SQLSTATE {sqlstate})' if isinstance(sqlstate, str) and re.fullmatch(r'[0-9A-Z]{5}', sqlstate) else ''
+        return f'Database error: {name}{suffix}'
+    if isinstance(exc, (ValueError, RuntimeError)):
+        reason = str(exc)
+        if len(reason) <= 200 and (reason in _PUBLIC_FAILURE_REASONS or re.fullmatch(
+            r'columns_mismatch_at_line_\d+|expected_count_mismatch: expected -?\d+, observed \d+', reason
+        )):
+            return reason
+    # Unexpected exceptions can also carry source rows, paths, or connection
+    # details. Their class is useful without disclosing their message/traceback.
+    return name
+
+
 def run_import(args, *, database_engine=engine):
     """Validate first, then reconcile within one consistent transaction."""
     csv_path, report_path = Path(args.input_csv), Path(args.report)
@@ -599,7 +629,7 @@ def run_import(args, *, database_engine=engine):
     except BaseException as exc:
         if report_path.exists():
             report = json.loads(report_path.read_text(encoding='utf-8'))
-        report.update(status='failed', error=str(exc), apply=args.apply, database_committed=committed)
+        report.update(status='failed', error=failure_message(exc), apply=args.apply, database_committed=committed)
         _atomic_json(report_path, report)
         raise
 
@@ -618,7 +648,11 @@ def main():
                         help='Also insert unmatched 2019–2022 canonical identities after duplicate and spatial checks')
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
-    run_import(args)
+    try:
+        run_import(args)
+    except (Exception, KeyboardInterrupt) as exc:
+        logger.error('Dashboard import failed: %s', failure_message(exc))
+        return 130 if isinstance(exc, KeyboardInterrupt) else 1
     return 0
 
 
