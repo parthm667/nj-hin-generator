@@ -362,6 +362,7 @@ def test_segment_stats_include_zero_crash_roads_and_apply_date_bounds_in_one_que
         "fatal_crashes": 1,
         "serious_injury_crashes": 0,
         "minor_injury_crashes": 1,
+        "possible_injury_crashes": 0,
         "property_damage_crashes": 0,
         "ped_crashes": 1,
         "bike_crashes": 1,

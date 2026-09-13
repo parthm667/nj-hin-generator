@@ -227,6 +227,7 @@ def get_analysis_summary(
         fatal_crashes=crash_summary['fatal_crashes'],
         serious_injury_crashes=crash_summary['serious_injury_crashes'],
         minor_injury_crashes=crash_summary['minor_injury_crashes'],
+        possible_injury_crashes=crash_summary['possible_injury_crashes'],
         property_damage_crashes=crash_summary['property_damage_crashes'],
         ped_crashes=crash_summary['ped_crashes'],
         bike_crashes=crash_summary['bike_crashes'],

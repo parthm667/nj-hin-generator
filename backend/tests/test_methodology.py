@@ -113,6 +113,7 @@ def segment_stats(
         "fatal_crashes": 0,
         "serious_injury_crashes": 0,
         "minor_injury_crashes": 0,
+        "possible_injury_crashes": 0,
         "property_damage_crashes": total_crashes,
         "ped_crashes": 0,
         "bike_crashes": 0,

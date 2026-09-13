@@ -99,7 +99,7 @@ class PDFReportGenerator:
         stats = CrashService(self.db).get_municipality_crash_summary(analysis.muni_id, analysis.start_year, analysis.end_year)
         total = stats['total_crashes']
         result = {'total': total}
-        for name in ('fatal', 'serious_injury', 'minor_injury', 'injury_unknown', 'property_damage'):
+        for name in ('fatal', 'serious_injury', 'minor_injury', 'possible_injury', 'injury_unknown', 'property_damage'):
             count = stats[f'{name}_crashes']
             result[name] = count
             result[f'{name}_pct'] = count / total * 100 if total else 0

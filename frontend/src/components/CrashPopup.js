@@ -114,6 +114,11 @@ function CrashDetails({ properties, severityLabel, popupRef }) {
           <span>{time === 'Not recorded' ? 'Time not recorded' : time}</span>
         </p>
         <p className="!my-3 leading-relaxed" style={{ overflowWrap: 'anywhere' }}>{crashSummary(properties)}</p>
+        {properties.severity === 'possible_injury' && (
+          <p className="mt-2 text-xs text-gray-600">
+            Possible injury is the recorded crash category (KABCO C). It does not confirm a minor or serious injury.
+          </p>
+        )}
         {properties.severity === 'injury_unknown' && (
           <p className="!my-2 text-xs text-gray-600">Injury severity was not specified in this record.</p>
         )}

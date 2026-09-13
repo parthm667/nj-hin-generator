@@ -51,14 +51,15 @@ def render_report_tex(analysis, municipality, stats, hin_stats, ranked_segments,
     county = escape_latex(municipality.county if municipality else 'Not recorded')
     annual = evidence.get('annual', [])
     annual_rows = [[str(row['year'])] + [number(row.get(key)) for key in (
-        'total_crashes', 'fatal_crashes', 'serious_injury_crashes', 'injury_unknown_crashes',
+        'total_crashes', 'fatal_crashes', 'serious_injury_crashes', 'possible_injury_crashes', 'injury_unknown_crashes',
         'total_killed', 'total_injured')] for row in annual]
     annual_table = table(['Year', 'Loaded crashes', 'Fatal crashes', 'Serious-injury crashes',
-                          'Injury detail unknown', 'People killed', 'People injured'], annual_rows,
-                         'L{31pt}R{51pt}R{49pt}R{66pt}R{70pt}R{56pt}R{58pt}',
+                          'Possible injury crashes', 'Injury detail unknown', 'People killed', 'People injured'], annual_rows,
+                         'L{28pt}R{44pt}R{40pt}R{53pt}R{49pt}R{61pt}R{48pt}R{50pt}',
                          'Annual counts within the selected municipality and period.') if annual else 'Annual evidence is not available.'
     severity_rows = []
     for key, label in [('fatal', 'Fatal'), ('serious_injury', 'Serious injury'), ('minor_injury', 'Minor injury'),
+                       ('possible_injury', 'Possible injury'),
                        ('injury_unknown', 'Injury; detail unknown'), ('property_damage', 'Property damage')]:
         count = stats.get(key)
         share = count / stats['total'] * 100 if stats.get('total') and count is not None else None
@@ -86,6 +87,7 @@ def render_report_tex(analysis, municipality, stats, hin_stats, ranked_segments,
         ('Crashes assigned to selected segments', 'selected_crashes', 0),
         ('Fatal crashes assigned to selected segments', 'selected_fatal_crashes', 0),
         ('Recorded serious-injury crashes on selected segments', 'selected_serious_injury_crashes', 0),
+        ('Recorded possible-injury crashes on selected segments', 'selected_possible_injury_crashes', 0),
         ('People killed on selected segments', 'selected_killed', 0),
         ('People injured on selected segments', 'selected_injured', 0)]]
     coverage_rows += [[label, percent(network.get(key))] for label, key in [
@@ -99,10 +101,11 @@ def render_report_tex(analysis, municipality, stats, hin_stats, ranked_segments,
         corridor_rows.append([str(rank), escape_latex(row.get('name') or 'Unnamed corridor'),
                               number(row.get('segment_count')), number(row.get('miles'), 2),
                               number(row.get('crashes')), number(row.get('fatal_crashes')),
-                              number(row.get('serious_injury_crashes')), number(row.get('injury_unknown_crashes')),
+                              number(row.get('serious_injury_crashes')), number(row.get('possible_injury_crashes')),
+                              number(row.get('injury_unknown_crashes')),
                               number(row.get('rate'), 2)])
-    corridors = table(['No.', 'Stored corridor name', 'Seg.', 'Miles', 'Crashes', 'Fatal', 'Serious', 'Injury detail unknown', 'Rate'],
-                      corridor_rows, 'L{20pt}L{127pt}R{25pt}R{35pt}R{42pt}R{30pt}R{38pt}R{60pt}R{36pt}',
+    corridors = table(['No.', 'Stored corridor name', 'Seg.', 'Miles', 'Crashes', 'Fatal', 'Serious', 'Possible', 'Injury detail unknown', 'Rate'],
+                      corridor_rows, 'L{20pt}L{94pt}R{25pt}R{35pt}R{42pt}R{30pt}R{38pt}R{40pt}R{53pt}R{36pt}',
                       'Up to ten selected corridors, ordered by stored assigned crash count.') if corridor_rows else (
                           'No corridor evidence is available. If no segments met the screening criteria, this does not establish that roads are safe.')
     user_rows = []

@@ -102,6 +102,22 @@ const emptyFeatureCollection = {
 
 let queryClient;
 
+test('possible injury has a distinct legend, popup label and filter', async () => {
+  analysisApi.get.mockResolvedValue({ data: completedAnalysis });
+  analysisApi.getCrashes.mockResolvedValue({ data: { features: [
+    { geometry: { type: 'Point', coordinates: [-74.5, 40.1] }, properties: { severity: 'possible_injury' } },
+    { geometry: { type: 'Point', coordinates: [-74.4, 40.2] }, properties: { severity: 'minor_injury' } },
+  ] } });
+  analysisApi.getHIN.mockResolvedValue({ data: emptyFeatureCollection });
+  renderAnalysisPage();
+  expect(await screen.findAllByTestId('crash-marker')).toHaveLength(2);
+  expect(screen.getByRole('option', { name: 'Possible injury' })).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Crash severity'), { target: { value: 'possible_injury' } });
+  expect(screen.getAllByTestId('crash-marker')).toHaveLength(1);
+  expect(screen.getByTestId('crash-marker')).toHaveAttribute('data-fill-color', '#0d9488');
+  expect(screen.getByText('POSSIBLE INJURY')).toBeInTheDocument();
+});
+
 test('filters crash severity independently of the HIN layer and restores hidden layers', async () => {
   analysisApi.get.mockResolvedValue({ data: completedAnalysis });
   analysisApi.getCrashes.mockResolvedValue({ data: { features: [

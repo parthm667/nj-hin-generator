@@ -106,7 +106,8 @@ def export_csv(
     else:
         collection = HINService(db).get_hin_geojson(analysis_id)
         fields = ['hin_id', 'segment_id', 'road_name', 'crash_count', 'crash_rate',
-                  'severity_score', 'corridor_name', 'in_vulnerable_tract']
+                  'severity_score', 'corridor_name', 'in_vulnerable_tract',
+                  'crash_count_possible_injury']
     output = io.StringIO(newline='')
     writer = csv.DictWriter(output, fieldnames=fields, extrasaction='ignore')
     writer.writeheader()

@@ -192,7 +192,7 @@ class CrashService:
         Get the weight for a crash severity level.
 
         Args:
-            severity: Severity level (fatal, serious_injury, minor_injury, property_damage)
+            severity: Recorded severity category, including possible_injury (KABCO C).
 
         Returns:
             Severity weight
@@ -227,6 +227,8 @@ class CrashService:
                         AS serious_injury_crashes,
                     COUNT(*) FILTER (WHERE severity = 'minor_injury')::integer
                         AS minor_injury_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'possible_injury')::integer
+                        AS possible_injury_crashes,
                     COUNT(*) FILTER (WHERE severity = 'injury_unknown')::integer
                         AS injury_unknown_crashes,
                     COUNT(*) FILTER (WHERE severity = 'property_damage')::integer
@@ -239,6 +241,7 @@ class CrashService:
                         WHEN 'fatal' THEN :fatal_weight
                         WHEN 'serious_injury' THEN :serious_weight
                         WHEN 'minor_injury' THEN :minor_weight
+                        WHEN 'possible_injury' THEN :possible_weight
                         WHEN 'property_damage' THEN :property_weight
                         ELSE 1
                     END), 0)::integer AS severity_score
@@ -255,6 +258,7 @@ class CrashService:
                 "fatal_weight": self.severity_weights["fatal"],
                 "serious_weight": self.severity_weights["serious_injury"],
                 "minor_weight": self.severity_weights["minor_injury"],
+                "possible_weight": self.severity_weights["possible_injury"],
                 "property_weight": self.severity_weights["property_damage"],
             },
         ).mappings().one()
@@ -283,6 +287,8 @@ class CrashService:
                         AS serious_injury_crashes,
                     COUNT(*) FILTER (WHERE severity = 'minor_injury')::integer
                         AS minor_injury_crashes,
+                    COUNT(*) FILTER (WHERE severity = 'possible_injury')::integer
+                        AS possible_injury_crashes,
                     COUNT(*) FILTER (WHERE severity = 'injury_unknown')::integer
                         AS injury_unknown_crashes,
                     COUNT(*) FILTER (WHERE severity = 'property_damage')::integer

@@ -9,6 +9,7 @@ class SeverityLevel(str, Enum):
     FATAL = "fatal"
     SERIOUS_INJURY = "serious_injury"
     MINOR_INJURY = "minor_injury"
+    POSSIBLE_INJURY = "possible_injury"
     INJURY_UNKNOWN = "injury_unknown"
     PROPERTY_DAMAGE = "property_damage"
 
@@ -172,6 +173,7 @@ class AnalysisSummary(BaseModel):
     fatal_crashes: int
     serious_injury_crashes: int
     minor_injury_crashes: int
+    possible_injury_crashes: int = 0
     injury_unknown_crashes: int = 0
     bike_involvement_unknown_crashes: int = 0
     total_killed: Optional[int] = None
@@ -206,6 +208,7 @@ class HINSegmentResponse(HINSegmentBase):
     crash_count_fatal: int
     crash_count_serious_injury: int
     crash_count_minor_injury: int
+    crash_count_possible_injury: int = 0
     crash_count_ped: int
     crash_count_bike: int
     corridor_id: Optional[int] = None

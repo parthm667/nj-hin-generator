@@ -274,6 +274,9 @@ class HINService:
                         WHERE crash.severity = 'minor_injury'
                     )::integer AS minor_injury_crashes,
                     COUNT(crash.crash_id) FILTER (
+                        WHERE crash.severity = 'possible_injury'
+                    )::integer AS possible_injury_crashes,
+                    COUNT(crash.crash_id) FILTER (
                         WHERE crash.severity = 'property_damage'
                     )::integer AS property_damage_crashes,
                     COUNT(crash.crash_id) FILTER (
@@ -286,6 +289,7 @@ class HINService:
                         WHEN 'fatal' THEN :fatal_weight
                         WHEN 'serious_injury' THEN :serious_weight
                         WHEN 'minor_injury' THEN :minor_weight
+                        WHEN 'possible_injury' THEN :possible_weight
                         WHEN 'injury_unknown' THEN :unknown_injury_weight
                         WHEN 'property_damage' THEN :property_weight
                         ELSE CASE WHEN crash.crash_id IS NULL THEN 0 ELSE 1 END
@@ -312,6 +316,7 @@ class HINService:
                     "serious_injury"
                 ],
                 "minor_weight": self.crash_service.severity_weights["minor_injury"],
+                "possible_weight": self.crash_service.severity_weights["possible_injury"],
                 "unknown_injury_weight": 3,
                 "property_weight": self.crash_service.severity_weights[
                     "property_damage"
@@ -403,6 +408,7 @@ class HINService:
                 crash_count_fatal=stats['fatal_crashes'],
                 crash_count_serious_injury=stats['serious_injury_crashes'],
                 crash_count_minor_injury=stats['minor_injury_crashes'],
+                crash_count_possible_injury=stats['possible_injury_crashes'],
                 crash_count_ped=stats['ped_crashes'],
                 crash_count_bike=stats['bike_crashes'],
                 severity_score=severity_score,
@@ -759,6 +765,7 @@ class HINService:
                     'segment_id': hin_seg.segment_id,
                     'road_name': segment.road_name,
                     'crash_count': hin_seg.crash_count_total,
+                    'crash_count_possible_injury': hin_seg.crash_count_possible_injury,
                     'crash_rate': hin_seg.crash_rate,
                     'severity_score': hin_seg.severity_score,
                     'corridor_name': hin_seg.corridor_name,

@@ -15,6 +15,7 @@ const SEVERITIES = [
   ['fatal', 'Fatal', '#dc2626'],
   ['serious_injury', 'Serious injury', '#ea580c'],
   ['minor_injury', 'Minor injury', '#f59e0b'],
+  ['possible_injury', 'Possible injury', '#0d9488'],
   ['injury_unknown', 'Unknown injury detail', '#7c3aed'],
   ['property_damage', 'Property damage', '#3b82f6'],
   ['other', 'Other / unknown', '#6b7280'],
@@ -184,6 +185,7 @@ function AnalysisPage() {
       fatal: '#dc2626',
       serious_injury: '#ea580c',
       minor_injury: '#f59e0b',
+      possible_injury: '#0d9488',
       injury_unknown: '#7c3aed',
       property_damage: '#3b82f6',
     };

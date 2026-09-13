@@ -34,6 +34,7 @@ def _empty_crash_summary():
         'fatal_crashes': 0,
         'serious_injury_crashes': 0,
         'minor_injury_crashes': 0,
+        'possible_injury_crashes': 0,
         'injury_unknown_crashes': 0,
         'property_damage_crashes': 0,
         'ped_crashes': 0,

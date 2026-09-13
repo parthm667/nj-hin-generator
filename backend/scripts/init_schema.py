@@ -67,6 +67,7 @@ def install_versions(connection):
 
 
 CORRECTNESS_ADDITIONS = (
+    'ALTER TABLE hin_segments ADD COLUMN IF NOT EXISTS crash_count_possible_injury integer NOT NULL DEFAULT 0',
     'ALTER TABLE analyses ADD COLUMN IF NOT EXISTS input_version jsonb',
     'ALTER TABLE crashes ADD COLUMN IF NOT EXISTS total_killed integer CHECK (total_killed >= 0)',
     'ALTER TABLE crashes ADD COLUMN IF NOT EXISTS total_injured integer CHECK (total_injured >= 0)',

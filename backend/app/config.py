@@ -55,6 +55,8 @@ class Settings(BaseSettings):
     weight_fatal: int = 10
     weight_serious_injury: int = 5
     weight_minor_injury: int = 3
+    # Descriptive only: KABCO C stays distinct, at the same default tier as B.
+    weight_possible_injury: int = 3
     weight_property_damage: int = 1
 
     # Application
@@ -114,6 +116,7 @@ class Settings(BaseSettings):
             "fatal": self.weight_fatal,
             "serious_injury": self.weight_serious_injury,
             "minor_injury": self.weight_minor_injury,
+            "possible_injury": self.weight_possible_injury,
             "property_damage": self.weight_property_damage
         }
 

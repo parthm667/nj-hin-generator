@@ -118,7 +118,7 @@ class Crash(Base):
     external_id = Column(String(50), unique=True)  # ID from source data
     crash_date = Column(Date, nullable=False, index=True)
     crash_time = Column(String(10))
-    # fatal, serious_injury, minor_injury, injury_unknown, property_damage
+    # fatal, serious_injury, minor_injury, possible_injury, injury_unknown, property_damage
     severity = Column(String(20), nullable=False, index=True)
     ped_involved = Column(Boolean, default=False, index=True)
     bike_involved = Column(Boolean, nullable=True, index=True)
@@ -278,6 +278,7 @@ class HINSegment(Base):
     crash_count_fatal = Column(Integer, default=0)
     crash_count_serious_injury = Column(Integer, default=0)
     crash_count_minor_injury = Column(Integer, default=0)
+    crash_count_possible_injury = Column(Integer, default=0, server_default='0', nullable=False)
     crash_count_ped = Column(Integer, default=0)
     crash_count_bike = Column(Integer, default=0)
 

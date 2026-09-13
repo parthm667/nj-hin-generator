@@ -40,7 +40,7 @@ def _assemble_evidence(start_year, end_year, annual, totals, corridors, location
     annual_rows = []
     for year in range(start_year, end_year + 1):
         row = dict.fromkeys((
-            "total_crashes", "fatal_crashes", "serious_injury_crashes",
+            "total_crashes", "fatal_crashes", "serious_injury_crashes", "possible_injury_crashes",
             "injury_unknown_crashes", "ped_crashes", "bike_crashes", "bike_unknown",
         ), 0)
         row.update(year=year, total_killed=None, total_injured=None)
@@ -93,6 +93,8 @@ def collect_report_evidence(db, analysis):
             COUNT(*) FILTER (WHERE severity = 'fatal')::integer AS fatal_crashes,
             COUNT(*) FILTER (WHERE severity = 'serious_injury')::integer
                 AS serious_injury_crashes,
+            COUNT(*) FILTER (WHERE severity = 'possible_injury')::integer
+                AS possible_injury_crashes,
             COUNT(*) FILTER (WHERE severity = 'injury_unknown')::integer
                 AS injury_unknown_crashes,
             CASE WHEN COUNT(total_killed) = COUNT(*)
@@ -143,6 +145,8 @@ def collect_report_evidence(db, analysis):
                     AS selected_fatal_crashes,
                 COUNT(*) FILTER (WHERE selected AND severity = 'serious_injury')::integer
                     AS selected_serious_injury_crashes,
+                COUNT(*) FILTER (WHERE selected AND severity = 'possible_injury')::integer
+                    AS selected_possible_injury_crashes,
                 CASE WHEN COUNT(total_killed) FILTER (WHERE selected)
                         = COUNT(*) FILTER (WHERE selected)
                     THEN SUM(total_killed) FILTER (WHERE selected)::integer
@@ -172,6 +176,8 @@ def collect_report_evidence(db, analysis):
             COALESCE(SUM(selected.crash_count_fatal), 0)::integer AS fatal_crashes,
             COALESCE(SUM(selected.crash_count_serious_injury), 0)::integer
                 AS serious_injury_crashes,
+            COALESCE(SUM(selected.crash_count_possible_injury), 0)::integer
+                AS possible_injury_crashes,
             COALESCE(SUM(unknown_injuries.crashes), 0)::integer AS injury_unknown_crashes,
             ARRAY_AGG(selected.segment_id ORDER BY selected.segment_id) AS segment_ids
         FROM selected LEFT JOIN unknown_injuries
