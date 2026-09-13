@@ -701,9 +701,11 @@ def test_postgis_batch_ingestion_prefers_contained_reported_points_and_is_idempo
         ]
 
         second = ArchiveReport("Mercer", 2022, ingester.source_url("Mercer", 2022))
+        connection.execute(text("UPDATE crashes SET bike_involved=true WHERE external_id LIKE 'NJDOT:2022:MERCER:phase2-%'"))
         ingester.ingest_archive(database, archive, county="Mercer", year=2022, report=second)
         assert second.loaded == 0
         assert second.duplicates == 4
+        assert connection.scalar(text("SELECT bool_and(bike_involved) FROM crashes WHERE external_id LIKE 'NJDOT:2022:MERCER:phase2-%'")) is True
     finally:
         database.close()
         transaction.rollback()
@@ -753,7 +755,7 @@ def test_enrichment_updates_official_semantics_without_regeocoding_existing_cras
                     bike_involved, muni_id, geom, geocode_quality
                 ) VALUES (
                     -93822, 'NJDOT:2022:MERCER:enrichment-existing',
-                    '2022-03-14', 'minor_injury', true, false, -93821,
+                    '2022-03-14', 'minor_injury', true, true, -93821,
                     ST_GeomFromText('POINT(-74.55 40.55)', 4326), 'reported'
                 );
                 """
@@ -783,7 +785,7 @@ def test_enrichment_updates_official_semantics_without_regeocoding_existing_cras
         ).mappings().one()
         assert dict(row) == {
             "severity": "injury_unknown",
-            "bike_involved": None,
+            "bike_involved": True,
             "total_killed": 1,
             "total_injured": 2,
             "pedestrians_killed": 0,

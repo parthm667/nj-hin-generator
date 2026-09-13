@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Callable, Iterable, Iterator, Mapping, Sequence
 
 import requests
-from sqlalchemy import text
+from sqlalchemy import func, text
 from sqlalchemy.dialects.postgresql import insert as postgresql_insert
 from sqlalchemy.orm import Session
 
@@ -621,7 +621,8 @@ class NJDOTCrashIngester:
                 set_={
                     "severity": insert_statement.excluded.severity,
                     "ped_involved": insert_statement.excluded.ped_involved,
-                    "bike_involved": insert_statement.excluded.bike_involved,
+                    # Accidents has no bicycle flag; retain companion-table evidence.
+                    "bike_involved": func.coalesce(Crash.bike_involved, insert_statement.excluded.bike_involved),
                     "total_killed": insert_statement.excluded.total_killed,
                     "total_injured": insert_statement.excluded.total_injured,
                     "pedestrians_killed": insert_statement.excluded.pedestrians_killed,
@@ -712,7 +713,7 @@ class NJDOTCrashIngester:
                 SET
                     severity = input.severity,
                     ped_involved = crash.ped_involved OR input.ped_involved,
-                    bike_involved = input.bike_involved,
+                    bike_involved = COALESCE(crash.bike_involved, input.bike_involved),
                     total_killed = COALESCE(input.total_killed, crash.total_killed),
                     total_injured = COALESCE(input.total_injured, crash.total_injured),
                     pedestrians_killed = COALESCE(
