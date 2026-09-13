@@ -16,7 +16,7 @@ NJDOT Accidents archives are county/year files. The initial schema-valid inspect
 
 Prefer usable reported coordinates. Route/milepost-derived locations are a separate quality category and use the current downloaded route network, which can differ from the historical crash-year network. Ambiguous routes, missing measures, unmatched municipalities, invalid dates/severity and unavailable source files must be counted and reported. Do not substitute a municipal centroid for an unresolved crash.
 
-The Accidents table distinguishes fatal, injury and property-damage crashes; it does not distinguish serious from minor injury. The current application stores undifferentiated injuries in `minor_injury`. Bicycle involvement is not available in this table, and pedestrian flags based on killed/injured counts do not capture all uninjured pedestrians. A bicycle HIN cannot be inferred from these records alone.
+The Accidents table distinguishes fatal, injury and property-damage crashes; it does not distinguish serious from minor injury. The application stores undifferentiated injuries as `injury_unknown`. The Accidents table alone does not establish bicycle involvement. Historical companion records can establish positive bicycle involvement where their explicit bicycle flag is `Y`; absence of a positive companion match does not establish that no bicycle was involved. Pedestrian flags based on killed/injured counts do not capture all uninjured pedestrians. A complete bicycle HIN cannot be inferred while involvement remains unknown for other crashes.
 
 All 21 county Accidents archive URLs were available for each year 2017–2022 during the source checks. Tested equivalent 2023 and 2024 URLs returned 404; that finding concerns the specific download URLs tested, not exhaustive availability across every county or a claim that no newer crash data exists elsewhere. The first verified load targeted 2022; the historical backfill subsequently added 2017–2021. Additional years require explicit selection and successful source checks.
 
@@ -45,7 +45,7 @@ The orchestrator loads all boundaries and roads before crashes. Omit `--county` 
 
 Road ingestion is strict by default. The example explicitly opts into the checked source's partial coverage: nine features have no geometry and five otherwise usable XY paths lack valid calibrated measures. `--allow-partial-roads` allows these reported record-level omissions after complete pagination and a nonempty analysis-network load; it does not suppress schema, download or pagination failures. Inspect `analysis_coverage_complete`, `reference_coverage_complete`, and `partial_coverage_accepted` in the road report. Remove the flag to require zero reported omissions. A strict failure can occur after valid road rows have committed, so inspect the report before rerunning.
 
-The official pipeline needs only `requirements-ingest.txt`, not GDAL or the legacy GeoPandas/Fiona stack in `requirements-scripts.txt`. The API image still installs only `requirements.txt`.
+The official pipeline needs only `requirements-ingest.txt`, not GDAL or the legacy GeoPandas/Fiona stack in `requirements-scripts.txt`. The production API/worker image in `deploy/Dockerfile.backend` installs `requirements-ingest.txt` and supports one-off imports. The separate `backend/Dockerfile` installs only `requirements.txt`.
 
 After loading, check actual coverage rather than just total rows:
 
@@ -67,7 +67,7 @@ The frontend fetches each municipality's loaded years before enabling analysis. 
 
 The API exposes this information at `/api/municipalities/{id}/coverage`. It rejects a missing-year analysis with HTTP 422 before creating a record. Existing completed analyses whose selected-year counts no longer match the database are marked with a separate `data_status`; stale, empty and missing-year results cannot be exported or fetched as current map/summary results (HTTP 409). The UI asks the user to run a new analysis instead of showing green completion and zero totals. Stored analyses are preserved, not silently recalculated.
 
-Freshness is count-based: it detects this backfill but cannot detect arbitrary same-count edits to coordinates, severity or the road network. Recreate analyses after any source/network change even if the record count is unchanged. An empty HIN with nonzero crash input can be legitimate and is not treated as missing crash data.
+Freshness checks loaded-year counts, dataset revisions and the analysis method version. Source-field changes, including same-count bicycle enrichment, invalidate older results. Recreate analyses after a source/network change; existing analyses are not silently updated. An empty HIN with nonzero crash input can be legitimate and is not treated as missing crash data.
 
 ## Initial 2022-only verification — September 10, 2026
 
@@ -91,8 +91,29 @@ Significance now uses actual crash counts and a leave-one-out road-class baselin
 
 Fragments shorter than 0.01 mile remain stored but are excluded from screening and baseline exposure. This is an explicit protective threshold, not an independently validated safety standard.
 
-Historical casualty enrichment uses `python scripts/ingest_njdot_crashes.py --start-year 2017 --end-year 2022 --offline --enrich-only`. It updates existing source IDs only and does not move crash points. Official Accidents severity I is `injury_unknown`, not minor injury; bicycle involvement is NULL because the source cannot establish it. Person counts are distinct from fatal/injury crash counts. See `data/processed/casualty-enrichment-report.json` for the local run evidence.
+Historical casualty enrichment uses `python scripts/ingest_njdot_crashes.py --start-year 2017 --end-year 2022 --offline --enrich-only`. It updates existing source IDs only and does not move crash points. Official Accidents severity I is `injury_unknown`, not minor injury. The Accidents source cannot establish bicycle involvement: new records leave it NULL, and a later Accidents replay or casualty enrichment preserves established companion-source bicycle flags. Person counts are distinct from fatal/injury crash counts. See `data/processed/casualty-enrichment-report.json` for the local run evidence.
 
 Load official CDC/ATSDR SVI using `python scripts/ingest_svi.py`. The selected snapshot is 2020 U.S. national tract rankings, not a custom ACS proxy and not a demographic measurement for every crash year. `RPL_THEMES` is converted from 0–1 to the application's 0–100 scale. Official missing scores remain NULL. The local load contains 2,175 NJ tracts, including 10 without ranks. Source metadata and checks are retained in `data/processed/svi-2020-report.json`.
 
 Global dataset revisions invalidate old analyses after source changes, even same-count edits. The method version is also checked. Routine derived crash snapping does not alter source revisions. All old unversioned results require a rerun; they are not deleted. Positive loaded counts do not certify source completeness: hundreds of thousands of source records still lack usable locations and are excluded rather than fabricated.
+
+## Historical bicycle involvement import (2017-2022)
+
+After the Accidents records are loaded, import the official historical companion records using their explicit bicycle `Y` flag. The importer matches existing crash source IDs and sets positive bicycle involvement only. Multiple companion rows for one crash must count as one bicycle-involved crash. Unmatched companion records are reported, not inserted as new crashes or assigned fabricated coordinates. All other unknown bicycle involvement remains NULL; this import does not provide a complete bicycle crash denominator, bicycle casualty totals, or support an unrestricted bicycle HIN.
+
+From `backend/`, with the ingestion environment and target `DATABASE_URL` configured:
+
+```bash
+python -u scripts/ingest_njdot_bicycles.py \
+  --start-year 2017 --end-year 2022 \
+  --cache-dir ../data/raw/bicycles \
+  --report ../data/processed/bicycle-import-report.json
+```
+
+Append `--dry-run` to validate and cache all selected archives without opening or writing to the database; then replace it with `--offline` to import from the same cache.
+
+The production wrapper is `deploy/run-once/08-import-historical-bicycles.sh`. It uses the existing `COMPOSE` configuration to run this command in a foreground, disposable API-image container with `--rm -T --no-deps`. The shared `hindata` volume retains its cache at `/srv/data/raw/bicycles` and report at `/srv/data/processed/bicycle-import-report.json`. It does not stop or kill the worker. After downloading and validating all archives, the importer acquires the worker ownership advisory lock for its update transaction, waiting up to 60 seconds for the current worker job to finish and release ownership before changing the dataset. A failed lock wait or import exits nonzero, so the existing autoupdate runner retries on a later tick; it records the run-once completion marker only after success.
+
+The public run-once log is `/var/log/nj-hin/runonce-08-import-historical-bicycles.sh.log`. Log output must contain aggregate per-year source, matched, unmatched and updated counts, plus before/after verification totals, without source-row identifiers, personal data or credentials. The report provides totals and per-year/per-archive counts: `source_rows`, `source_person_rows` (explicit bicycle `Y` rows), `source_crashes` (distinct positive crash IDs), `matched`, `updated`, `already_known`, `unmatched`, and `conflicting_false`. Compare pre/post crash counts and geometry verification; importing involvement must preserve crash locations, existing crash rows, casualty counts and the road network. A verification failure must fail the job rather than emit a success marker. A successful replay should update zero already-enriched flags.
+
+Source revisions invalidate pre-import results when bicycle flags change. Run a fresh analysis to expose the enriched counts; preserved historical analysis records are not silently recomputed. An unchanged total crash count does not mean that old analysis results are current.
